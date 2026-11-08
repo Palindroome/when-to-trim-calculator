@@ -68,7 +68,7 @@ export function renderShell(m: Messages): string {
 
   <section class="card">
     <h2><span class="n">3</span>${m.sections.schedule}</h2>
-    <div class="grid">
+    <div class="grid dates">
       <div><label for="thrown">${f.thrown}</label><input id="thrown" type="datetime-local"></div>
       <div><label for="when">${f.when}</label><input id="when" type="datetime-local"></div>
     </div>
