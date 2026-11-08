@@ -92,10 +92,18 @@ cd ~/wtc-worktrees/<branch> && . ~/.nvm/nvm.sh && npm ci
 ## 5. Verify (all must pass before you hand off)
 
 ```bash
-. ~/.nvm/nvm.sh && npm run typecheck && npm run test:unit && npm run test:e2e && npm run build
+free_port() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])'; }
+. ~/.nvm/nvm.sh && npm run typecheck && npm run test:unit && E2E_PORT=$(free_port) npm run test:e2e && npm run build
 ```
 
-- For UI changes, also check the built page at 320, 375 and 1280 px widths, for example with a Playwright script or a browser tool. Confirm there is no horizontal overflow and the result renders.
+- **Test servers.** Other agents may be testing in other worktrees at the same time, and a server on the default ports (4173/4174) may belong to one of them. Never reuse a running server: always start your own, from your worktree, on a free port.
+  - Set `E2E_PORT=$(free_port)` on every Playwright run, including `test:e2e:prototype` and re-recording `e2e/golden.json`. Playwright then starts its own server on that port, never reuses one, and stops it when the run ends.
+  - For a manual preview, start it in the background on its own port and remember the PID:
+    ```bash
+    P=$(free_port); npm run build && (npx vite preview --host 127.0.0.1 --port $P --strictPort & echo $! > /tmp/wtc-preview-$P.pid)
+    ```
+  - **Clean up** before you commit or hand off, even when a check failed: kill every server you started (`kill $(cat /tmp/wtc-preview-$P.pid)`; `rm` the pid file), check that none of your ports is still listening (`ss -ltn | grep ":$P "` prints nothing), and never kill a process you did not start.
+- For UI changes, also check the built page at 320, 375 and 1280 px widths on your own preview server, for example with a Playwright script or a browser tool. Confirm there is no horizontal overflow and the result renders.
 - Do not hand off with failing checks. If you are stuck, report what fails and why.
 
 ## 6. Commit
