@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { choose, field, fill, openApp, setNight, snapshot } from './helpers';
+import { PROTOTYPE, choose, field, fill, openApp, setNight, snapshot, type Field } from './helpers';
 
 test.describe('page shell', () => {
   test('title, language and headings', async ({ page }) => {
@@ -74,17 +74,25 @@ test.describe('inputs and defaults', () => {
     await expect(field(page, 'Chcę trymować')).toHaveValue('2026-03-06T10:00');
   });
 
-  test('numeric attributes are preserved', async ({ page }) => {
+  test('numeric fields are text inputs with a decimal keypad', async ({ page }) => {
+    test.skip(PROTOTYPE, 'the prototype uses type=number, see #2');
     await openApp(page);
-    await expect(field(page, 'Masa po toczeniu')).toHaveAttribute('min', '20');
-    await expect(field(page, 'Grubość ścianki')).toHaveAttribute('min', '2');
-    await expect(field(page, 'Grubość ścianki')).toHaveAttribute('max', '30');
-    await expect(field(page, 'Grubość dna')).toHaveAttribute('max', '40');
-    await expect(field(page, 'Wilgotność powietrza')).toHaveAttribute('min', '5');
-    await expect(field(page, 'Wilgotność powietrza')).toHaveAttribute('max', '99');
-    for (const l of ['Masa po toczeniu', 'Grubość ścianki', 'Temperatura w pracowni', 'Masa teraz'] as const) {
-      await expect(field(page, l)).toHaveAttribute('type', 'number');
+    // type=text so a typed decimal comma reaches the parser; limits are clamped in code, not by min/max
+    for (const l of [
+      'Masa po toczeniu',
+      'Grubość ścianki',
+      'Grubość dna',
+      'Temperatura w pracowni',
+      'Wilgotność powietrza',
+      'Temperatura nocą (22–7)',
+      'Wilgotność nocą',
+      'Mokra przechowalnia: temp.',
+      'Mokra przechowalnia: wilg.',
+      'Masa teraz',
+    ] as const) {
+      await expect(field(page, l)).toHaveAttribute('type', 'text');
       await expect(field(page, l)).toHaveAttribute('inputmode', 'decimal');
+      await expect(field(page, l)).toHaveAttribute('autocomplete', 'off');
     }
     await expect(field(page, 'Wytoczona')).toHaveAttribute('type', 'datetime-local');
   });
@@ -139,6 +147,42 @@ test.describe('inputs and defaults', () => {
         os.map((o) => [(o as HTMLOptionElement).value, (o.textContent ?? '').trim()]),
       );
       expect(actual).toEqual(opts);
+    });
+  }
+});
+
+test.describe('decimal comma', () => {
+  test.skip(PROTOTYPE, 'the prototype drops the decimal comma, see #2');
+  // Typed key by key, as a user would: some browsers silently drop the comma in type=number inputs.
+  const cases: { label: Field; comma: string; dot: string; setup?: (page: Page) => Promise<void> }[] = [
+    { label: 'Masa po toczeniu', comma: '500,5', dot: '500.5' },
+    { label: 'Grubość ścianki', comma: '6,5', dot: '6.5' },
+    { label: 'Grubość dna', comma: '9,5', dot: '9.5' },
+    { label: 'Temperatura w pracowni', comma: '20,5', dot: '20.5' },
+    { label: 'Temperatura w pracowni', comma: '-2,5', dot: '-2.5' },
+    { label: 'Wilgotność powietrza', comma: '50,5', dot: '50.5' },
+    { label: 'Temperatura nocą (22–7)', comma: '12,5', dot: '12.5', setup: (p) => setNight(p, true) },
+    { label: 'Wilgotność nocą', comma: '60,5', dot: '60.5', setup: (p) => setNight(p, true) },
+    { label: 'Mokra przechowalnia: temp.', comma: '14,5', dot: '14.5', setup: (p) => fill(p, 'Chcę trymować', '2026-03-09T10:00') },
+    { label: 'Mokra przechowalnia: wilg.', comma: '88,5', dot: '88.5', setup: (p) => fill(p, 'Chcę trymować', '2026-03-09T10:00') },
+    { label: 'Masa teraz', comma: '470,5', dot: '470.5' },
+  ];
+  for (const { label, comma, dot, setup } of cases) {
+    test(`"${comma}" typed into "${label}" gives the same result as "${dot}"`, async ({ page }) => {
+      const result = async (): Promise<unknown> => [await snapshot(page), await page.locator('#wout').innerText()];
+      await openApp(page);
+      await setup?.(page);
+      const input = field(page, label);
+      await input.fill('');
+      await input.pressSequentially(comma);
+      await expect(input).toHaveValue(comma);
+      const withComma = await result();
+      await fill(page, label, dot);
+      const withDot = await result();
+      expect(withComma).toEqual(withDot);
+      // guard: the field matters here, so a dropped comma would have been caught
+      await fill(page, label, comma.replace(',', ''));
+      expect(await result()).not.toEqual(withDot);
     });
   }
 });

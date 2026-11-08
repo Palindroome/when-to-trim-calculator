@@ -11,6 +11,8 @@ export type Step =
 export interface Scenario {
   name: string;
   steps: Step[];
+  /** Why the build intentionally differs from the prototype here (the scenario is skipped on the prototype). */
+  prototypeDiffers?: string;
 }
 
 export async function applySteps(page: Page, steps: Step[]): Promise<void> {
@@ -94,7 +96,11 @@ export const SCENARIOS: Scenario[] = [
   { name: 'thick base (slow tip)', steps: [{ fill: 'Grubość dna', value: '25' }] },
   { name: 'base thinner than wall', steps: [{ fill: 'Grubość dna', value: '3' }] },
   { name: 'base empty falls back to wall', steps: [{ fill: 'Grubość dna', value: '' }] },
-  { name: 'wall typed with comma 6,5', steps: [{ type: 'Grubość ścianki', value: '6,5' }] },
+  {
+    name: 'wall typed with comma 6,5',
+    steps: [{ type: 'Grubość ścianki', value: '6,5' }],
+    prototypeDiffers: 'the prototype drops the decimal comma (6,5 -> 65), see #2',
+  },
   { name: 'wall decimal 6.5', steps: [{ fill: 'Grubość ścianki', value: '6.5' }] },
   { name: 'wall below minimum clamps to 2', steps: [{ fill: 'Grubość ścianki', value: '1' }] },
   { name: 'mass empty falls back to 500', steps: [{ fill: 'Masa po toczeniu', value: '' }] },
