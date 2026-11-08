@@ -25,17 +25,36 @@ cd ~/wtc-worktrees/validate-<branch> && . ~/.nvm/nvm.sh && npm ci
 
 Remove this worktree when you are done (`git worktree remove --force ~/wtc-worktrees/validate-<branch>`).
 
+## Test servers
+
+Other agents may be testing in other worktrees at the same time, and a server on the default ports (4173/4174) may belong to one of them. Never reuse a running server: always start your own, from your worktree, on a free port.
+
+- Pick a fresh free port for every Playwright run and every preview server:
+  ```bash
+  free_port() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])'; }
+  ```
+- Run Playwright with `E2E_PORT=$(free_port)`. Playwright then starts its own server on that port, never reuses one, and stops it when the run ends.
+- For a manual preview, start it in the background on its own port and remember the PID:
+  ```bash
+  P=$(free_port); npm run build && (npx vite preview --host 127.0.0.1 --port $P --strictPort & echo $! > /tmp/wtc-preview-$P.pid)
+  ```
+- **Clean up** before you return your report, even when a check failed:
+  - kill every server you started (`kill $(cat /tmp/wtc-preview-$P.pid)`; `rm` the pid file);
+  - check that none of your ports is still listening (`ss -ltn | grep ":$P "` prints nothing);
+  - never kill a process you did not start.
+
 ## Checks
 
 1. **Spec.** Read `gh issue view N --comments`. Go through each acceptance criterion and verify it with evidence: a command output, a measurement or a test name. "Looks fine" is not evidence.
 2. **Automated checks** on a clean install:
    ```bash
-   npm run typecheck && npm run test:unit && npm run test:e2e && npm run build
+   npm run typecheck && npm run test:unit && E2E_PORT=$(free_port) npm run test:e2e && npm run build
    ```
+   Also run `E2E_PORT=$(free_port) npm run test:e2e:prototype` when the change touches `reference/` or the e2e suite.
    Record pass/fail counts.
 3. **Behaviour.**
-   - **Bugs:** reproduce on `origin/main` first (in a separate detached worktree, or the live site), then confirm the fix on the branch.
-   - **UI changes:** check the built page (`npm run preview`) at 320, 375 and 1280 px:
+   - **Bugs:** reproduce on `origin/main` first (in a separate detached worktree with its own server on its own free port, or the live site), then confirm the fix on the branch.
+   - **UI changes:** check the built page on your own preview server (see "Test servers") at 320, 375 and 1280 px:
      - no horizontal overflow (`scrollWidth <= clientWidth`);
      - the result renders;
      - no console errors.
