@@ -100,8 +100,20 @@ cd ~/wtc-worktrees/<branch> && . ~/.nvm/nvm.sh && npm ci
 
 ## 6. Commit
 
-- Commit small, focused changes with imperative subjects (≤ 72 chars) and a body explaining why.
-- The final commit body of an issue task includes `Fixes #N`.
+- Commit small, focused changes. Every commit message follows the **commit message convention in `CLAUDE.md`** (Conventional Commits with a scope). For example:
+
+  ```
+  fix(ui): stop date-time inputs overflowing the Termin grid on phones
+
+  The two-column .grid used 1fr columns, whose min-content width let
+  datetime-local inputs (~212 px) push the page past 375 px. Use
+  minmax(0, 1fr) so the columns can shrink.
+
+  Fixes #1
+  ```
+
+- Choose the type from what the commit does, not from the issue label. A bug issue can contain a `test(e2e): …` commit followed by a `fix(ui): …` commit. When test-first, commit the failing test together with the fix, or put it immediately before the fix.
+- The final commit of an issue task has `Fixes #N` in its footer.
 - Use the configured git identity. Never set author or committer by env or flags.
 - No `Co-Authored-By` trailers and no mention of Claude, Anthropic or AI anywhere: messages, code, comments, docs.
 - Before reporting, run:

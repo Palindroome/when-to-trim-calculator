@@ -60,7 +60,7 @@ Remove this worktree when you are done (`git worktree remove --force ~/wtc-workt
    - The branch contains current `origin/main`: `git merge-base --is-ancestor origin/main <branch>`.
    - Author and committer of every commit match `git config user.name` / `user.email`: `git log --format='%h %an <%ae> | %cn <%ce>' origin/main..<branch>`.
    - No `Co-Authored-By` trailers and no Claude, Anthropic or AI mentions: `git log --format=%B origin/main..<branch>` and `git diff origin/main...<branch>` grepped case-insensitively for `co-authored|claude|anthropic`.
-   - The commit messages are meaningful, and the issue has `Fixes #N`.
+   - Every commit message follows the convention in `CLAUDE.md`: `type(scope): subject` with a valid type and scope, a subject of at most 72 characters, a body explaining why, and `Fixes #N` on the commit that completes the issue.
 
 ## Verdict
 

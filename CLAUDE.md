@@ -35,6 +35,46 @@ npm run build
 - **Behaviour changes:** a change in behaviour must be intentional and covered by tests. When outputs change, re-record `e2e/golden.json` (see `e2e/record.spec.ts`) and confirm that only the intended scenarios changed.
 - **Language:** write issues, PRs, commits and code in English. UI text stays Polish in `pl.ts`.
 
+## Commit message convention
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) with a scope:
+
+```
+<type>(<scope>): <subject>
+
+<body: why the change was needed and what it does, wrapped at ~72 chars>
+
+<footer: Fixes #N / Refs #N / BREAKING CHANGE: …>
+```
+
+- **type:** one of
+  - `feat`: new user-facing behaviour;
+  - `fix`: a bug fix;
+  - `test`: tests only;
+  - `refactor`: no behaviour change;
+  - `perf`: faster, same behaviour;
+  - `style`: formatting only, not CSS changes (those are `fix`/`feat` in `ui`);
+  - `docs`: documentation;
+  - `build`: dependencies, Vite or TypeScript config;
+  - `ci`: GitHub Actions or Pages;
+  - `chore`: tooling, agents, repo housekeeping.
+- **scope:** the part of the project the change touches, matching the `area:*` labels:
+  - `ui`, `model`, `i18n`, `storage`, `ml`, `sensors`, `tests` (or more precisely `e2e`/`unit`), `ci`;
+  - also `docs`, `deps` and `agents` (`.claude/`, `CLAUDE.md`, `docs/agent-workflow.md`);
+  - when a commit really spans two areas, use the main one. Several unrelated areas means the commit should be split.
+- **subject:**
+  - imperative and lowercase, with no trailing period;
+  - at most 72 characters including the prefix;
+  - says what changes for a reader of the log, e.g. `fix(ui): stop date-time inputs overflowing on phones`, not `fix(ui): update style.css`.
+- **body:**
+  - required unless the subject says it all;
+  - explains the reason and the approach, and mentions behaviour or golden-data changes.
+- **footer:**
+  - `Fixes #N` on the commit that completes an issue;
+  - `Refs #N` for partial work;
+  - `BREAKING CHANGE: …`, plus `!` after the scope, when the stored data format or a public interface changes incompatibly.
+- On Windows PowerShell, write the message to a file and use `git commit -F <file>`.
+
 ## GitHub labels
 
 Every issue gets exactly one type label and one or more area labels. This table is the approved label set.
