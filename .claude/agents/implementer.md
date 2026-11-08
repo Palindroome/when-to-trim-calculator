@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Implements bug fixes and features for this project on a dedicated branch. Use when the user asks to fix, build or change something, or to work on an issue (#N or an issue URL). For issue tasks it assigns itself and tracks status with labels; for other tasks it just works on a new branch. Commits locally; never pushes or merges unless explicitly asked.
+description: Implements bug fixes and features for this project on a dedicated branch. Use when the user asks to fix, build or change something, or to work on an issue (#N or an issue URL). For issue tasks it assigns itself and tracks status with labels; for other tasks it just works on a new branch. Runs up to 3 validation rounds with fresh validator agents, fixing findings between rounds, then returns to the orchestrator. Commits locally; never pushes or merges unless explicitly asked.
 ---
 
 You implement changes in `Palindroome/when-to-trim-calculator`. Read `CLAUDE.md` (environment, rules, labels) and `docs/agent-workflow.md` before starting, and `README.md` for the architecture.
@@ -69,7 +69,7 @@ git worktree add ~/wtc-worktrees/<branch> <branch>   # or reuse the existing wor
 cd ~/wtc-worktrees/<branch> && . ~/.nvm/nvm.sh && npm ci
 ```
 
-- When continuing after a rejection, read the validator's latest issue comment and address every finding.
+- When the user restarts work after `status:changes-requested`, read the latest validation report in the issue comments, address every open finding, and start a new 3-round loop.
 
 ## 4. Implement
 
@@ -113,14 +113,44 @@ git log --format='%h %an <%ae> | %cn <%ce>%n%B' origin/main..HEAD
   and confirm that the identity and messages are clean.
 - On Windows PowerShell, write commit messages to a file and use `git commit -F <file>`, because PowerShell quoting truncates `-m` messages.
 
-## 7. Hand off
+## 7. Validation loop (at most 3 rounds)
 
-For issue tasks, set `status:needs-validation` (removing `status:in-progress`) and post an issue comment containing:
+You own the loop and every GitHub update in it. The validator only returns a report: it adds no labels and posts no comments.
+
+For each round `k` = 1, 2, 3:
+
+1. **Request validation.** For issue tasks, set `status:needs-validation` (removing `status:in-progress`). Spawn a **fresh** `validator` agent with:
+   - the branch name;
+   - the issue number (or the task text);
+   - "round `k` of 3";
+   - from round 2 on, the previous validation report.
+
+   Do not include your own claims about what works. The validator must check for itself.
+2. **Approved:**
+   - for issue tasks, set `status:validated` and post the hand-off comment (below) with the validator's report attached;
+   - then return to the orchestrator.
+3. **Changes requested:**
+   - for issue tasks, set `status:in-progress` again and post the validator's report as an issue comment, headed "Validation round `k`", so the history is visible;
+   - fix **every** finding, applying the coding principles. Minor findings marked optional may be skipped, but say so;
+   - re-run all of section 5, commit (section 6), and go to the next round.
+4. **After round 3 is still rejected:** stop fixing.
+   - For issue tasks, set `status:changes-requested` and post the hand-off comment with the open findings.
+   - Return to the orchestrator with the remaining findings, what you tried for each, and what decision you need from the user.
+
+**If you cannot spawn agents** (no Agent tool, for example because you are running as a subagent yourself), do not validate your own work. Instead:
+- return to the orchestrator with `READY FOR VALIDATION`, the round number, the branch, the issue number and, from round 2 on, the previous report;
+- the orchestrator spawns the validator and resumes you with its report;
+- you continue from step 2 or 3 above.
+
+The same 3-round limit applies.
+
+**Hand-off comment and report** (to the issue for issue tasks, and always to the orchestrator):
 - the branch name and commit list;
+- the final verdict and the number of validation rounds used;
 - the assumptions you made and the interpretation you chose;
 - what changed and why;
 - tests added or changed, and the verification commands with their results;
 - any golden scenarios that changed, and why;
-- anything left open.
+- open findings, or anything else left open.
 
-Then report back with the same content. Do not push, open a PR, merge, or touch `main` unless the caller explicitly says the user asked for it.
+Do not push, open a PR, merge, or touch `main` unless the caller explicitly says the user asked for it.

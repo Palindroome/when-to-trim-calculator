@@ -55,11 +55,11 @@ Every issue gets exactly one type label and one or more area labels. This table 
 | `area:tests` | area | bfdadc | e2e/unit tests, golden data |
 | `area:ci` | area | ededed | GitHub Actions, Pages deployment, tooling |
 | `status:in-progress` | status | fef2c0 | an implementer is assigned and working |
-| `status:needs-validation` | status | f9d0c4 | implemented on a branch, waiting for the validator |
-| `status:changes-requested` | status | e99695 | the validator rejected it, back to the implementer |
+| `status:needs-validation` | status | f9d0c4 | a validation round is running |
+| `status:changes-requested` | status | e99695 | still rejected after 3 validation rounds, waiting for the user |
 | `status:validated` | status | 0e8a16 | the validator approved it, ready for the user to merge |
 
-Optional extra labels: `accessibility`, `good first issue`. An issue has at most one `status:*` label at a time.
+Optional extra labels: `accessibility`, `good first issue`. An issue has at most one `status:*` label at a time. Only the implementer sets `status:*` labels; the validator never touches labels.
 
 ## Agent workflow
 
