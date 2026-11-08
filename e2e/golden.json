@@ -1,0 +1,1391 @@
+{
+  "defaults": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 26.7273%",
+      "13.1762% | target 26.7273%",
+      "47.5961% | target 26.7273%",
+      "71.4286% | target 26.7273%",
+      "100% | target 26.7273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 20 h (do czw 5.03 05:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "chip jutro": {
+    "kind": "REKOMENDACJA",
+    "big": "Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.",
+    "sub": "Gotowa ok. czw 5.03 09:09: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 05:07 → czw 5.03 15:11",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 13.6364%",
+      "13.1762% good | target 13.6364%",
+      "47.5961% | target 13.6364%",
+      "71.4286% | target 13.6364%",
+      "100% | target 13.6364%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (1 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 5 h (do śr 4.03 13:44), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 5 h (do śr 4.03 14:00), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 24 h (do czw 5.03 08:45), potem zawiń całą w worek."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "chip za 3 dni": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 3 h (do śr 4.03 11:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. sob 7.03 07:50: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: pt 6.03 10:01 → nd 8.03 16:34",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 39.8182%",
+      "13.1762% | target 39.8182%",
+      "47.5961% | target 39.8182%",
+      "71.4286% | target 39.8182%",
+      "100% | target 39.8182%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (3 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 13 h (do śr 4.03 22:00), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 17 h (do czw 5.03 01:30), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "chip za 5 dni (damp allowed)": {
+    "kind": "REKOMENDACJA",
+    "big": "Zawiń całą w worek od razu.",
+    "sub": "Gotowa ok. pn 9.03 19:57: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: nd 8.03 22:07 → śr 11.03 04:41",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h"
+    ],
+    "tracks": [
+      "2.95928% | target 62.5%",
+      "12.4774% | target 62.5%",
+      "45.072% | target 62.5%",
+      "67.6406% good | target 62.5%",
+      "94.6969% | target 62.5%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (5 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 2 h (do śr 4.03 10:59), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 2 h (do śr 4.03 11:15), potem zawiń całą w worek.",
+      "Wstaw do mokrej przechowalni na 20 h (do czw 5.03 04:45), potem zawiń całą w worek."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "chip za tydzień": {
+    "kind": "REKOMENDACJA",
+    "big": "Włóż do zamkniętego pudełka od razu.",
+    "sub": "Gotowa ok. czw 12.03 00:19: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: wt 10.03 17:46 → pt 13.03 22:09",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h"
+    ],
+    "tracks": [
+      "2.11877% | target 62.5%",
+      "8.93353% | target 62.5%",
+      "32.2705% | target 62.5%",
+      "48.4291% | target 62.5%",
+      "67.8007% good | target 62.5%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (7 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 2 h (do śr 4.03 10:59), potem włóż do zamkniętego pudełka.",
+      "Wstaw do mokrej przechowalni na 13 h (do śr 4.03 22:00), potem włóż do zamkniętego pudełka.",
+      "Zawiń całą w worek na 1 d 12 h (do czw 5.03 20:45), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [
+      "Ponad 6 dni w wilgoci: zajrzyj co 2–3 dni, czy nie pojawia się pleśń, zwłaszcza na drewnianym podłożu."
+    ],
+    "save": true
+  },
+  "when equals thrown (error)": {
+    "kind": "UWAGA",
+    "big": "Termin trymowania musi być po toczeniu.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | no target",
+      "13.1762% | no target",
+      "47.5961% | no target",
+      "71.4286% | no target",
+      "100% | no target"
+    ],
+    "legend": "Pionowa kreska to Twój termin (–). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [],
+    "save": false
+  },
+  "when before thrown (error)": {
+    "kind": "UWAGA",
+    "big": "Termin trymowania musi być po toczeniu.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | no target",
+      "13.1762% | no target",
+      "47.5961% | no target",
+      "71.4286% | no target",
+      "100% | no target"
+    ],
+    "legend": "Pionowa kreska to Twój termin (–). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [],
+    "save": false
+  },
+  "deadline in 2 hours (too fast error)": {
+    "kind": "UWAGA",
+    "big": "Nawet odkryta będzie gotowa najwcześniej za 6 h. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 1.09091%",
+      "13.1762% | target 1.09091%",
+      "47.5961% | target 1.09091%",
+      "71.4286% | target 1.09091%",
+      "100% | target 1.09091%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [],
+    "save": true
+  },
+  "deadline in 8 hours": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 5 h (do śr 4.03 14:00), potem przykryj luźno workiem (dno lub brzeg odsłonięte).",
+    "sub": "Gotowa ok. śr 4.03 16:16: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: śr 4.03 13:46 → śr 4.03 22:18",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 4.36364%",
+      "13.1762% | target 4.36364%",
+      "47.5961% | target 4.36364%",
+      "71.4286% | target 4.36364%",
+      "100% | target 4.36364%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (8 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 6 h (do śr 4.03 14:30), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 6 h (do śr 4.03 14:30), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "deadline in 30 minutes": {
+    "kind": "UWAGA",
+    "big": "Nawet odkryta będzie gotowa najwcześniej za 6 h. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 0.272727%",
+      "13.1762% | target 0.272727%",
+      "47.5961% | target 0.272727%",
+      "71.4286% | target 0.272727%",
+      "100% | target 0.272727%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (30 min). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [],
+    "save": true
+  },
+  "exactly 4 days (damp boundary)": {
+    "kind": "REKOMENDACJA",
+    "big": "Wstaw do mokrej przechowalni od razu.",
+    "sub": "Gotowa ok. nd 8.03 00:15: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: sob 7.03 09:42 → nd 8.03 22:04",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 52.3637%",
+      "13.1762% | target 52.3637%",
+      "47.5961% good | target 52.3637%",
+      "71.4286% | target 52.3637%",
+      "100% | target 52.3637%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (4 d). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 2 h (do śr 4.03 10:30), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 3 h (do śr 4.03 11:45), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 8 h (do śr 4.03 16:44), potem zawiń całą w worek."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "just under 4 days": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 2 h (do śr 4.03 10:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. nd 8.03 05:42: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: sob 7.03 07:52 → pn 9.03 14:26",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 52.2273%",
+      "13.1762% | target 52.2273%",
+      "47.5961% good | target 52.2273%",
+      "71.4286% | target 52.2273%",
+      "100% | target 52.2273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (4 d). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 3 h (do śr 4.03 11:44), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 8 h (do śr 4.03 16:44), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 13 h (do śr 4.03 22:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "long wait 20 days": {
+    "kind": "UWAGA",
+    "big": "Nawet w najszczelniejszym opatuleniu zajmie to 7 d 15 h lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h"
+    ],
+    "tracks": [
+      "0.744434% | target 62.5%",
+      "3.13881% | target 62.5%",
+      "11.3383% | target 62.5%",
+      "17.0156% | target 62.5%",
+      "23.8219% | target 62.5%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (20 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [
+      "Ponad 6 dni w wilgoci: zajrzyj co 2–3 dni, czy nie pojawia się pleśń, zwłaszcza na drewnianym podłożu."
+    ],
+    "save": true
+  },
+  "very long wait 40 days": {
+    "kind": "UWAGA",
+    "big": "Nawet w najszczelniejszym opatuleniu zajmie to 7 d 15 h lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h"
+    ],
+    "tracks": [
+      "0.372992% | target 62.5%",
+      "1.57267% | target 62.5%",
+      "5.68095% | target 62.5%",
+      "8.52554% | target 62.5%",
+      "11.9358% | target 62.5%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (40 d). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [
+      "Ponad 6 dni w wilgoci: zajrzyj co 2–3 dni, czy nie pojawia się pleśń, zwłaszcza na drewnianym podłożu."
+    ],
+    "save": true
+  },
+  "hot dry draft, small plate, long wait (tightest error)": {
+    "kind": "UWAGA",
+    "big": "Nawet w najszczelniejszym opatuleniu zajmie to 1 d 15 h lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 22 min",
+      "Worek częściowo 2 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 1 d 15 h",
+      "Cały worek 14 h",
+      "Pudełko 19 h"
+    ],
+    "tracks": [
+      "0.135951% | target 62.5%",
+      "0.730716% | target 62.5%",
+      "14.5738% | target 62.5%",
+      "5.04962% | target 62.5%",
+      "7.06946% | target 62.5%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (7 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [],
+    "save": true
+  },
+  "stage soft": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 1 h (do śr 4.03 10:29), potem wstaw do mokrej przechowalni.",
+    "sub": "Gotowa ok. pt 6.03 12:22: cel to utrata ok. 5,0% masy (25 g).",
+    "win": "Okno: czw 5.03 21:49 → sob 7.03 10:11",
+    "bars": [
+      "Odkryta 5 h",
+      "Worek częściowo 20 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 1 h",
+      "Cały worek 4 d 13 h",
+      "Pudełko 6 d 9 h+"
+    ],
+    "tracks": [
+      "3.125% | target 32.0727%",
+      "13.1762% | target 32.0727%",
+      "47.5961% | target 32.0727%",
+      "71.4286% | target 32.0727%",
+      "100% | target 32.0727%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 3 h (do śr 4.03 11:45), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 3 h (do śr 4.03 12:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 9 h (do śr 4.03 17:59), potem wstaw do mokrej przechowalni."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "stage hard": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 6 h (do śr 4.03 14:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:55: cel to utrata ok. 8,0% masy (40 g).",
+    "win": "Okno: czw 5.03 12:05 → sob 7.03 18:39",
+    "bars": [
+      "Odkryta 8 h",
+      "Worek częściowo 1 d 8 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 4 d 20 h",
+      "Cały worek 7 d 7 h",
+      "Pudełko 10 d 4 h+"
+    ],
+    "tracks": [
+      "3.18287% | target 20.4167%",
+      "13.4202% | target 20.4167%",
+      "48.4775% | target 20.4167%",
+      "72.7513% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 6 h (do śr 4.03 15:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 4 h (do czw 5.03 13:14), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 6 h (do czw 5.03 14:30), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "wet dry": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 3 h (do śr 4.03 11:45), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 04:33: cel to utrata ok. 5,0% masy (25 g).",
+    "win": "Okno: czw 5.03 06:43 → sob 7.03 13:17",
+    "bars": [
+      "Odkryta 5 h",
+      "Worek częściowo 20 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 1 h",
+      "Cały worek 4 d 13 h",
+      "Pudełko 6 d 9 h+"
+    ],
+    "tracks": [
+      "3.125% | target 32.0727%",
+      "13.1762% | target 32.0727%",
+      "47.5961% | target 32.0727%",
+      "71.4286% | target 32.0727%",
+      "100% | target 32.0727%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 3 h (do śr 4.03 12:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 14 h (do śr 4.03 22:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 16 h (do czw 5.03 00:30), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "wet very wet": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 5 h (do śr 4.03 14:00), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:56: cel to utrata ok. 7,5% masy (38 g).",
+    "win": "Okno: czw 5.03 12:06 → sob 7.03 18:40",
+    "bars": [
+      "Odkryta 7 h",
+      "Worek częściowo 1 d 6 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 4 d 13 h",
+      "Cały worek 6 d 20 h",
+      "Pudełko 9 d 13 h+"
+    ],
+    "tracks": [
+      "3.125% | target 21.3818%",
+      "13.1762% | target 21.3818%",
+      "47.5961% | target 21.3818%",
+      "71.4286% | target 21.3818%",
+      "100% | target 21.3818%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 6 h (do śr 4.03 14:45), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 2 h (do czw 5.03 10:45), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 3 h (do czw 5.03 12:15), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "shape bowl": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 3 h (do śr 4.03 11:59), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 12:30: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 17:00 → sob 7.03 17:47",
+    "bars": [
+      "Odkryta 5 h",
+      "Worek częściowo 22 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 6 h",
+      "Cały worek 4 d 21 h",
+      "Pudełko 6 d 20 h+"
+    ],
+    "tracks": [
+      "3.125% | target 29.8924%",
+      "13.1762% | target 29.8924%",
+      "47.5961% | target 29.8924%",
+      "71.4286% | target 29.8924%",
+      "100% | target 29.8924%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 15 h (do czw 5.03 00:14), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 17 h (do czw 5.03 02:15), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "shape plate": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 6 h (do śr 4.03 15:15), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 07:29: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 00:04 → nd 8.03 06:38",
+    "bars": [
+      "Odkryta 8 h",
+      "Worek częściowo 1 d 11 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 5 d 6 h",
+      "Cały worek 7 d 21 h",
+      "Pudełko 11 d+"
+    ],
+    "tracks": [
+      "3.4375% | target 20.4167%",
+      "14.4938% | target 20.4167%",
+      "52.3557% | target 20.4167%",
+      "78.5714% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 7 h (do śr 4.03 15:44), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 8 h (do czw 5.03 16:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 8 h (do czw 5.03 17:29), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "shape vase": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 6 h (do śr 4.03 14:59), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 15:12: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 08:18 → nd 8.03 13:32",
+    "bars": [
+      "Odkryta 8 h",
+      "Worek częściowo 1 d 10 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 5 d 4 h",
+      "Cały worek 7 d 17 h",
+      "Pudełko 10 d 19 h+"
+    ],
+    "tracks": [
+      "3.37874% | target 20.4167%",
+      "14.246% | target 20.4167%",
+      "51.4607% | target 20.4167%",
+      "77.2283% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 7 h (do śr 4.03 15:44), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 7 h (do czw 5.03 15:45), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 8 h (do czw 5.03 16:44), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [
+      "Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej."
+    ],
+    "save": true
+  },
+  "shape closed (slow tip)": {
+    "kind": "REKOMENDACJA",
+    "big": "Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.",
+    "sub": "Gotowa ok. pt 6.03 11:14: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: pt 6.03 02:52 → pt 6.03 23:48",
+    "bars": [
+      "Odkryta 12 h",
+      "Worek częściowo 2 d 2 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 7 d 13 h",
+      "Cały worek 11 d 8 h+",
+      "Pudełko 15 d 21 h+"
+    ],
+    "tracks": [
+      "4.96527% | target 20.4167%",
+      "20.9354% good | target 20.4167%",
+      "75.6248% | target 20.4167%",
+      "100% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 10 h (do śr 4.03 19:00), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 11 h (do śr 4.03 19:30), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [
+      "Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej."
+    ],
+    "save": true
+  },
+  "clay grog": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:29), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 14:23: cel to utrata ok. 5,5% masy (28 g).",
+    "win": "Okno: czw 5.03 18:44 → sob 7.03 19:51",
+    "bars": [
+      "Odkryta 5 h",
+      "Worek częściowo 20 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d",
+      "Cały worek 4 d 12 h",
+      "Pudełko 6 d 7 h+"
+    ],
+    "tracks": [
+      "3.125% | target 32.3967%",
+      "13.1762% | target 32.3967%",
+      "47.5961% | target 32.3967%",
+      "71.4286% | target 32.3967%",
+      "100% | target 32.3967%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 3 h (do śr 4.03 12:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 13 h (do śr 4.03 22:14), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 16 h (do czw 5.03 00:30), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "clay porcelain": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 6 h (do śr 4.03 14:45), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 07:11: cel to utrata ok. 6,5% masy (33 g).",
+    "win": "Okno: czw 5.03 03:54 → nd 8.03 00:06",
+    "bars": [
+      "Odkryta 8 h",
+      "Worek częściowo 1 d 9 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 4 d 22 h",
+      "Cały worek 7 d 9 h",
+      "Pudełko 10 d 8 h+"
+    ],
+    "tracks": [
+      "3.2326% | target 20.4167%",
+      "13.6298% | target 20.4167%",
+      "49.2349% | target 20.4167%",
+      "73.888% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 6 h (do śr 4.03 15:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 5 h (do czw 5.03 13:59), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 6 h (do czw 5.03 15:00), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [
+      "Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej."
+    ],
+    "save": true
+  },
+  "clay earthenware": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 3 h (do śr 4.03 12:15), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 08:54: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 12:10 → sob 7.03 16:00",
+    "bars": [
+      "Odkryta 5 h",
+      "Worek częściowo 23 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 11 h",
+      "Cały worek 5 d 4 h",
+      "Pudełko 7 d 6 h+"
+    ],
+    "tracks": [
+      "3.125% | target 28.134%",
+      "13.1762% | target 28.134%",
+      "47.5961% | target 28.134%",
+      "71.4286% | target 28.134%",
+      "100% | target 28.134%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:00), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 17 h (do czw 5.03 02:00), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:44), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "bat plastic": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 06:41: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 06:40 → sob 7.03 18:42",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d 3 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 4 d",
+      "Cały worek 6 d",
+      "Pudełko 8 d 10 h+"
+    ],
+    "tracks": [
+      "3.125% | target 24.2975%",
+      "13.1762% | target 24.2975%",
+      "47.5961% | target 24.2975%",
+      "71.4286% | target 24.2975%",
+      "100% | target 24.2975%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 5 h (do śr 4.03 13:45), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 21 h (do czw 5.03 06:14), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 23 h (do czw 5.03 08:00), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "bat plaster": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:29), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 11:07: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 17:39 → sob 7.03 13:18",
+    "bars": [
+      "Odkryta 5 h",
+      "Worek częściowo 19 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 2 d 22 h",
+      "Cały worek 4 d 9 h",
+      "Pudełko 6 d 3 h+"
+    ],
+    "tracks": [
+      "3.125% | target 33.4091%",
+      "13.1762% | target 33.4091%",
+      "47.5961% | target 33.4091%",
+      "71.4286% | target 33.4091%",
+      "100% | target 33.4091%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 3 h (do śr 4.03 11:59), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 12 h (do śr 4.03 21:29), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 15 h (do śr 4.03 23:44), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "air still": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 6 h (do śr 4.03 14:59), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 12:14: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 14:24 → sob 7.03 20:58",
+    "bars": [
+      "Odkryta 9 h",
+      "Worek częściowo 1 d 7 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "5% | target 26.7273%",
+      "16.6667% | target 26.7273%",
+      "47.5961% | target 26.7273%",
+      "71.4286% | target 26.7273%",
+      "100% | target 26.7273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 7 h (do śr 4.03 16:00), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 1 h (do czw 5.03 09:44), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 3 h (do czw 5.03 11:44), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "air draft (draft tip)": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:14), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 10:37: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 12:48 → sob 7.03 19:22",
+    "bars": [
+      "Odkryta 4 h",
+      "Worek częściowo 19 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "1.92308% | target 26.7273%",
+      "10.3362% | target 26.7273%",
+      "47.5961% | target 26.7273%",
+      "71.4286% | target 26.7273%",
+      "100% | target 26.7273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 2 h (do śr 4.03 11:29), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 14 h (do śr 4.03 22:44), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 15 h (do czw 5.03 00:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [
+      "Powietrze jest suche lub jest przeciąg. Brzeg i ucha wyschną dużo szybciej niż dno, więc owiń je paskiem folii albo obróć pracę dnem do góry, gdy brzeg zesztywnieje."
+    ],
+    "save": true
+  },
+  "dry warm air (vpd tip)": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 30 min (do śr 4.03 09:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:40: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 22:49 → sob 7.03 01:56",
+    "bars": [
+      "Odkryta 3 h",
+      "Worek częściowo 12 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 2 d 17 h",
+      "Pudełko 3 d 19 h+"
+    ],
+    "tracks": [
+      "3.125% | target 53.7925%",
+      "13.1762% | target 53.7925%",
+      "95.7939% | target 53.7925%",
+      "71.4286% | target 53.7925%",
+      "100% | target 53.7925%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 1 h (do śr 4.03 10:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 6 h (do śr 4.03 15:15), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [
+      "Powietrze jest suche lub jest przeciąg. Brzeg i ucha wyschną dużo szybciej niż dno, więc owiń je paskiem folii albo obróć pracę dnem do góry, gdy brzeg zesztywnieje."
+    ],
+    "save": true
+  },
+  "rh above 100 unclamped in tips": {
+    "kind": "UWAGA",
+    "big": "Nawet odkryta będzie gotowa najwcześniej za 3 d 15 h. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 11 d 22 h+",
+      "Worek częściowo > 30 dni",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek > 30 dni",
+      "Pudełko > 30 dni"
+    ],
+    "tracks": [
+      "100% | target 20.4167%",
+      "100% | target 20.4167%",
+      "36.3581% | target 20.4167%",
+      "100% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [],
+    "save": true
+  },
+  "rh 0": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 45 min (do śr 4.03 09:44), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 10:44: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 23:43 → sob 7.03 03:16",
+    "bars": [
+      "Odkryta 3 h",
+      "Worek częściowo 12 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 2 d 18 h",
+      "Pudełko 3 d 21 h+"
+    ],
+    "tracks": [
+      "3.125% | target 52.92%",
+      "13.1762% | target 52.92%",
+      "94.2402% | target 52.92%",
+      "71.4286% | target 52.92%",
+      "100% | target 52.92%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 1 h (do śr 4.03 10:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 4 h (do śr 4.03 12:44), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 6 h (do śr 4.03 15:29), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [
+      "Powietrze jest suche lub jest przeciąg. Brzeg i ucha wyschną dużo szybciej niż dno, więc owiń je paskiem folii albo obróć pracę dnem do góry, gdy brzeg zesztywnieje."
+    ],
+    "save": true
+  },
+  "cold room": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 5 h (do śr 4.03 13:45), potem przykryj luźno workiem (dno lub brzeg odsłonięte).",
+    "sub": "Gotowa ok. pt 6.03 09:33: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 22:46 → sob 7.03 01:42",
+    "bars": [
+      "Odkryta 15 h",
+      "Worek częściowo 2 d 17 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 14 d 14 h+",
+      "Pudełko 20 d 11 h+"
+    ],
+    "tracks": [
+      "6.3875% | target 20.4167%",
+      "26.9321% | target 20.4167%",
+      "36.3581% | target 20.4167%",
+      "100% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 14 h (do śr 4.03 22:44), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 14 h (do śr 4.03 22:59), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "thick base (slow tip)": {
+    "kind": "REKOMENDACJA",
+    "big": "Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.",
+    "sub": "Gotowa ok. pt 6.03 05:35: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 22:09 → pt 6.03 16:44",
+    "bars": [
+      "Odkryta 11 h",
+      "Worek częściowo 1 d 21 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 6 d 17 h",
+      "Cały worek 10 d 2 h+",
+      "Pudełko 14 d 2 h+"
+    ],
+    "tracks": [
+      "4.40655% | target 20.4167%",
+      "18.5796% good | target 20.4167%",
+      "67.115% | target 20.4167%",
+      "100% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 9 h (do śr 4.03 17:44), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 9 h (do śr 4.03 18:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 19 h (do pt 6.03 04:29), potem zawiń całą w worek."
+    ],
+    "tips": [
+      "Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej."
+    ],
+    "save": true
+  },
+  "base thinner than wall": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:14), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 14:29: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 21:22 → sob 7.03 16:09",
+    "bars": [
+      "Odkryta 4 h",
+      "Worek częściowo 19 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 2 d 20 h",
+      "Cały worek 4 d 7 h",
+      "Pudełko 6 d+"
+    ],
+    "tracks": [
+      "3.125% | target 34.0886%",
+      "13.1762% | target 34.0886%",
+      "47.5961% | target 34.0886%",
+      "71.4286% | target 34.0886%",
+      "100% | target 34.0886%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 3 h (do śr 4.03 11:59), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 12 h (do śr 4.03 21:00), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 14 h (do śr 4.03 23:15), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "base empty falls back to wall": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:14), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 14:29: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 21:22 → sob 7.03 16:09",
+    "bars": [
+      "Odkryta 4 h",
+      "Worek częściowo 19 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 2 d 20 h",
+      "Cały worek 4 d 7 h",
+      "Pudełko 6 d+"
+    ],
+    "tracks": [
+      "3.125% | target 34.0886%",
+      "13.1762% | target 34.0886%",
+      "47.5961% | target 34.0886%",
+      "71.4286% | target 34.0886%",
+      "100% | target 34.0886%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 3 h (do śr 4.03 11:59), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 12 h (do śr 4.03 21:00), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 14 h (do śr 4.03 23:15), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "wall typed with comma 6,5": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą od razu.",
+    "sub": "Gotowa ok. pt 6.03 09:39: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: pt 6.03 01:33 → pt 6.03 21:49",
+    "bars": [
+      "Odkryta 2 d 1 h",
+      "Worek częściowo 8 d 13 h+",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni > 30 dni",
+      "Cały worek > 30 dni",
+      "Pudełko > 30 dni"
+    ],
+    "tracks": [
+      "23.7171% good | target 23.8813%",
+      "100% | target 23.8813%",
+      "100% | target 23.8813%",
+      "100% | target 23.8813%",
+      "100% | target 23.8813%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 2 d (do pt 6.03 09:29), potem przykryj luźno workiem (dno lub brzeg odsłonięte).",
+      "Zostaw odkrytą na 2 d (do pt 6.03 09:29), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 2 d (do pt 6.03 09:29), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "wall decimal 6.5": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:44), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 14:14: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 15:42 → nd 8.03 00:03",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d 1 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 18 h",
+      "Cały worek 5 d 15 h",
+      "Pudełko 7 d 21 h+"
+    ],
+    "tracks": [
+      "3.125% | target 25.8851%",
+      "13.1762% | target 25.8851%",
+      "47.5961% | target 25.8851%",
+      "71.4286% | target 25.8851%",
+      "100% | target 25.8851%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:29), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 04:29), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 21 h (do czw 5.03 06:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "wall below minimum clamps to 2": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 1 h (do śr 4.03 10:29), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 12:35: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 22:32 → sob 7.03 09:41",
+    "bars": [
+      "Odkryta 4 h",
+      "Worek częściowo 16 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 2 d 8 h",
+      "Cały worek 3 d 12 h",
+      "Pudełko 4 d 22 h+"
+    ],
+    "tracks": [
+      "3.125% | target 41.4766%",
+      "13.1762% | target 41.4766%",
+      "47.5961% | target 41.4766%",
+      "71.4286% | target 41.4766%",
+      "100% | target 41.4766%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 2 h (do śr 4.03 11:00), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 8 h (do śr 4.03 16:59), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 10 h (do śr 4.03 19:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [
+      "Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej."
+    ],
+    "save": true
+  },
+  "mass empty falls back to 500": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 26.7273%",
+      "13.1762% | target 26.7273%",
+      "47.5961% | target 26.7273%",
+      "71.4286% | target 26.7273%",
+      "100% | target 26.7273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 20 h (do czw 5.03 05:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "mass below minimum clamps to 20": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (1 g).",
+    "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 26.7273%",
+      "13.1762% | target 26.7273%",
+      "47.5961% | target 26.7273%",
+      "71.4286% | target 26.7273%",
+      "100% | target 26.7273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 20 h (do czw 5.03 05:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "mass 2000": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (120 g).",
+    "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 26.7273%",
+      "13.1762% | target 26.7273%",
+      "47.5961% | target 26.7273%",
+      "71.4286% | target 26.7273%",
+      "100% | target 26.7273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 20 h (do czw 5.03 05:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "temp empty falls back to 20": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 26.7273%",
+      "13.1762% | target 26.7273%",
+      "47.5961% | target 26.7273%",
+      "71.4286% | target 26.7273%",
+      "100% | target 26.7273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 20 h (do czw 5.03 05:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "night mode on": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 13:00), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 06:14: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 03:32 → sob 7.03 19:02",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d 4 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 6 d 9 h",
+      "Pudełko 9 d 1 h+"
+    ],
+    "tracks": [
+      "2.63943% | target 22.5744%",
+      "12.8553% | target 22.5744%",
+      "40.2005% | target 22.5744%",
+      "70.6887% | target 22.5744%",
+      "100% | target 22.5744%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:29), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 24 h (do czw 5.03 08:45), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 1 h (do czw 5.03 10:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "night mode with custom night values": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 07:48: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: śr 4.03 19:46 → nd 8.03 05:52",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d 7 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 7 d 13 h",
+      "Pudełko 10 d 20 h+"
+    ],
+    "tracks": [
+      "2.38715% | target 20.4167%",
+      "13.0267% | target 20.4167%",
+      "36.3581% | target 20.4167%",
+      "75.2946% | target 20.4167%",
+      "100% | target 20.4167%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 5 h (do śr 4.03 13:45), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 5 h (do czw 5.03 13:45), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 1 d 6 h (do czw 5.03 14:30), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "night values ignored when night off": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 26.7273%",
+      "13.1762% | target 26.7273%",
+      "47.5961% | target 26.7273%",
+      "71.4286% | target 26.7273%",
+      "100% | target 26.7273%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 20 h (do czw 5.03 05:14), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "damp room custom, stage soft": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:44), potem wstaw do mokrej przechowalni.",
+    "sub": "Gotowa ok. pt 6.03 10:15: cel to utrata ok. 5,0% masy (25 g).",
+    "win": "Okno: śr 4.03 15:50 → pn 9.03 01:53",
+    "bars": [
+      "Odkryta 5 h",
+      "Worek częściowo 20 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 8 d 20 h+",
+      "Cały worek 4 d 13 h",
+      "Pudełko 6 d 9 h"
+    ],
+    "tracks": [
+      "2.25067% | target 23.0993%",
+      "9.48967% | target 23.0993%",
+      "100% | target 23.0993%",
+      "51.444% | target 23.0993%",
+      "72.0215% | target 23.0993%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 3 h (do śr 4.03 11:45), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 3 h (do śr 4.03 12:15), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 17 h (do czw 5.03 02:00), potem wstaw do mokrej przechowalni."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "thrown earlier, trim tomorrow": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 3 h (do pn 2.03 21:00), potem przykryj luźno workiem (dno lub brzeg odsłonięte).",
+    "sub": "Gotowa ok. wt 3.03 09:48: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: wt 3.03 05:47 → wt 3.03 15:51",
+    "bars": [
+      "Odkryta 6 h",
+      "Worek częściowo 1 d",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h",
+      "Cały worek 5 d 11 h",
+      "Pudełko 7 d 15 h+"
+    ],
+    "tracks": [
+      "3.125% | target 8.45455%",
+      "13.1762% | target 8.45455%",
+      "47.5961% | target 8.45455%",
+      "71.4286% | target 8.45455%",
+      "100% | target 8.45455%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (16 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 5 h (do pn 2.03 23:44), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 5 h (do pn 2.03 23:44), potem włóż do zamkniętego pudełka."
+    ],
+    "tips": [],
+    "save": true
+  },
+  "big porcelain closed form, long wait (mould tip)": {
+    "kind": "REKOMENDACJA",
+    "big": "Zostaw odkrytą na 13 h (do śr 4.03 22:29), potem wstaw do mokrej przechowalni.",
+    "sub": "Gotowa ok. sob 14.03 13:24: cel to utrata ok. 6,5% masy (98 g).",
+    "win": "Okno: śr 11.03 18:15 → śr 18.03 18:09",
+    "bars": [
+      "Odkryta 1 d 5 h",
+      "Worek częściowo 5 d 1 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 18 d 5 h+",
+      "Cały worek 27 d 7 h+",
+      "Pudełko > 30 dni"
+    ],
+    "tracks": [
+      "7.43284% | target 62.5%",
+      "31.3396% | target 62.5%",
+      "100% | target 62.5%",
+      "100% | target 62.5%",
+      "100% | target 62.5%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (10 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [
+      "Zostaw odkrytą na 19 h (do czw 5.03 03:45), potem zawiń całą w worek.",
+      "Zostaw odkrytą na 22 h (do czw 5.03 06:45), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 3 d 3 h (do sob 7.03 11:44), potem wstaw do mokrej przechowalni."
+    ],
+    "tips": [
+      "Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej.",
+      "Ponad 6 dni w wilgoci: zajrzyj co 2–3 dni, czy nie pojawia się pleśń, zwłaszcza na drewnianym podłożu."
+    ],
+    "save": true
+  }
+}
