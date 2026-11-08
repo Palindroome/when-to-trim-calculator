@@ -12,6 +12,8 @@ h2{font-family:Fraunces,serif;font-weight:500;font-size:19px;margin:0 0 12px;dis
 h2 .n{font-family:"IBM Plex Sans";font-size:12px;font-weight:600;color:var(--clay);background:var(--clay-soft);border-radius:99px;padding:1px 8px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:0 0 14px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.dates{display:flex;flex-wrap:wrap}
+.dates>div{flex:1 1 0}
 .full{grid-column:1/-1}
 label{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:4px}
 input,select{width:100%;font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-height:42px}
