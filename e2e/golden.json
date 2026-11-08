@@ -1022,28 +1022,28 @@
   },
   "wall typed with comma 6,5": {
     "kind": "REKOMENDACJA",
-    "big": "Zostaw odkrytą od razu.",
-    "sub": "Gotowa ok. pt 6.03 09:39: cel to utrata ok. 6,0% masy (30 g).",
-    "win": "Okno: pt 6.03 01:33 → pt 6.03 21:49",
+    "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:44), potem zawiń całą w worek.",
+    "sub": "Gotowa ok. pt 6.03 14:14: cel to utrata ok. 6,0% masy (30 g).",
+    "win": "Okno: czw 5.03 15:42 → nd 8.03 00:03",
     "bars": [
-      "Odkryta 2 d 1 h",
-      "Worek częściowo 8 d 13 h+",
-      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni > 30 dni",
-      "Cały worek > 30 dni",
-      "Pudełko > 30 dni"
+      "Odkryta 6 h",
+      "Worek częściowo 1 d 1 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 18 h",
+      "Cały worek 5 d 15 h",
+      "Pudełko 7 d 21 h+"
     ],
     "tracks": [
-      "23.7171% good | target 23.8813%",
-      "100% | target 23.8813%",
-      "100% | target 23.8813%",
-      "100% | target 23.8813%",
-      "100% | target 23.8813%"
+      "3.125% | target 25.8851%",
+      "13.1762% | target 25.8851%",
+      "47.5961% | target 25.8851%",
+      "71.4286% | target 25.8851%",
+      "100% | target 25.8851%"
     ],
     "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
     "alts": [
-      "Zostaw odkrytą na 2 d (do pt 6.03 09:29), potem przykryj luźno workiem (dno lub brzeg odsłonięte).",
-      "Zostaw odkrytą na 2 d (do pt 6.03 09:29), potem zawiń całą w worek.",
-      "Zostaw odkrytą na 2 d (do pt 6.03 09:29), potem włóż do zamkniętego pudełka."
+      "Zostaw odkrytą na 4 h (do śr 4.03 13:29), potem włóż do zamkniętego pudełka.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 04:29), potem zawiń całą w worek.",
+      "Przykryj luźno workiem (dno lub brzeg odsłonięte) na 21 h (do czw 5.03 06:14), potem włóż do zamkniętego pudełka."
     ],
     "tips": [],
     "save": true

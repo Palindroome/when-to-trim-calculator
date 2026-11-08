@@ -21,13 +21,13 @@ export function renderShell(m: Messages): string {
     <h2><span class="n">1</span>${m.sections.piece}</h2>
     <div class="grid">
       <div class="full"><label for="name">${f.name}</label><input id="name" placeholder="${f.namePlaceholder}"></div>
-      <div><label for="mass">${f.mass}</label><div class="unit"><input id="mass" type="number" inputmode="decimal" value="500" min="20"><span>${u.grams}</span></div></div>
+      <div><label for="mass">${f.mass}</label><div class="unit"><input id="mass" type="text" inputmode="decimal" autocomplete="off" value="500"><span>${u.grams}</span></div></div>
       <div><label for="shape">${f.shape}</label>
         <select id="shape">
           ${options(SHAPES, o.shape)}
         </select></div>
-      <div><label for="wall">${f.wall}</label><div class="unit"><input id="wall" type="number" inputmode="decimal" value="6" min="2" max="30"><span>${u.millimetres}</span></div></div>
-      <div><label for="base">${f.base}</label><div class="unit"><input id="base" type="number" inputmode="decimal" value="9" min="2" max="40"><span>${u.millimetres}</span></div></div>
+      <div><label for="wall">${f.wall}</label><div class="unit"><input id="wall" type="text" inputmode="decimal" autocomplete="off" value="6"><span>${u.millimetres}</span></div></div>
+      <div><label for="base">${f.base}</label><div class="unit"><input id="base" type="text" inputmode="decimal" autocomplete="off" value="9"><span>${u.millimetres}</span></div></div>
       <div><label for="clay">${f.clay}</label>
         <select id="clay">
           ${options(CLAYS, o.clay, 'stone')}
@@ -50,8 +50,8 @@ export function renderShell(m: Messages): string {
   <section class="card">
     <h2><span class="n">2</span>${m.sections.conditions}</h2>
     <div class="grid">
-      <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="number" inputmode="decimal" value="20"><span>${u.celsius}</span></div></div>
-      <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="number" inputmode="decimal" value="50" min="5" max="99"><span>${u.percent}</span></div></div>
+      <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="text" inputmode="decimal" autocomplete="off" value="20"><span>${u.celsius}</span></div></div>
+      <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="text" inputmode="decimal" autocomplete="off" value="50"><span>${u.percent}</span></div></div>
       <div class="full"><label for="air">${f.airflow}</label>
         <select id="air">
           ${options(AIRFLOWS, o.airflow, 'light')}
@@ -59,10 +59,10 @@ export function renderShell(m: Messages): string {
       <div class="full">
         <label class="check"><input type="checkbox" id="night"> ${f.night}</label>
       </div>
-      <div class="night"><label for="ntemp">${f.nightTemp}</label><div class="unit"><input id="ntemp" type="number" inputmode="decimal" value="15"><span>${u.celsius}</span></div></div>
-      <div class="night"><label for="nrh">${f.nightRh}</label><div class="unit"><input id="nrh" type="number" inputmode="decimal" value="60"><span>${u.percent}</span></div></div>
-      <div><label for="dtemp">${f.dampTemp}</label><div class="unit"><input id="dtemp" type="number" inputmode="decimal" value="15"><span>${u.celsius}</span></div></div>
-      <div><label for="drh">${f.dampRh}</label><div class="unit"><input id="drh" type="number" inputmode="decimal" value="88"><span>${u.percent}</span></div></div>
+      <div class="night"><label for="ntemp">${f.nightTemp}</label><div class="unit"><input id="ntemp" type="text" inputmode="decimal" autocomplete="off" value="15"><span>${u.celsius}</span></div></div>
+      <div class="night"><label for="nrh">${f.nightRh}</label><div class="unit"><input id="nrh" type="text" inputmode="decimal" autocomplete="off" value="60"><span>${u.percent}</span></div></div>
+      <div><label for="dtemp">${f.dampTemp}</label><div class="unit"><input id="dtemp" type="text" inputmode="decimal" autocomplete="off" value="15"><span>${u.celsius}</span></div></div>
+      <div><label for="drh">${f.dampRh}</label><div class="unit"><input id="drh" type="text" inputmode="decimal" autocomplete="off" value="88"><span>${u.percent}</span></div></div>
     </div>
   </section>
 
@@ -83,7 +83,7 @@ export function renderShell(m: Messages): string {
     <h2><span class="n">4</span>${m.sections.weight}</h2>
     <p class="muted" style="margin:-4px 0 10px">${m.weightHint}</p>
     <div class="grid">
-      <div><label for="mnow">${f.massNow}</label><div class="unit"><input id="mnow" type="number" inputmode="decimal" placeholder="${f.massNowPlaceholder}"><span>${u.grams}</span></div></div>
+      <div><label for="mnow">${f.massNow}</label><div class="unit"><input id="mnow" type="text" inputmode="decimal" autocomplete="off" placeholder="${f.massNowPlaceholder}"><span>${u.grams}</span></div></div>
       <div><label for="wnow">${f.coverSoFar}</label>
         <select id="wnow"></select></div>
     </div>

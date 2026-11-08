@@ -14,7 +14,7 @@ import { byId } from './dom';
 
 /** Parses a number field, accepting a decimal comma; falls back when not a finite number. */
 export function parseNumber(raw: string, fallback: number): number {
-  const v = parseFloat(String(raw).replace(',', '.'));
+  const v = parseFloat(String(raw).trim().replaceAll(',', '.'));
   return isFinite(v) ? v : fallback;
 }
 

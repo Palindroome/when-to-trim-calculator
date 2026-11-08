@@ -59,7 +59,7 @@ src/
     form.ts           reads inputs; formConditionsSource
     render.ts         HTML for result, pieces, calibration, weight check
     app.ts            state + event wiring
-e2e/                  Playwright suite (runs unchanged against the prototype and the build)
+e2e/                  Playwright suite (runs against the prototype and the build; tests for intended fixes skip on the prototype)
 reference/index.html  original prototype
 ```
 
