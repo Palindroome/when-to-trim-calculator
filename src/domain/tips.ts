@@ -1,0 +1,19 @@
+import type { ModelParams } from './params';
+import { psat } from './physics';
+import type { Recommendation } from './planner';
+import type { Conditions, Piece } from './types';
+
+export type TipId = 'dryAirRim' | 'thickBase' | 'mould';
+
+/** Practical warnings shown under the comparison bars, in display order. */
+export function tipsFor(rec: Recommendation, piece: Piece, env: Conditions, p: ModelParams): TipId[] {
+  // note: uses the raw daytime humidity, without the clamp applied in the rate model
+  const vpd = psat(env.temp) * (1 - env.rh / 100);
+  const option = rec.status === 'invalidDeadline' ? undefined : rec.option;
+  const tips: TipId[] = [];
+  const usesOpen = option !== undefined && option.plan[0]!.cover === 'open';
+  if (usesOpen && (vpd > p.tips.dryAirVpd || p.airflowFactor[env.airflow] >= p.tips.draughtAirflow)) tips.push('dryAirRim');
+  if (piece.slow > p.tips.slowPiece) tips.push('thickBase');
+  if (option !== undefined && option.hours > p.tips.longWaitHours) tips.push('mould');
+  return tips;
+}

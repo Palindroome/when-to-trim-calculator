@@ -1,0 +1,211 @@
+// Polish UI strings — the source of truth for the `Messages` type.
+// A new language: copy this file, translate, type it as `Messages`, register it in ./index.ts.
+// Keys ending in `Html` contain trusted markup and are inserted unescaped.
+
+import type { AirflowId, BatId, ClayId, Cover, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
+import type { TipId } from '../domain/tips';
+
+const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+
+const coverPhrase: Record<Cover, string> = {
+  open: 'zostaw odkrytą',
+  partial: 'przykryj luźno workiem (dno lub brzeg odsłonięte)',
+  full: 'zawiń całą w worek',
+  box: 'włóż do zamkniętego pudełka',
+  damp: 'wstaw do mokrej przechowalni',
+};
+
+export const pl = {
+  lang: 'pl',
+  title: 'Kiedy trymować? – prototyp',
+  heading: 'Kiedy trymować?',
+  lead: 'Podaj pracę, warunki i termin trymowania. Kalkulator podpowie, jak ją opatulić, i z każdą zapisaną pracą uczy się Twojej pracowni.',
+
+  sections: {
+    piece: 'Praca',
+    conditions: 'Warunki',
+    schedule: 'Termin',
+    weight: 'Sprawdź wagą',
+    pieces: 'Moje prace i kalibracja',
+  },
+
+  fields: {
+    name: 'Nazwa (opcjonalnie)',
+    namePlaceholder: 'np. kubki z czwartku',
+    mass: 'Masa po toczeniu',
+    shape: 'Kształt',
+    wall: 'Grubość ścianki',
+    base: 'Grubość dna',
+    clay: 'Masa ceramiczna',
+    bat: 'Podłoże',
+    wetness: 'Mokrość po toczeniu',
+    stage: 'Na co ma być gotowa',
+    temp: 'Temperatura w pracowni',
+    rh: 'Wilgotność powietrza',
+    airflow: 'Ruch powietrza przy półce',
+    night: 'W nocy jest chłodniej (np. ogrzewanie wyłączone)',
+    nightTemp: 'Temperatura nocą (22–7)',
+    nightRh: 'Wilgotność nocą',
+    dampTemp: 'Mokra przechowalnia: temp.',
+    dampRh: 'Mokra przechowalnia: wilg.',
+    thrown: 'Wytoczona',
+    when: 'Chcę trymować',
+    massNow: 'Masa teraz',
+    massNowPlaceholder: 'np. 470',
+    coverSoFar: 'Przez ten czas była',
+  },
+
+  units: { grams: 'g', millimetres: 'mm', celsius: '°C', percent: '%' },
+
+  options: {
+    shape: {
+      cyl: 'Kubek / cylinder',
+      bowl: 'Miska',
+      plate: 'Talerz / płaska',
+      vase: 'Wąski wazon',
+      closed: 'Forma zamknięta',
+    } satisfies Record<ShapeId, string>,
+    clay: {
+      grog: 'Z szamotem',
+      stone: 'Kamionka gładka',
+      porc: 'Porcelana',
+      earth: 'Czerwona / fajans',
+    } satisfies Record<ClayId, string>,
+    bat: {
+      plastic: 'Bat plastikowy',
+      wood: 'Deska / sklejka',
+      plaster: 'Bat gipsowy',
+    } satisfies Record<BatId, string>,
+    wetness: {
+      dry: 'Toczona „na sucho”',
+      normal: 'Normalnie',
+      wet: 'Bardzo mokra, dużo szlikru',
+    } satisfies Record<WetnessId, string>,
+    stage: {
+      soft: 'Doklejanie uch / miękka',
+      trim: 'Trymowanie',
+      hard: 'Rzeźbienie / twarda',
+    } satisfies Record<StageId, string>,
+    airflow: {
+      still: 'Cisza, zamknięty kąt',
+      light: 'Lekki ruch (ludzie, wentylacja)',
+      draft: 'Przeciąg, wentylator, kaloryfer obok',
+    } satisfies Record<AirflowId, string>,
+  },
+
+  quickDate: (days: number): string => (days === 1 ? 'jutro' : days === 7 ? 'za tydzień' : `za ${days} dni`),
+
+  weightHint:
+    'Zważ pracę (bez batu) przy toczeniu i teraz. Utracona masa mówi więcej niż dotyk, zwłaszcza przy grubym dnie.',
+
+  covers: {
+    label: {
+      open: 'Odkryta',
+      partial: 'Worek częściowo',
+      full: 'Cały worek',
+      box: 'Pudełko',
+      damp: 'Mokra przechowalnia',
+    } satisfies Record<Cover, string>,
+    phrase: coverPhrase,
+  },
+
+  plan: {
+    single: (cover: Cover): string => `${cap(coverPhrase[cover])} od razu.`,
+    twoPhase: (first: Cover, duration: string, until: string, then: Cover): string =>
+      `${cap(coverPhrase[first])} na ${duration} (do ${until}), potem ${coverPhrase[then]}.`,
+  },
+
+  result: {
+    recommendation: 'Rekomendacja',
+    warning: 'Uwaga',
+    ready: (date: string, lossPct: string, grams: number): string =>
+      `Gotowa ok. ${date}: cel to utrata ok. ${lossPct}% masy (${grams} g).`,
+    window: (from: string, to: string): string => `Okno: ${from} → ${to}`,
+    windowOpenEnd: '…',
+    compareTitle: 'Ile to potrwa w każdym wariancie',
+    dampNote: 'tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni',
+    legend: (deadline: string): string =>
+      `Pionowa kreska to Twój termin (${deadline}). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.`,
+    noDeadline: '–',
+    alternatives: 'Inne sposoby na ten sam termin:',
+    save: 'Zapisz tę pracę z planem',
+  },
+
+  errors: {
+    invalidDeadline: 'Termin trymowania musi być po toczeniu.',
+    tooFast: (duration: string): string =>
+      `Nawet odkryta będzie gotowa najwcześniej za ${duration}. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.`,
+    tooSlow: (duration: string): string =>
+      `Nawet w najszczelniejszym opatuleniu zajmie to ${duration} lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.`,
+  },
+
+  tips: {
+    dryAirRim:
+      'Powietrze jest suche lub jest przeciąg. Brzeg i ucha wyschną dużo szybciej niż dno, więc owiń je paskiem folii albo obróć pracę dnem do góry, gdy brzeg zesztywnieje.',
+    thickBase:
+      'Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej.',
+    mould: 'Ponad 6 dni w wilgoci: zajrzyj co 2–3 dni, czy nie pojawia się pleśń, zwłaszcza na drewnianym podłożu.',
+  } satisfies Record<TipId, string>,
+
+  weight: {
+    tooSoft: (loss: string, estimate: string): string => `Utrata ${loss}%: jeszcze za miękka.${estimate}`,
+    observedRate: (gramsPerHour: string, remaining: string): string =>
+      ` Przy obecnym tempie (${gramsPerHour} g/h) zostało ok. ${remaining}.`,
+    modelEstimate: (remaining: string): string => ` W tym opatuleniu potrzeba jeszcze ok. ${remaining}.`,
+    inWindow: (loss: string): string =>
+      `Utrata ${loss}%: jest w oknie trymowania. Jeśli trymujesz później, zawiń ją w worek.`,
+    tooHard: (loss: string): string =>
+      `Utrata ${loss}%: prawdopodobnie już za twarda na gładkie trymowanie. Spróbuj zawinąć ją z wilgotną gąbką na kilka godzin.`,
+  },
+
+  pieces: {
+    empty:
+      'Nie ma jeszcze zapisanych prac. Zapisz pracę z planem, a gdy będziesz ją trymować, oceń, jak trafiła prognoza. Po kilku ocenach czasy dopasują się do Twojej pracowni.',
+    defaultName: (n: number): string => `Praca ${n}`,
+    feedbackPrompt: 'Trymuję teraz i jest:',
+    feedbackButton: { wet: 'za mokra', ok: 'w sam raz', dry: 'za sucha' } satisfies Record<FeedbackKind, string>,
+    feedbackResult: { wet: 'była za mokra', ok: 'w sam raz', dry: 'była za sucha' } satisfies Record<FeedbackKind, string>,
+    rated: (result: string, after: string): string => `${result} · po ${after}`,
+    dueIn: (duration: string): string => `za ${duration}`,
+    due: 'powinna być gotowa',
+    meta: (thrown: string, forecast: string): string => `Toczona ${thrown} · prognoza ${forecast}`,
+    remove: 'usuń',
+  },
+
+  calibration: {
+    cover: 'Wariant',
+    multiplier: 'Mnożnik czasu',
+    count: 'Prace',
+    value: (m: string): string => `× ${m}`,
+    noteHtml: 'Mnożnik &gt; 1 oznacza, że w Twojej pracowni ten wariant schnie wolniej, niż zakłada model.',
+  },
+
+  explainer: {
+    summary: 'Jak to liczy (i czego jeszcze nie umie)',
+    itemsHtml: [
+      '<b>Parowanie</b> zależy od tego, ile pary wodnej powietrze może jeszcze przyjąć (niedobór pary: ciśnienie nasycenia przy danej temperaturze × (1 − wilgotność)). Do tego dochodzą ruch powietrza i odsłonięta powierzchnia, liczona z masy, grubości ścianki i kształtu.',
+      '<b>Opatulenie</b> ma współczynnik: worek częściowo ≈ 30% tempa na otwartym powietrzu, cały worek ≈ 7%, szczelne pudełko ≈ 5%. Przechowalnia liczona jest z jej własnej temperatury i wilgotności. Ponieważ jest mała, kalkulator proponuje ją tylko wtedy, gdy praca ma zostać bardzo mokra (cel „doklejanie uch / miękka”) albo gdy czekanie trwa 4 dni lub dłużej.',
+      '<b>Skórzana twardość</b> to utrata ok. 5–7% masy od toczenia, zależnie od masy ceramicznej, mokrości i celu. Okno trymowania to mniej więcej ±1–1,5 punktu procentowego wokół tej wartości.',
+      '<b>Grube dno, porcelana, plastikowy bat i forma zamknięta</b> wydłużają czas. Gips go skraca.',
+      'Wszystkie współczynniki to <b>założenia startowe</b>. Każda zapisana praca z oceną „za mokra / w sam raz / za sucha” koryguje mnożnik dla danego opatulenia.',
+      'Dane zapisują się tylko w tej przeglądarce. W kolejnej wersji temperaturę i wilgotność mogą wpisywać czujniki BLE z półki i przechowalni.',
+    ],
+  },
+
+  /** Inputs for the locale-aware formatter (../i18n/format.ts). */
+  format: {
+    weekdaysShort: ['nd', 'pn', 'wt', 'śr', 'czw', 'pt', 'sob'],
+    decimalSeparator: ',',
+    minutes: (n: number): string => `${n} min`,
+    hours: (n: number): string => `${n} h`,
+    days: (n: number): string => `${n} d`,
+    daysHours: (d: number, h: number): string => `${d} d ${h} h`,
+    beyondHorizon: (days: number): string => `> ${days} dni`,
+    /** e.g. "śr 4.03 10:00" */
+    dateTime: (weekday: string, day: number, month: string, hh: string, mm: string): string =>
+      `${weekday} ${day}.${month} ${hh}:${mm}`,
+  },
+};
+
+/** Shape every locale must provide. */
+export type Messages = typeof pl;

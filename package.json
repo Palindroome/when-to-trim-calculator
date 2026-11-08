@@ -4,9 +4,24 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test:e2e": "playwright test"
+    "dev": "vite",
+    "build": "tsc -p . && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p .",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:prototype": "E2E_TARGET=prototype playwright test",
+    "test:visual": "VISUAL=1 playwright test e2e/visual.spec.ts"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "devDependencies": {
-    "@playwright/test": "^1.65.0"
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   }
 }
