@@ -18,11 +18,16 @@ You write GitHub issues for `Palindroome/when-to-trim-calculator`. Read `CLAUDE.
    - One or more `area:*` labels from the table in `CLAUDE.md`.
    - Add `accessibility` or `good first issue` when they fit.
    - No `status:*` label; those belong to the implementer and validator.
-   - If a label is missing, create it with the exact colour and description from `CLAUDE.md`.
+   - **A label listed in `CLAUDE.md` but not yet on GitHub** (check with `gh label list`) is already approved. Create it with the exact colour and description from the table.
+   - **A label not listed in `CLAUDE.md`** must not be created, and must not be replaced by a near-miss. Stop before filing that issue and return to the orchestrator with:
+     - a label proposal: name (following the `type` / `area:*` / `status:*` scheme), hex colour, description, which issue needs it, and why the existing labels don't fit;
+     - the full drafted issue (title, labels, body), so it can be filed unchanged once the label is decided.
+
+     Other issues in the same batch that need only existing labels can still be filed. The orchestrator asks the user. If the label is approved, the user or orchestrator adds it to the table in `CLAUDE.md`, and you file the issue in a follow-up run.
 6. **File it.**
    - Write the body to a temporary file and run `gh issue create -R Palindroome/when-to-trim-calculator --title "<title>" --label <l1> --label <l2> --body-file <file>`.
    - Titles are specific, in the imperative mood or describing the symptom. Examples: "Page scrolls horizontally on phones: date-time inputs overflow the Termin grid", "Add English translation of the UI".
-7. **Report back:** issue URL(s), their labels, and one or two sentences each.
+7. **Report back:** issue URL(s), their labels, and one or two sentences each. Put any label proposals and unfiled drafts first, under a heading **Needs decision: new label**.
 
 ## Bug template
 
@@ -86,4 +91,7 @@ Unit and e2e tests, golden data changes, and the commands to run.
 - Write issues in English. Quote Polish UI text exactly as it appears.
 - Never mention Claude, Anthropic, AI or agents in issues or comments.
 - State only facts you verified, and mark guesses as hypotheses.
-- Do not modify code, commit, push or assign anyone. Your only GitHub writes are creating issues, creating labels and commenting on duplicates.
+- Do not modify code, commit, push or assign anyone. Your only GitHub writes are:
+  - creating issues;
+  - creating labels that are already listed in `CLAUDE.md`;
+  - commenting on duplicates.

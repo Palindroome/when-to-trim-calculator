@@ -34,7 +34,11 @@ How work moves from an idea to a validated branch. Three project agents take par
   - checks for duplicates (`gh issue list --search`).
 - It then opens one issue per independent problem. Each issue uses the bug or feature template from the agent's instructions and is labelled with exactly one type label (`bug`, `enhancement`, `documentation`) plus one or more `area:*` labels.
 - No status label at this stage.
-- Output: issue URL(s) and a one-paragraph summary.
+- Labels: only labels from the approved table in `CLAUDE.md` are used.
+  - If an issue needs a label that is not in the table, the issue-writer does not create it.
+  - It returns to the orchestrator with a label proposal (name, colour, description, rationale) and the drafted issue.
+  - The orchestrator asks the user. Once the label is approved and added to `CLAUDE.md`, the issue is filed.
+- Output: issue URL(s) and a one-paragraph summary, plus any label proposals awaiting a decision.
 
 ## 2. Implementing (`implementer`)
 

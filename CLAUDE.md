@@ -29,13 +29,17 @@ npm run build
   - All user-facing text goes through `src/i18n` (`pl.ts` is the source of truth).
   - All model constants live in `ModelParams` (`src/domain/params.ts`).
   - Keep the `kiedy-trymowac-v1` localStorage format backward compatible.
-- **Planned features:** more languages, ML-fitted drying parameters per studio, and temperature/humidity sensors. Design changes so these stay easy to add.
+- **Planned features:** more languages, ML-fitted drying parameters per studio, and temperature/humidity sensors.
+  - Keep them easy to add by using the existing seams and layer boundaries.
+  - Don't build speculative abstractions for them before an issue asks for one (see the coding principles in `.claude/agents/implementer.md`).
 - **Behaviour changes:** a change in behaviour must be intentional and covered by tests. When outputs change, re-record `e2e/golden.json` (see `e2e/record.spec.ts`) and confirm that only the intended scenarios changed.
 - **Language:** write issues, PRs, commits and code in English. UI text stays Polish in `pl.ts`.
 
 ## GitHub labels
 
-Every issue gets exactly one type label and one or more area labels. Create a missing label with the colour below (`gh label create <name> --color <hex> --description "<text>"`).
+Every issue gets exactly one type label and one or more area labels. This table is the approved label set.
+- A label from the table that is missing on GitHub may be created with the colour below (`gh label create <name> --color <hex> --description "<text>"`).
+- A label that is not in the table needs the user's approval first: propose it to the orchestrator or user, and add it here once approved.
 
 | Label | Kind | Colour | Use for |
 |---|---|---|---|

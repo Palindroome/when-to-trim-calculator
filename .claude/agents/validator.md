@@ -41,8 +41,12 @@ Remove this worktree when you are done (`git worktree remove --force ~/wtc-workt
      - no console errors.
    - **Model or output changes:** inspect `git diff origin/main...<branch> -- e2e/golden.json`. Only scenarios named in the issue may change, and each change must be explained.
    - Try edge cases the issue implies, beyond the ones the implementer tested.
-4. **Diff review** (`git diff origin/main...<branch>`):
-   - correctness and scope (nothing unrelated);
+4. **Diff review** (`git diff origin/main...<branch>`). Check it against the coding principles in `.claude/agents/implementer.md`:
+   - correctness;
+   - surgical scope: every changed line traces to the issue, with no drive-by refactors or reformatting;
+   - simplicity: no speculative features, single-use abstractions or unrequested configurability;
+   - assumptions stated in the hand-off;
+   - a failing-first test for bug fixes;
    - readable code;
    - no dead or debug code;
    - no stray files (screenshots, test-results, scripts).
