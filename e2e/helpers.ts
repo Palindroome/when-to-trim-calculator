@@ -82,7 +82,7 @@ export interface Snapshot {
 const norm = (s: string): string => s.replace(/\s+/g, ' ').trim();
 
 /** Collects the whole visible result area into plain strings. */
-export async function snapshot(page: Page): Promise<Snapshot> {
+export async function snapshot(page: Page, saveLabel = 'Zapisz tę pracę z planem'): Promise<Snapshot> {
   const result = page.locator('#result');
   const text = async (sel: string): Promise<string> => {
     const l = result.locator(sel);
@@ -109,6 +109,6 @@ export async function snapshot(page: Page): Promise<Snapshot> {
     legend: await text('.legend'),
     alts: await all('.alt li'),
     tips: await all('.tip'),
-    save: (await page.getByRole('button', { name: 'Zapisz tę pracę z planem' }).count()) === 1,
+    save: (await page.getByRole('button', { name: saveLabel }).count()) === 1,
   };
 }

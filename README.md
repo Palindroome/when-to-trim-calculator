@@ -50,10 +50,12 @@ src/
     conditions.ts     ConditionsSource interface
   i18n/
     pl.ts             Polish catalog: the source of truth; exports the `Messages` type
+    en.ts             English catalog
     format.ts         locale-aware formatter (durations, dates, decimals)
-    index.ts          locale registry, getMessages()
+    index.ts          locale registry, getMessages(), resolveLocale() (initial language)
   storage/
     pieces.ts         StoredPiece (v1 format), PieceRepository, LocalStoragePieceRepository
+    preferences.ts    chosen UI language (`kiedy-trymowac-lang`)
   ui/
     shell.ts          static page markup from the catalog
     form.ts           reads inputs; formConditionsSource
@@ -68,14 +70,17 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
 ## Extension points
 
 - **New language.**
-  1. Copy `src/i18n/pl.ts` to e.g. `en.ts` and translate it.
-  2. Type it as `const en: Messages = {...}`. The compiler then reports any missing key.
-  3. Register it in `LOCALES` in `src/i18n/index.ts`.
-  4. Pass `getMessages('en')` in `main.ts`, or add a language switch.
+  1. Copy `src/i18n/en.ts` to e.g. `de.ts` and translate it.
+  2. Type it as `const de: Messages = {...}`. The compiler then reports any missing key.
+  3. Register it in `LOCALES` in `src/i18n/index.ts`, and add its endonym to `language.names` in every catalog.
 
-  Weekday names, decimal separator and duration wording live in the `format` section of the catalog.
+  The `PL | EN` switch in the page header gets one button per registered locale (turn it into a select once there are more than about three). Switching re-renders the page without a reload and keeps the form, the saved pieces and the calibration. The choice is stored under its own localStorage key, `kiedy-trymowac-lang`; `kiedy-trymowac-v1` is not touched.
 
-  Saved pieces store their plan sentence (`label`) in the language that was active at save time. Re-render it from `plan` if that should follow the current language.
+  The initial language comes from `resolveLocale()`, called in `main.ts`: a stored choice, then Polish when saved pieces already exist, then the first browser language (`navigator.languages`, primary subtag) that is registered, otherwise `DEFAULT_LOCALE` (Polish). Only a click on the switch stores a choice.
+
+  Weekday and month names, decimal separator, duration wording and the date-time pattern live in the `format` section of the catalog.
+
+  Saved pieces store their plan sentence (`label`) in the language that was active at save time. The piece list re-renders it from `plan` in the current language and falls back to `label` for unexpected plan shapes.
 - **Fitted parameters.** Every coefficient is in `ModelParams` (`src/domain/params.ts`): evaporation coefficient, cover factors, shape/clay/surface factors, wetness/stage offsets, window bounds, planner and tip thresholds. Pass a different object to `startApp`.
 - **Trained models.** There are two seams:
   - `RateModel` (`domain/physics.ts`) predicts grams per hour for a cover, time, piece and conditions. Replace `physicalRateModel` to change the drying physics itself.

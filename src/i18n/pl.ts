@@ -1,5 +1,5 @@
 // Polish UI strings — the source of truth for the `Messages` type.
-// A new language: copy this file, translate, type it as `Messages`, register it in ./index.ts.
+// A new language: copy en.ts, translate, type it as `Messages`, register it in ./index.ts.
 // Keys ending in `Html` contain trusted markup and are inserted unescaped.
 
 import type { AirflowId, BatId, ClayId, Cover, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
@@ -20,6 +20,12 @@ export const pl = {
   title: 'Kiedy trymować? – prototyp',
   heading: 'Kiedy trymować?',
   lead: 'Podaj pracę, warunki i termin trymowania. Kalkulator podpowie, jak ją opatulić, i z każdą zapisaną pracą uczy się Twojej pracowni.',
+
+  /** Language switch; `names` are endonyms, keyed by locale code. */
+  language: {
+    label: 'Język',
+    names: { pl: 'Polski', en: 'English' } satisfies Record<string, string>,
+  },
 
   sections: {
     piece: 'Praca',
@@ -195,6 +201,8 @@ export const pl = {
   /** Inputs for the locale-aware formatter (../i18n/format.ts). */
   format: {
     weekdaysShort: ['nd', 'pn', 'wt', 'śr', 'czw', 'pt', 'sob'],
+    /** Passed to `dateTime`; the Polish format shows the month number instead. */
+    monthsShort: ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'],
     decimalSeparator: ',',
     minutes: (n: number): string => `${n} min`,
     hours: (n: number): string => `${n} h`,
@@ -202,7 +210,7 @@ export const pl = {
     daysHours: (d: number, h: number): string => `${d} d ${h} h`,
     beyondHorizon: (days: number): string => `> ${days} dni`,
     /** e.g. "śr 4.03 10:00" */
-    dateTime: (weekday: string, day: number, month: string, hh: string, mm: string): string =>
+    dateTime: (weekday: string, day: number, month: string, hh: string, mm: string, _monthShort: string): string =>
       `${weekday} ${day}.${month} ${hh}:${mm}`,
   },
 };
