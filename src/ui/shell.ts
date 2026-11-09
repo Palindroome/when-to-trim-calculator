@@ -8,13 +8,26 @@ const options = <K extends string>(order: readonly K[], labels: Record<K, string
     .map((k) => `<option value="${k}"${k === selected ? ' selected' : ''}>${labels[k]}</option>`)
     .join('\n          ');
 
+/** `PL | EN` segmented control; one button per registered locale code. */
+function languageSwitch(m: Messages, locales: readonly string[]): string {
+  const names: Record<string, string> = m.language.names;
+  const buttons = locales.map(
+    (code) =>
+      `<button type="button" data-lang="${code}" lang="${code}" aria-label="${names[code] ?? code}" aria-pressed="${code === m.lang}">${code.toUpperCase()}</button>`,
+  );
+  return `<div class="lang" role="group" aria-label="${m.language.label}">${buttons.join('')}</div>`;
+}
+
 /** Static page structure (everything except the dynamic result / list areas). */
-export function renderShell(m: Messages): string {
+export function renderShell(m: Messages, locales: readonly string[]): string {
   const f = m.fields;
   const u = m.units;
   const o = m.options;
   return `
-  <h1>${m.heading}</h1>
+  <header class="top">
+    <h1>${m.heading}</h1>
+    <div class="toolbar">${languageSwitch(m, locales)}</div>
+  </header>
   <p class="lead">${m.lead}</p>
 
   <section class="card">

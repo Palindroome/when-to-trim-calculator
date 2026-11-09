@@ -18,7 +18,12 @@ import { renderShell } from './shell';
 
 export interface AppDeps {
   root: HTMLElement;
+  /** initial language */
   messages: Messages;
+  /** languages offered by the switch, by locale code */
+  locales: Readonly<Record<string, Messages>>;
+  /** called with the locale code when the user picks a language */
+  onLocaleChange: (code: string) => void;
   params: ModelParams;
   repository: PieceRepository;
   conditions: ConditionsSource;
@@ -40,19 +45,23 @@ interface Saveable {
   we: number;
 }
 
+/** Everything the user has entered, kept across a language switch. */
+interface FormState {
+  fields: { id: string; value: string; checked: boolean }[];
+  /** `data-d` of the selected quick-date chip */
+  quick: string | undefined;
+}
+
 export function startApp(deps: AppDeps): void {
-  const { root, messages: m, params, repository, conditions, rateModel } = deps;
+  const { root, params, repository, conditions, rateModel } = deps;
   const now = deps.now ?? Date.now;
-  const view: View = { m, params, fmt: createFormatter(m, params.horizonHours / 24) };
+  let m: Messages;
+  let view: View;
 
   let pieces: StoredPiece[] = repository.load();
   let saveable: Saveable | null = null;
 
   const calibration = () => deps.calibrator(calibrationSamples(pieces), params);
-
-  document.documentElement.lang = m.lang;
-  document.title = m.title;
-  root.innerHTML = renderShell(m);
 
   const chips = (): NodeListOf<HTMLButtonElement> => root.querySelectorAll<HTMLButtonElement>('#quick .chip');
 
@@ -184,35 +193,87 @@ export function startApp(deps: AppDeps): void {
     chips().forEach((c) => c.classList.toggle('on', +(c.dataset.d ?? NaN) === days));
   }
 
-  // ---------- init ----------
-  const start = new Date(now());
-  start.setSeconds(0, 0);
-  byId<HTMLInputElement>('thrown').value = toLocalInput(start);
-  setWhenDays(DEFAULT_QUICK_DAYS);
-  byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');
-  chips().forEach((c) => {
-    c.onclick = () => {
-      setWhenDays(+(c.dataset.d ?? NaN));
-      compute();
+  // ---------- language ----------
+  function captureForm(): FormState {
+    return {
+      fields: [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input,select')].map((e) => ({
+        id: e.id,
+        value: e.value,
+        checked: e instanceof HTMLInputElement && e.checked,
+      })),
+      quick: root.querySelector<HTMLElement>('#quick .chip.on')?.dataset.d,
     };
-  });
-  const night = byId<HTMLInputElement>('night');
-  const syncNight = (): void => {
-    root.querySelectorAll('.night').forEach((e) => e.classList.toggle('hide', !night.checked));
-  };
-  night.addEventListener('change', syncNight);
-  syncNight();
-  root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input,select').forEach((e) => {
-    if (e.id === 'mnow' || e.id === 'wnow') {
-      e.addEventListener('input', updateWeight);
-      return;
+  }
+
+  function restoreForm(s: FormState): void {
+    for (const f of s.fields) {
+      const e = byId<HTMLInputElement | HTMLSelectElement>(f.id);
+      e.value = f.value;
+      if (e instanceof HTMLInputElement && e.type === 'checkbox') e.checked = f.checked;
     }
-    e.addEventListener('input', () => {
-      if (e.id === 'when') chips().forEach((c) => c.classList.remove('on'));
-      compute();
+    chips().forEach((c) => c.classList.toggle('on', c.dataset.d === s.quick));
+  }
+
+  function switchLanguage(code: string): void {
+    const next = deps.locales[code];
+    if (!next) return;
+    deps.onLocaleChange(code);
+    if (next === m) return;
+    render(next, captureForm());
+    root.querySelector<HTMLElement>(`[data-lang="${code}"]`)?.focus();
+  }
+
+  // ---------- render ----------
+  /** (Re)builds the page in `messages`; `form` restores the inputs after a language switch. */
+  function render(messages: Messages, form: FormState | null): void {
+    m = messages;
+    view = { m, params, fmt: createFormatter(m, params.horizonHours / 24) };
+    document.documentElement.lang = m.lang;
+    document.title = m.title;
+    root.innerHTML = renderShell(m, Object.keys(deps.locales));
+    byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');
+    if (form) {
+      restoreForm(form);
+    } else {
+      const start = new Date(now());
+      start.setSeconds(0, 0);
+      byId<HTMLInputElement>('thrown').value = toLocalInput(start);
+      setWhenDays(DEFAULT_QUICK_DAYS);
+    }
+    wire();
+    renderPieces();
+    compute();
+  }
+
+  function wire(): void {
+    root.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((b) => {
+      b.onclick = () => switchLanguage(b.dataset.lang ?? '');
     });
-  });
+    chips().forEach((c) => {
+      c.onclick = () => {
+        setWhenDays(+(c.dataset.d ?? NaN));
+        compute();
+      };
+    });
+    const night = byId<HTMLInputElement>('night');
+    const syncNight = (): void => {
+      root.querySelectorAll('.night').forEach((e) => e.classList.toggle('hide', !night.checked));
+    };
+    night.addEventListener('change', syncNight);
+    syncNight();
+    root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input,select').forEach((e) => {
+      if (e.id === 'mnow' || e.id === 'wnow') {
+        e.addEventListener('input', updateWeight);
+        return;
+      }
+      e.addEventListener('input', () => {
+        if (e.id === 'when') chips().forEach((c) => c.classList.remove('on'));
+        compute();
+      });
+    });
+  }
+
+  // ---------- init ----------
+  render(deps.messages, null);
   conditions.subscribe?.(compute);
-  renderPieces();
-  compute();
 }

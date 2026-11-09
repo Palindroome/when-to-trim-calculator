@@ -28,6 +28,33 @@ export function planText(v: View, o: PlanOption, startMs: number): string {
   );
 }
 
+const isCover = (w: unknown): w is Cover => COVERS.includes(w as Cover);
+
+/**
+ * A saved piece's plan sentence in the current language, rebuilt from `plan` the way `planText`
+ * built it at save time. Unexpected plan shapes fall back to the stored `label`.
+ */
+function storedPlanText(v: View, p: StoredPiece): string {
+  const plan = Array.isArray(p.plan) ? p.plan : [];
+  const [a, b] = plan;
+  if (plan.length === 1 && a && a.h === null && isCover(a.w)) return v.m.plan.single(a.w);
+  if (
+    plan.length === 2 &&
+    a &&
+    b &&
+    isCover(a.w) &&
+    isCover(b.w) &&
+    typeof a.h === 'number' &&
+    a.h > 0 &&
+    isFinite(a.h) &&
+    b.h === null &&
+    isFinite(p.start)
+  ) {
+    return v.m.plan.twoPhase(a.w, v.fmt.duration(a.h), v.fmt.dateTime(p.start + a.h * MS_PER_HOUR), b.w);
+  }
+  return p.label;
+}
+
 export interface ResultModel {
   piece: Piece;
   startMs: number;
@@ -108,7 +135,7 @@ export function renderPieceList(v: View, pieces: readonly StoredPiece[], nowMs: 
       ).join('');
       return `<div class="piece">
           <div class="top"><b>${esc(p.name)}</b>${status}</div>
-          <div class="meta">${esc(p.label)}<br>${m.pieces.meta(fmt.dateTime(p.start), fmt.dateTime(ready))}</div>
+          <div class="meta">${esc(storedPlanText(v, p))}<br>${m.pieces.meta(fmt.dateTime(p.start), fmt.dateTime(ready))}</div>
           <div class="fb">
             ${p.fb ? '' : `<span class="muted" style="align-self:center">${m.pieces.feedbackPrompt}</span>${buttons}`}
             <button class="ghost" data-del="${p.id}" style="margin-left:auto">${m.pieces.remove}</button>
