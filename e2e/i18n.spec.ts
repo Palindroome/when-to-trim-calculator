@@ -15,7 +15,7 @@ const toEnglish = async (page: Page): Promise<void> => {
 const storedRaw = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
 
 const DEFAULTS_EN = {
-  kind: 'RECOMMENDATION',
+  kind: 'Recommendation',
   big: 'Leave uncovered for 4 h (until Wed 4 Mar 12:30), then wrap fully in a bag.',
   sub: 'Ready around Fri 6 Mar 09:59: the target is a loss of about 6.0% of the mass (30 g).',
   win: 'Window: Thu 5 Mar 12:09 → Sat 7 Mar 18:43',

@@ -1,6 +1,6 @@
 {
   "defaults": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
@@ -28,7 +28,7 @@
     "save": true
   },
   "chip jutro": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.",
     "sub": "Gotowa ok. czw 5.03 09:09: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 05:07 → czw 5.03 15:11",
@@ -56,7 +56,7 @@
     "save": true
   },
   "chip za 3 dni": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 3 h (do śr 4.03 11:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. sob 7.03 07:50: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: pt 6.03 10:01 → nd 8.03 16:34",
@@ -84,7 +84,7 @@
     "save": true
   },
   "chip za 5 dni (damp allowed)": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zawiń całą w worek od razu.",
     "sub": "Gotowa ok. pn 9.03 19:57: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: nd 8.03 22:07 → śr 11.03 04:41",
@@ -112,7 +112,7 @@
     "save": true
   },
   "chip za tydzień": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Włóż do zamkniętego pudełka od razu.",
     "sub": "Gotowa ok. czw 12.03 00:19: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: wt 10.03 17:46 → pt 13.03 22:09",
@@ -142,7 +142,7 @@
     "save": true
   },
   "when equals thrown (error)": {
-    "kind": "UWAGA",
+    "kind": "Uwaga",
     "big": "Termin trymowania musi być po toczeniu.",
     "sub": "",
     "win": "",
@@ -166,7 +166,7 @@
     "save": false
   },
   "when before thrown (error)": {
-    "kind": "UWAGA",
+    "kind": "Uwaga",
     "big": "Termin trymowania musi być po toczeniu.",
     "sub": "",
     "win": "",
@@ -190,7 +190,7 @@
     "save": false
   },
   "deadline in 2 hours (too fast error)": {
-    "kind": "UWAGA",
+    "kind": "Uwaga",
     "big": "Nawet odkryta będzie gotowa najwcześniej za 6 h. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.",
     "sub": "",
     "win": "",
@@ -214,7 +214,7 @@
     "save": true
   },
   "deadline in 8 hours": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 5 h (do śr 4.03 14:00), potem przykryj luźno workiem (dno lub brzeg odsłonięte).",
     "sub": "Gotowa ok. śr 4.03 16:16: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: śr 4.03 13:46 → śr 4.03 22:18",
@@ -241,7 +241,7 @@
     "save": true
   },
   "deadline in 30 minutes": {
-    "kind": "UWAGA",
+    "kind": "Uwaga",
     "big": "Nawet odkryta będzie gotowa najwcześniej za 6 h. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.",
     "sub": "",
     "win": "",
@@ -265,7 +265,7 @@
     "save": true
   },
   "exactly 4 days (damp boundary)": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Wstaw do mokrej przechowalni od razu.",
     "sub": "Gotowa ok. nd 8.03 00:15: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: sob 7.03 09:42 → nd 8.03 22:04",
@@ -293,7 +293,7 @@
     "save": true
   },
   "just under 4 days": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 2 h (do śr 4.03 10:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. nd 8.03 05:42: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: sob 7.03 07:52 → pn 9.03 14:26",
@@ -321,7 +321,7 @@
     "save": true
   },
   "long wait 20 days": {
-    "kind": "UWAGA",
+    "kind": "Uwaga",
     "big": "Nawet w najszczelniejszym opatuleniu zajmie to 7 d 15 h lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.",
     "sub": "",
     "win": "",
@@ -347,7 +347,7 @@
     "save": true
   },
   "very long wait 40 days": {
-    "kind": "UWAGA",
+    "kind": "Uwaga",
     "big": "Nawet w najszczelniejszym opatuleniu zajmie to 7 d 15 h lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.",
     "sub": "",
     "win": "",
@@ -373,7 +373,7 @@
     "save": true
   },
   "hot dry draft, small plate, long wait (tightest error)": {
-    "kind": "UWAGA",
+    "kind": "Uwaga",
     "big": "Nawet w najszczelniejszym opatuleniu zajmie to 1 d 15 h lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.",
     "sub": "",
     "win": "",
@@ -397,7 +397,7 @@
     "save": true
   },
   "stage soft": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 1 h (do śr 4.03 10:29), potem wstaw do mokrej przechowalni.",
     "sub": "Gotowa ok. pt 6.03 12:22: cel to utrata ok. 5,0% masy (25 g).",
     "win": "Okno: czw 5.03 21:49 → sob 7.03 10:11",
@@ -425,7 +425,7 @@
     "save": true
   },
   "stage hard": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 6 h (do śr 4.03 14:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:55: cel to utrata ok. 8,0% masy (40 g).",
     "win": "Okno: czw 5.03 12:05 → sob 7.03 18:39",
@@ -453,7 +453,7 @@
     "save": true
   },
   "wet dry": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 3 h (do śr 4.03 11:45), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 04:33: cel to utrata ok. 5,0% masy (25 g).",
     "win": "Okno: czw 5.03 06:43 → sob 7.03 13:17",
@@ -481,7 +481,7 @@
     "save": true
   },
   "wet very wet": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 5 h (do śr 4.03 14:00), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:56: cel to utrata ok. 7,5% masy (38 g).",
     "win": "Okno: czw 5.03 12:06 → sob 7.03 18:40",
@@ -509,7 +509,7 @@
     "save": true
   },
   "shape bowl": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 3 h (do śr 4.03 11:59), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 12:30: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 17:00 → sob 7.03 17:47",
@@ -537,7 +537,7 @@
     "save": true
   },
   "shape plate": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 6 h (do śr 4.03 15:15), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 07:29: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 00:04 → nd 8.03 06:38",
@@ -565,7 +565,7 @@
     "save": true
   },
   "shape vase": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 6 h (do śr 4.03 14:59), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 15:12: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 08:18 → nd 8.03 13:32",
@@ -595,7 +595,7 @@
     "save": true
   },
   "shape closed (slow tip)": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.",
     "sub": "Gotowa ok. pt 6.03 11:14: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: pt 6.03 02:52 → pt 6.03 23:48",
@@ -624,7 +624,7 @@
     "save": true
   },
   "clay grog": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:29), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 14:23: cel to utrata ok. 5,5% masy (28 g).",
     "win": "Okno: czw 5.03 18:44 → sob 7.03 19:51",
@@ -652,7 +652,7 @@
     "save": true
   },
   "clay porcelain": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 6 h (do śr 4.03 14:45), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 07:11: cel to utrata ok. 6,5% masy (33 g).",
     "win": "Okno: czw 5.03 03:54 → nd 8.03 00:06",
@@ -682,7 +682,7 @@
     "save": true
   },
   "clay earthenware": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 3 h (do śr 4.03 12:15), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 08:54: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 12:10 → sob 7.03 16:00",
@@ -710,7 +710,7 @@
     "save": true
   },
   "bat plastic": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 06:41: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 06:40 → sob 7.03 18:42",
@@ -738,7 +738,7 @@
     "save": true
   },
   "bat plaster": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:29), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 11:07: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 17:39 → sob 7.03 13:18",
@@ -766,7 +766,7 @@
     "save": true
   },
   "air still": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 6 h (do śr 4.03 14:59), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 12:14: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 14:24 → sob 7.03 20:58",
@@ -794,7 +794,7 @@
     "save": true
   },
   "air draft (draft tip)": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:14), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 10:37: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 12:48 → sob 7.03 19:22",
@@ -824,7 +824,7 @@
     "save": true
   },
   "dry warm air (vpd tip)": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 30 min (do śr 4.03 09:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:40: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 22:49 → sob 7.03 01:56",
@@ -854,7 +854,7 @@
     "save": true
   },
   "rh above 100 unclamped in tips": {
-    "kind": "UWAGA",
+    "kind": "Uwaga",
     "big": "Nawet odkryta będzie gotowa najwcześniej za 3 d 15 h. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.",
     "sub": "",
     "win": "",
@@ -878,7 +878,7 @@
     "save": true
   },
   "rh 0": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 45 min (do śr 4.03 09:44), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 10:44: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 23:43 → sob 7.03 03:16",
@@ -908,7 +908,7 @@
     "save": true
   },
   "cold room": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 5 h (do śr 4.03 13:45), potem przykryj luźno workiem (dno lub brzeg odsłonięte).",
     "sub": "Gotowa ok. pt 6.03 09:33: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 22:46 → sob 7.03 01:42",
@@ -935,7 +935,7 @@
     "save": true
   },
   "thick base (slow tip)": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.",
     "sub": "Gotowa ok. pt 6.03 05:35: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 22:09 → pt 6.03 16:44",
@@ -965,7 +965,7 @@
     "save": true
   },
   "base thinner than wall": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:14), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 14:29: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 21:22 → sob 7.03 16:09",
@@ -993,7 +993,7 @@
     "save": true
   },
   "base empty falls back to wall": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 2 h (do śr 4.03 11:14), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 14:29: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 21:22 → sob 7.03 16:09",
@@ -1021,7 +1021,7 @@
     "save": true
   },
   "wall typed with comma 6,5": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:44), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 14:14: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 15:42 → nd 8.03 00:03",
@@ -1049,7 +1049,7 @@
     "save": true
   },
   "wall decimal 6.5": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:44), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 14:14: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 15:42 → nd 8.03 00:03",
@@ -1077,7 +1077,7 @@
     "save": true
   },
   "wall below minimum clamps to 2": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 1 h (do śr 4.03 10:29), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 12:35: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 22:32 → sob 7.03 09:41",
@@ -1107,7 +1107,7 @@
     "save": true
   },
   "mass empty falls back to 500": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
@@ -1135,7 +1135,7 @@
     "save": true
   },
   "mass below minimum clamps to 20": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (1 g).",
     "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
@@ -1163,7 +1163,7 @@
     "save": true
   },
   "mass 2000": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (120 g).",
     "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
@@ -1191,7 +1191,7 @@
     "save": true
   },
   "temp empty falls back to 20": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
@@ -1219,7 +1219,7 @@
     "save": true
   },
   "night mode on": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 13:00), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 06:14: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 03:32 → sob 7.03 19:02",
@@ -1247,7 +1247,7 @@
     "save": true
   },
   "night mode with custom night values": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 07:48: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: śr 4.03 19:46 → nd 8.03 05:52",
@@ -1275,7 +1275,7 @@
     "save": true
   },
   "night values ignored when night off": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.",
     "sub": "Gotowa ok. pt 6.03 09:59: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: czw 5.03 12:09 → sob 7.03 18:43",
@@ -1303,7 +1303,7 @@
     "save": true
   },
   "damp room custom, stage soft": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 4 h (do śr 4.03 12:44), potem wstaw do mokrej przechowalni.",
     "sub": "Gotowa ok. pt 6.03 10:15: cel to utrata ok. 5,0% masy (25 g).",
     "win": "Okno: śr 4.03 15:50 → pn 9.03 01:53",
@@ -1331,7 +1331,7 @@
     "save": true
   },
   "thrown earlier, trim tomorrow": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 3 h (do pn 2.03 21:00), potem przykryj luźno workiem (dno lub brzeg odsłonięte).",
     "sub": "Gotowa ok. wt 3.03 09:48: cel to utrata ok. 6,0% masy (30 g).",
     "win": "Okno: wt 3.03 05:47 → wt 3.03 15:51",
@@ -1358,7 +1358,7 @@
     "save": true
   },
   "big porcelain closed form, long wait (mould tip)": {
-    "kind": "REKOMENDACJA",
+    "kind": "Rekomendacja",
     "big": "Zostaw odkrytą na 13 h (do śr 4.03 22:29), potem wstaw do mokrej przechowalni.",
     "sub": "Gotowa ok. sob 14.03 13:24: cel to utrata ok. 6,5% masy (98 g).",
     "win": "Okno: śr 11.03 18:15 → śr 18.03 18:09",

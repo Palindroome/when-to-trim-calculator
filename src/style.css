@@ -55,9 +55,10 @@ h2 .n{color:var(--text-muted);font-size:var(--text-sm);font-weight:500;font-vari
   main>section{grid-column:1}
   h1{font-size:var(--text-2xl)}
   .card{padding:var(--space-5)}
-  /* the result stays in view beside the form; it scrolls itself if taller than the window */
+  /* the result stays in view beside the form and scrolls itself if taller than the window;
+     the negative bottom margin lets it use main's bottom padding, so it fits at the end of the page too */
   #result{grid-column:2;grid-row:3/span 6;position:sticky;top:0;max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
-    padding:var(--space-5) var(--space-5) var(--space-6);margin:calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) 0}
+    padding:var(--space-5) var(--space-5) var(--space-6);margin:calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) calc(-1 * var(--space-7))}
 }
 
 /* ---------- form ---------- */
@@ -91,6 +92,11 @@ select{appearance:none;padding-right:var(--space-7);cursor:pointer;
 .chip:active{transform:scale(.97)}
 .chip.on{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);z-index:1}
 .chip:focus-visible{z-index:2}
+/* too narrow for five connected segments: separate buttons that wrap */
+@media (max-width:479px){
+  .chips{flex-wrap:wrap;gap:var(--space-2)}
+  .chip,.chip:first-child,.chip:last-child{margin:0;border-radius:var(--radius-md);white-space:nowrap;padding:var(--space-1) var(--space-3)}
+}
 
 /* night checkbox as a switch */
 .check{display:flex;gap:var(--space-3);align-items:center;min-height:var(--control-h);margin:0;font-size:var(--text-md);font-weight:400;color:var(--text);cursor:pointer}

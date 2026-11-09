@@ -70,7 +70,7 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
           ${options(AIRFLOWS, o.airflow, 'light')}
         </select></div>
       <div class="full">
-        <label class="check"><input type="checkbox" id="night"> ${f.night}</label>
+        <label class="check"><input type="checkbox" id="night" role="switch"> ${f.night}</label>
       </div>
       <div class="night"><label for="ntemp">${f.nightTemp}</label><div class="unit"><input id="ntemp" type="text" inputmode="decimal" autocomplete="off" value="15"><span>${u.celsius}</span></div></div>
       <div class="night"><label for="nrh">${f.nightRh}</label><div class="unit"><input id="nrh" type="text" inputmode="decimal" autocomplete="off" value="60"><span>${u.percent}</span></div></div>
@@ -94,7 +94,7 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
 
   <section class="card">
     <h2><span class="n">4</span>${m.sections.weight}</h2>
-    <p class="muted" style="margin:-4px 0 10px">${m.weightHint}</p>
+    <p class="muted hint">${m.weightHint}</p>
     <div class="grid">
       <div><label for="mnow">${f.massNow}</label><div class="unit"><input id="mnow" type="text" inputmode="decimal" autocomplete="off" placeholder="${f.massNowPlaceholder}"><span>${u.grams}</span></div></div>
       <div><label for="wnow">${f.coverSoFar}</label>

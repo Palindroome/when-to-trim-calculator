@@ -1,28 +1,47 @@
 import { expect, test } from '@playwright/test';
-import { fill, openApp } from './helpers';
+import { PROTOTYPE, fill, openApp } from './helpers';
 
 test.describe('layout', () => {
-  test('desktop: centred 640px column, two-column form grid', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await openApp(page);
-    const box = await page.locator('main').boundingBox();
-    expect(box?.width).toBe(640);
-    expect(box?.x).toBe((1280 - 640) / 2);
-    const cols = await page.locator('.grid').first().evaluate((el) => getComputedStyle(el).gridTemplateColumns);
-    expect(cols.split(' ')).toHaveLength(2);
-    const bar = await page.locator('.bar').first().evaluate((el) => getComputedStyle(el).gridTemplateColumns);
-    expect(bar).toMatch(/^118px \S+ 74px$/);
-    const thrown = await page.locator('#thrown').boundingBox();
-    const when = await page.locator('#when').boundingBox();
-    expect(when?.y).toBe(thrown?.y);
-    expect(when?.width).toBe(thrown?.width);
-  });
+  test.describe('page columns (build only)', () => {
+    test.skip(PROTOTYPE, 'the prototype keeps its single 640px column');
 
-  test('phone: narrower bar columns', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    await openApp(page);
-    const bar = await page.locator('.bar').first().evaluate((el) => getComputedStyle(el).gridTemplateColumns);
-    expect(bar).toMatch(/^96px \S+ 66px$/);
+    test('1280px: the result is sticky in the right column and stays in view', async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await openApp(page);
+      const form = (await page.locator('main > section.card').first().boundingBox())!;
+      const result = (await page.locator('#result .rec').boundingBox())!;
+      expect(result.x).toBeGreaterThanOrEqual(form.x + form.width);
+      expect(Math.abs(result.y - form.y)).toBeLessThan(2);
+      const thrown = await page.locator('#thrown').boundingBox();
+      const when = await page.locator('#when').boundingBox();
+      expect(when?.y).toBe(thrown?.y);
+
+      // after scrolling to "5 Moje prace", and at the very end of the page, the whole result is inside the window
+      for (const scroll of [
+        () => document.getElementById('pieces')!.closest('section')!.scrollIntoView({ block: 'start' }),
+        () => window.scrollTo(0, document.documentElement.scrollHeight),
+      ]) {
+        await page.evaluate(scroll);
+        expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+        const r = await page.locator('#result').evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
+        expect(r.top).toBeGreaterThanOrEqual(0);
+        expect(r.bottom).toBeLessThanOrEqual(900);
+      }
+    });
+
+    for (const width of [1023, 768, 375]) {
+      test(`${width}px: one column, result below "Termin"`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await openApp(page);
+        const cards = page.locator('main > section');
+        const first = (await cards.nth(0).boundingBox())!;
+        const termin = (await cards.nth(2).boundingBox())!;
+        const result = (await page.locator('#result').boundingBox())!;
+        expect(result.x).toBeCloseTo(first.x, 0);
+        expect(result.width).toBeCloseTo(first.width, 0);
+        expect(result.y).toBeGreaterThan(termin.y + termin.height - 1);
+      });
+    }
   });
 
   for (const [width, height] of [[320, 640], [375, 812], [414, 896], [480, 900]] as const) {
