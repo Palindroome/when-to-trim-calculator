@@ -51,13 +51,13 @@ h2 .n{color:var(--text-muted);font-size:var(--text-sm);font-weight:500;font-vari
 
 @media (min-width:1024px){
   main{max-width:1200px;padding:var(--space-6) var(--space-6) var(--space-7);display:grid;grid-template-columns:minmax(0,1fr) 400px;column-gap:var(--space-6);align-items:start}
-  main>.masthead,main>.lead{grid-column:1/-1}
+  main>.masthead,main>.lead,main>.wizard-bar{grid-column:1/-1}
   main>section{grid-column:1}
   h1{font-size:var(--text-2xl)}
   .card{padding:var(--space-5)}
   /* the result stays in view beside the form and scrolls itself if taller than the window;
      the negative bottom margin lets it use main's bottom padding, so it fits at the end of the page too */
-  #result{grid-column:2;grid-row:3/span 6;position:sticky;top:0;max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  #result{grid-column:2;grid-row:4/span 6;position:sticky;top:0;max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
     padding:var(--space-5) var(--space-5) var(--space-6);margin:calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) calc(-1 * var(--space-7))}
 }
 
@@ -178,3 +178,14 @@ details[open] summary::after{transform:rotate(-135deg)}
 details ul{margin:var(--space-3) 0 0;padding-left:var(--space-5)}
 details p,details li{font-size:var(--text-md);color:var(--text-muted)}
 details li{margin:var(--space-2) 0}
+
+/* ---------- first-run wizard: one section at a time, single column at every width ---------- */
+.wizard-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-2) var(--space-3);margin:0 0 var(--space-4)}
+.wizard-progress{margin:0;font-size:var(--text-sm);font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums}
+.wizard-nav{display:flex;flex-wrap:wrap;gap:var(--space-3);margin:0 0 var(--space-4)}
+.wizard-nav button{flex:1 1 auto;width:auto;min-height:var(--control-h)}
+.wizard-nav button[hidden]{display:none}
+main:not(.wizard) .wizard-only,main.wizard .full-only{display:none}
+main.wizard>section:not(.current){display:none}
+main.wizard{display:block;max-width:720px}
+main.wizard #result{position:static;max-height:none;overflow:visible;padding:0;margin:0}

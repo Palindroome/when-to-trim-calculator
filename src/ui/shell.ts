@@ -29,8 +29,13 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
     <div class="toolbar">${languageSwitch(m, locales)}</div>
   </header>
   <p class="lead">${m.lead}</p>
+  <div class="wizard-bar">
+    <p class="wizard-progress wizard-only" id="wizard-progress" aria-live="polite"></p>
+    <button type="button" class="ghost wizard-only" id="wizard-skip">${m.wizard.skip}</button>
+    <button type="button" class="ghost full-only" id="wizard-open">${m.wizard.reopen}</button>
+  </div>
 
-  <section class="card">
+  <section class="card" data-step>
     <h2><span class="n">1</span>${m.sections.piece}</h2>
     <div class="grid">
       <div class="full"><label for="name">${f.name}</label><input id="name" placeholder="${f.namePlaceholder}"></div>
@@ -60,7 +65,7 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
     </div>
   </section>
 
-  <section class="card">
+  <section class="card" data-step>
     <h2><span class="n">2</span>${m.sections.conditions}</h2>
     <div class="grid">
       <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="text" inputmode="decimal" autocomplete="off" value="20"><span>${u.celsius}</span></div></div>
@@ -79,7 +84,7 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
     </div>
   </section>
 
-  <section class="card">
+  <section class="card" data-step>
     <h2><span class="n">3</span>${m.sections.schedule}</h2>
     <div class="grid dates">
       <div><label for="thrown">${f.thrown}</label><input id="thrown" type="datetime-local"></div>
@@ -90,7 +95,11 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
     </div>
   </section>
 
-  <section id="result"></section>
+  <section id="result" data-step></section>
+  <nav class="wizard-nav wizard-only" aria-label="${m.wizard.label}">
+    <button type="button" class="ghost" id="wizard-back">${m.wizard.back}</button>
+    <button type="button" class="main" id="wizard-next">${m.wizard.next}</button>
+  </nav>
 
   <section class="card">
     <h2><span class="n">4</span>${m.sections.weight}</h2>

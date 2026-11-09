@@ -59,11 +59,13 @@ src/
   storage/
     pieces.ts         StoredPiece (v1 format), PieceRepository, LocalStoragePieceRepository
     preferences.ts    chosen UI language (`kiedy-trymowac-lang`)
+    wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
   ui/
     shell.ts          static page markup from the catalog
     form.ts           reads inputs; formConditionsSource
     render.ts         HTML for result, pieces, calibration, weight check
     app.ts            state + event wiring
+    wizard.ts         first-run wizard: shows the [data-step] sections one at a time, then the full form
 e2e/                  Playwright suite (runs against the prototype and the build; tests for intended fixes and the build's design skip on the prototype)
 reference/index.html  original prototype
 ```

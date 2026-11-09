@@ -5,6 +5,7 @@ import { physicalRateModel } from './domain/physics';
 import { getMessages, LOCALES, resolveLocale } from './i18n';
 import { LocalStoragePieceRepository } from './storage/pieces';
 import { loadLanguage, saveLanguage } from './storage/preferences';
+import { LocalStorageWizardStore } from './storage/wizard';
 import { startApp } from './ui/app';
 import { formConditionsSource } from './ui/form';
 
@@ -30,6 +31,7 @@ startApp({
   onLocaleChange: saveLanguage,
   params,
   repository,
+  wizard: new LocalStorageWizardStore(),
   conditions: formConditionsSource,
   rateModel: physicalRateModel(params),
   calibrator: geometricMeanCalibrator,

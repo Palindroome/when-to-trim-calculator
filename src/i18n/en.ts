@@ -33,6 +33,17 @@ export const en: Messages = {
     pieces: 'My pieces and calibration',
   },
 
+  wizard: {
+    label: 'Step-by-step guide',
+    progress: (step: number, total: number, title: string): string => `Step ${step} of ${total}: ${title}`,
+    resultStep: 'Result',
+    next: 'Next',
+    back: 'Back',
+    finish: 'Done – show the full form',
+    skip: 'Skip – show the full form',
+    reopen: 'Walk me through it step by step',
+  },
+
   fields: {
     name: 'Name (optional)',
     namePlaceholder: 'e.g. Thursday mugs',

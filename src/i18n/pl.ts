@@ -35,6 +35,17 @@ export const pl = {
     pieces: 'Moje prace i kalibracja',
   },
 
+  wizard: {
+    label: 'Przewodnik krok po kroku',
+    progress: (step: number, total: number, title: string): string => `Krok ${step} z ${total}: ${title}`,
+    resultStep: 'Wynik',
+    next: 'Dalej',
+    back: 'Wstecz',
+    finish: 'Gotowe – pokaż cały formularz',
+    skip: 'Pomiń – pokaż cały formularz',
+    reopen: 'Przeprowadź mnie krok po kroku',
+  },
+
   fields: {
     name: 'Nazwa (opcjonalnie)',
     namePlaceholder: 'np. kubki z czwartku',

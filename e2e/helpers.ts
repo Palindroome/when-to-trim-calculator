@@ -3,11 +3,18 @@ import { expect, type Locator, type Page } from '@playwright/test';
 /** Fixed "now" for every test: Wednesday 4 March 2026, 09:00 in Europe/Warsaw (CET, +01:00). */
 export const NOW = '2026-03-04T09:00:00+01:00';
 export const STORAGE_KEY = 'kiedy-trymowac-v1';
+export const WIZARD_KEY = 'kiedy-trymowac-wizard';
 /** True when the suite runs against reference/index.html; tests for intended fixes skip there. */
 export const PROTOTYPE = process.env.E2E_TARGET === 'prototype';
 
-export async function openApp(page: Page, opts: { now?: string; storage?: string | null } = {}): Promise<void> {
+export async function openApp(page: Page, opts: { now?: string; storage?: string | null; wizard?: boolean } = {}): Promise<void> {
   await page.clock.setFixedTime(new Date(opts.now ?? NOW));
+  // Most tests need the full form: mark the first-run wizard as done unless the test is about the wizard.
+  if (!opts.wizard) {
+    await page.addInitScript((key) => {
+      if (localStorage.getItem(key) === null) localStorage.setItem(key, 'done');
+    }, WIZARD_KEY);
+  }
   // Keep the test hermetic: external web fonts are not needed for behaviour.
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
   if (opts.storage !== undefined && opts.storage !== null) {
