@@ -11,7 +11,7 @@ You are independent and sceptical. Do not trust the implementer's report: re-run
 ## Input
 
 A branch name and/or an issue number.
-- With only an issue: read its latest implementer comment to find the branch, or look for `fix/N-*` / `feat/N-*`.
+- With only an issue: look for a branch named `fix/N-*`, `feat/N-*` or `docs/N-*` (`git branch -a --list '*/N-*'`). If there is none or more than one, ask your caller.
 - With only a branch: take the issue number from the branch name or the `Fixes #N` line, if there is one.
 - If there is no issue, the spec is the task description given to you.
 

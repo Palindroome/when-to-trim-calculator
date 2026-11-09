@@ -19,15 +19,19 @@ How work moves from an idea to a validated branch. Three project agents take par
  │  validator   │  returns a report to the implementer (no labels, no comments)
  └──────────────┘
      │       │
-     │       └─ changes requested → implementer posts the report, fixes every
-     │          finding, commits, next round (back to the arrow above)
+     │       └─ changes requested → implementer fixes every finding, commits,
+     │          next round (back to the arrow above)
      │
      ├─ approved (any round) → implementer sets status:validated
-     │                         → orchestrator → user reviews, merges, pushes
+     │                         → hand-off report to orchestrator
+     │                         → user reviews, merges, pushes
      │
      └─ still rejected after round 3 → implementer sets status:changes-requested
-                                       → orchestrator → user decides
+                                       → hand-off report + all reports to orchestrator
+                                       → user decides
 ```
+
+Validation reports and hand-off reports never go to the issue. They pass only between the implementer and the validator, and then to the orchestrator. During the loop, the only GitHub updates are `status:*` labels.
 
 ## 1. Writing an issue (`issue-writer`)
 
@@ -59,13 +63,14 @@ How work moves from an idea to a validated branch. Three project agents take par
   - Commits are small and focused, written in the imperative mood, and may reference the issue (`Fixes #N` in the final commit body).
   - The configured git identity is used, with no AI attribution (see `CLAUDE.md`).
 - **Before handing off:** `npm run typecheck`, `npm run test:unit`, `npm run test:e2e` and `npm run build` must all pass. New behaviour has tests, and golden data is re-recorded only for scenarios that are meant to change.
-- **Validation loop (up to 3 rounds):** the implementer owns the loop and every label and comment in it.
+- **Validation loop (up to 3 rounds):** the implementer owns the loop and its status labels. It posts no issue comments in the loop.
   1. It sets `status:needs-validation` and spawns a **fresh** validator with the branch, the issue, the round number and, from round 2 on, the previous report.
-  2. If the report says changes are requested, it posts the report as an issue comment ("Validation round k"), sets `status:in-progress`, fixes every finding, re-runs all checks, commits, and starts the next round.
-  3. If the report says approved, it sets `status:validated`, posts the hand-off comment and returns to the orchestrator.
-  4. If round 3 is still rejected, it sets `status:changes-requested`, posts the open findings and returns to the orchestrator, which asks the user how to proceed.
+  2. If the report says changes are requested, it sets `status:in-progress`, fixes every finding, re-runs all checks, commits, and starts the next round.
+  3. If the report says approved, it sets `status:validated` and returns the hand-off report to the orchestrator.
+  4. If round 3 is still rejected, it sets `status:changes-requested` and returns the hand-off report, all validation reports and the open findings to the orchestrator, which asks the user how to proceed.
+  5. When the user restarts work after `status:changes-requested`, the orchestrator passes the open findings to the implementer, since they are not on the issue.
 - **Spawning limits:** Claude Code subagents usually cannot spawn agents. An implementer running as a subagent returns `READY FOR VALIDATION` instead. The orchestrator then spawns the validator and resumes the same implementer with the report. The loop and the 3-round limit are unchanged.
-- **Hand-off comment:** the branch and commits, the verdict and rounds used, assumptions, what changed, the tests and check results, golden changes, and open items.
+- **Hand-off report** (to the orchestrator only): the branch and commits, the verdict and rounds used, assumptions, what changed, the tests and check results, golden changes, and open items.
 - **Never:** push, open PRs, merge or touch `main`, unless the user asked for that in the conversation.
 
 ## 3. Validating (`validator`)

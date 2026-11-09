@@ -69,7 +69,7 @@ git worktree add ~/wtc-worktrees/<branch> <branch>   # or reuse the existing wor
 cd ~/wtc-worktrees/<branch> && . ~/.nvm/nvm.sh && npm ci
 ```
 
-- When the user restarts work after `status:changes-requested`, read the latest validation report in the issue comments, address every open finding, and start a new 3-round loop.
+- When the user restarts work after `status:changes-requested`, the orchestrator gives you the open findings from the last validation report. Address every one and start a new 3-round loop. Validation reports are never on the issue, so do not look for them there.
 
 ## 4. Implement
 
@@ -135,7 +135,9 @@ git log --format='%h %an <%ae> | %cn <%ce>%n%B' origin/main..HEAD
 
 ## 7. Validation loop (at most 3 rounds)
 
-You own the loop and every GitHub update in it. The validator only returns a report: it adds no labels and posts no comments.
+You own the loop and its status labels. The validator only returns a report: it adds no labels and posts no comments.
+
+**Validation stays off GitHub.** Validation reports, findings and hand-off notes are exchanged only between you and the validator, and at the end of the loop they go to the orchestrator. Never post them as issue comments, in any round or at the end. The only GitHub updates in the loop are the `status:*` labels.
 
 For each round `k` = 1, 2, 3:
 
@@ -147,15 +149,16 @@ For each round `k` = 1, 2, 3:
 
    Do not include your own claims about what works. The validator must check for itself.
 2. **Approved:**
-   - for issue tasks, set `status:validated` and post the hand-off comment (below) with the validator's report attached;
-   - then return to the orchestrator.
+   - for issue tasks, set `status:validated`;
+   - then return the hand-off report (below), with the validator's report attached, to the orchestrator.
 3. **Changes requested:**
-   - for issue tasks, set `status:in-progress` again and post the validator's report as an issue comment, headed "Validation round `k`", so the history is visible;
+   - for issue tasks, set `status:in-progress` again;
+   - keep the validator's report for the next round and for your hand-off report;
    - fix **every** finding, applying the coding principles. Minor findings marked optional may be skipped, but say so;
    - re-run all of section 5, commit (section 6), and go to the next round.
 4. **After round 3 is still rejected:** stop fixing.
-   - For issue tasks, set `status:changes-requested` and post the hand-off comment with the open findings.
-   - Return to the orchestrator with the remaining findings, what you tried for each, and what decision you need from the user.
+   - For issue tasks, set `status:changes-requested`.
+   - Return the hand-off report to the orchestrator with all 3 validation reports, the remaining findings, what you tried for each, and what decision you need from the user.
 
 **If you cannot spawn agents** (no Agent tool, for example because you are running as a subagent yourself), do not validate your own work. Instead:
 - return to the orchestrator with `READY FOR VALIDATION`, the round number, the branch, the issue number and, from round 2 on, the previous report;
@@ -164,7 +167,7 @@ For each round `k` = 1, 2, 3:
 
 The same 3-round limit applies.
 
-**Hand-off comment and report** (to the issue for issue tasks, and always to the orchestrator):
+**Hand-off report** (to the orchestrator only, never to the issue):
 - the branch name and commit list;
 - the final verdict and the number of validation rounds used;
 - the assumptions you made and the interpretation you chose;
