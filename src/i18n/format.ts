@@ -3,7 +3,7 @@ import type { Messages } from './pl';
 export interface Formatter {
   /** Rounded duration such as "45 min", "5 h", "2 d 3 h"; non-finite → beyond the horizon. */
   duration(hours: number): string;
-  /** Short local date-time such as "śr 4.03 10:00". */
+  /** Short local date-time such as "śr 4.03 10:00" or "Wed 4 Mar 10:00". */
   dateTime(ms: number): string;
   /** Fixed decimals with the locale's separator. */
   decimal(x: number, digits: number): string;
@@ -31,6 +31,7 @@ export function createFormatter(m: Messages, horizonDays: number): Formatter {
         pad(d.getMonth() + 1),
         pad(d.getHours()),
         pad(d.getMinutes()),
+        String(f.monthsShort[d.getMonth()]),
       );
     },
     decimal(x, digits) {
