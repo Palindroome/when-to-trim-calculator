@@ -138,7 +138,7 @@ test.describe('saved pieces', () => {
     await page.getByRole('button', { name: 'w sam raz' }).click();
     // same inputs as before rating; only the "Cały worek" multiplier (×1,01) changed
     expect(await snapshot(page)).toEqual({
-      kind: 'REKOMENDACJA',
+      kind: 'Rekomendacja',
       big: 'Zostaw odkrytą na 4 h (do śr 4.03 12:44), potem zawiń całą w worek.',
       sub: 'Gotowa ok. pt 6.03 10:17: cel to utrata ok. 6,0% masy (30 g).',
       win: 'Okno: czw 5.03 12:19 → sob 7.03 19:15',

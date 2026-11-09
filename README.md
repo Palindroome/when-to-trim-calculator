@@ -21,11 +21,13 @@ The first Playwright run needs a browser: `npx playwright install chromium`. On 
 
 The build uses `base: './'`, so `dist/` works from any sub-path, for example GitHub Pages at `/when-to-trim-calculator/`. The Pages workflow runs `npm ci && npm run build` and deploys `dist/`.
 
-### Visual parity check (optional)
+### Visual regression check (optional)
+
+The build has its own design, so screenshots are compared with an earlier run of the build, not with the prototype.
 
 ```bash
-VISUAL=1 E2E_TARGET=prototype npx playwright test e2e/visual.spec.ts --update-snapshots  # baseline from the prototype
-VISUAL=1 npx playwright test e2e/visual.spec.ts                                          # compare the build (VISUAL_STRICT=1: pixel-exact)
+VISUAL=1 npx playwright test e2e/visual.spec.ts --update-snapshots  # baseline from the build, before a change
+VISUAL=1 npx playwright test e2e/visual.spec.ts                     # compare after the change (VISUAL_STRICT=1: pixel-exact)
 ```
 
 Baselines go to `e2e/__screenshots__/`. That folder is git-ignored because the images depend on the machine.
@@ -33,10 +35,11 @@ Baselines go to `e2e/__screenshots__/`. That folder is git-ignored because the i
 ## Structure
 
 ```
-index.html            page skeleton (fonts, <main>); everything else is rendered by src/
+index.html            page skeleton (font preload, <main>); everything else is rendered by src/
+public/fonts/         self-hosted Inter variable font (Latin subset) and its OFL licence
 src/
   main.ts             composition root: picks language, params, storage, conditions source, models
-  style.css
+  style.css           design tokens (one :root block: type, space, radii, colour roles, shadows) + components
   domain/             pure logic, no DOM; unit-tested
     types.ts          ids (Cover, ShapeId, ...), Piece, Conditions, Plan
     params.ts         ModelParams + DEFAULT_PARAMS: every model constant in one typed object
@@ -56,12 +59,15 @@ src/
   storage/
     pieces.ts         StoredPiece (v1 format), PieceRepository, LocalStoragePieceRepository
     preferences.ts    chosen UI language (`kiedy-trymowac-lang`)
+    wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
   ui/
     shell.ts          static page markup from the catalog
     form.ts           reads inputs; formConditionsSource
     render.ts         HTML for result, pieces, calibration, weight check
     app.ts            state + event wiring
-e2e/                  Playwright suite (runs against the prototype and the build; tests for intended fixes skip on the prototype)
+    wizard.ts         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
+    cards.ts          after the wizard, sections 1-3 collapse to one-line summaries that open on click
+e2e/                  Playwright suite (runs against the prototype and the build; tests for intended fixes and the build's design skip on the prototype)
 reference/index.html  original prototype
 ```
 

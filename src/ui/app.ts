@@ -11,10 +11,13 @@ import { COVERS, type Cover, type FeedbackKind, type Piece } from '../domain/typ
 import { assessWeight } from '../domain/weight';
 import { createFormatter, type Messages } from '../i18n';
 import { calibrationSamples, type PieceRepository, type StoredPiece } from '../storage/pieces';
+import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
 import { readName, readPieceInput, readThrownMs, readWeightInputs, readWhenMs, toLocalInput } from './form';
-import { renderCalibration, renderPieceList, renderResult, renderWeight, planText, type View } from './render';
+import { renderCalibration, renderSummaries, renderPieceList, renderResult, renderWeight, planText, type View } from './render';
 import { renderShell } from './shell';
+import { createSummaryCards } from './cards';
+import { createWizard } from './wizard';
 
 export interface AppDeps {
   root: HTMLElement;
@@ -26,6 +29,7 @@ export interface AppDeps {
   onLocaleChange: (code: string) => void;
   params: ModelParams;
   repository: PieceRepository;
+  wizard: WizardStore;
   conditions: ConditionsSource;
   rateModel: RateModel;
   calibrator: CalibratorFactory;
@@ -62,6 +66,9 @@ export function startApp(deps: AppDeps): void {
   let saveable: Saveable | null = null;
 
   const calibration = () => deps.calibrator(calibrationSamples(pieces), params);
+
+  const cards = createSummaryCards(root, deps.wizard.load() === 'done');
+  const wizard = createWizard(root, deps.wizard, (outcome) => cards.set(outcome === 'done'));
 
   const chips = (): NodeListOf<HTMLButtonElement> => root.querySelectorAll<HTMLButtonElement>('#quick .chip');
 
@@ -104,6 +111,9 @@ export function startApp(deps: AppDeps): void {
       calibration: perCover,
       canSave: saveable !== null,
     });
+    cards.update(
+      renderSummaries(view, { name: readName(), piece: input, conditions: ctx.conditions, thrownMs: startMs, whenMs: readWhenMs() }),
+    );
     const saveBtn = document.getElementById('savebtn');
     if (saveBtn) saveBtn.onclick = savePiece;
     updateWeight();
@@ -231,6 +241,8 @@ export function startApp(deps: AppDeps): void {
     document.documentElement.lang = m.lang;
     document.title = m.title;
     root.innerHTML = renderShell(m, Object.keys(deps.locales));
+    wizard.mount(m);
+    cards.mount(m);
     byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');
     if (form) {
       restoreForm(form);

@@ -3,7 +3,7 @@ import type { CoverCalibration } from '../domain/calibration';
 import { MS_PER_HOUR, type ModelParams } from '../domain/params';
 import type { PlanOption, PlanResult } from '../domain/planner';
 import type { TipId } from '../domain/tips';
-import { COVERS, FEEDBACK_KINDS, type Cover, type Piece } from '../domain/types';
+import { COVERS, FEEDBACK_KINDS, type Conditions, type Cover, type Piece, type PieceInput } from '../domain/types';
 import type { WeightAssessment } from '../domain/weight';
 import type { Formatter, Messages } from '../i18n';
 import type { StoredPiece } from '../storage/pieces';
@@ -87,7 +87,7 @@ export function renderResult(v: View, r: ResultModel): string {
         : rec.status === 'tooFast'
           ? m.errors.tooFast(fmt.duration(rec.fastestHours))
           : m.errors.tooSlow(fmt.duration(rec.slowestHours));
-    html += `<div class="rec"><div class="k">${m.result.warning}</div><div class="big" style="font-size:18px">${esc(err)}</div></div>`;
+    html += `<div class="rec err"><div class="k">${m.result.warning}</div><div class="big">${esc(err)}</div></div>`;
   }
 
   // comparison bars
@@ -102,26 +102,26 @@ export function renderResult(v: View, r: ResultModel): string {
     const pct = Math.min(100, ((isFinite(t) ? t : maxShown) / maxShown) * 100);
     const good = H > 0 && isFinite(t) && Math.abs(t - H) / H <= v.params.planner.targetTolerance;
     const n = r.calibration[c].samples;
-    html += `<div class="bar"><div>${m.covers.label[c]}${n ? ` <span class="muted">·${n}</span>` : ''}${c === 'damp' ? `<br><span class="muted" style="font-size:11.5px">${m.result.dampNote}</span>` : ''}</div>
+    html += `<div class="bar"><div>${m.covers.label[c]}${n ? ` <span class="muted">·${n}</span>` : ''}${c === 'damp' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
         <div class="track"><div class="fill ${good ? 'good' : ''}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
         <div class="t">${fmt.duration(t)}${pct >= 100 && isFinite(t) ? '+' : ''}</div></div>`;
   }
   html += `</div><div class="legend">${m.result.legend(H > 0 ? fmt.duration(H) : m.result.noDeadline)}</div>`;
   if (plan.alternatives.length) {
     html +=
-      `<div class="muted" style="margin-top:12px">${m.result.alternatives}</div><ul class="alt">` +
+      `<div class="muted alt-title">${m.result.alternatives}</div><ul class="alt">` +
       plan.alternatives.map((o) => `<li>${esc(planText(v, o, start))}</li>`).join('') +
       `</ul>`;
   }
   for (const tip of r.tips) html += `<div class="tip">${esc(m.tips[tip])}</div>`;
-  if (r.canSave) html += `<div style="margin-top:12px"><button class="main" id="savebtn">${m.result.save}</button></div>`;
+  if (r.canSave) html += `<div class="actions"><button class="main" id="savebtn">${m.result.save}</button></div>`;
   html += `</div>`;
   return html;
 }
 
 export function renderPieceList(v: View, pieces: readonly StoredPiece[], nowMs: number): string {
   const { m, fmt } = v;
-  if (!pieces.length) return `<p class="muted" style="margin:0 0 6px">${m.pieces.empty}</p>`;
+  if (!pieces.length) return `<p class="muted empty">${m.pieces.empty}</p>`;
   return pieces
     .map((p) => {
       const ready = p.start + p.predH * MS_PER_HOUR;
@@ -137,8 +137,8 @@ export function renderPieceList(v: View, pieces: readonly StoredPiece[], nowMs: 
           <div class="top"><b>${esc(p.name)}</b>${status}</div>
           <div class="meta">${esc(storedPlanText(v, p))}<br>${m.pieces.meta(fmt.dateTime(p.start), fmt.dateTime(ready))}</div>
           <div class="fb">
-            ${p.fb ? '' : `<span class="muted" style="align-self:center">${m.pieces.feedbackPrompt}</span>${buttons}`}
-            <button class="ghost" data-del="${p.id}" style="margin-left:auto">${m.pieces.remove}</button>
+            ${p.fb ? '' : `<span class="muted">${m.pieces.feedbackPrompt}</span>${buttons}`}
+            <button class="ghost del" data-del="${p.id}">${m.pieces.remove}</button>
           </div></div>`;
     })
     .join('');
@@ -175,4 +175,25 @@ export function renderWeight(v: View, a: WeightAssessment | null): string {
     msg = m.weight.tooHard(loss);
   }
   return `<div class="state ${a.state}">${esc(msg)}</div>`;
+}
+
+export interface SummaryInput {
+  name: string;
+  piece: PieceInput;
+  conditions: Conditions;
+  thrownMs: number;
+  /** NaN when no trim date is set */
+  whenMs: number;
+}
+
+/** One-line summaries of sections 1–3 (Praca, Warunki, Termin) for the collapsed cards. */
+export function renderSummaries(v: View, s: SummaryInput): [string, string, string] {
+  const { m, fmt } = v;
+  const n = (x: number): string => fmt.decimal(x, Number.isInteger(x) ? 0 : 1);
+  const { piece: p, conditions: c } = s;
+  return [
+    m.summary.piece(s.name, m.options.shape[p.shape], n(p.massG), n(p.wallMm), n(p.baseMm ?? p.wallMm), m.options.clay[p.clay]),
+    m.summary.conditions(n(c.temp), n(c.rh), m.options.airflow[c.airflow], c.night ? { temp: n(c.nightTemp), rh: n(c.nightRh) } : undefined),
+    m.summary.schedule(fmt.dateTime(s.thrownMs), isFinite(s.whenMs) ? fmt.dateTime(s.whenMs) : m.result.noDeadline),
+  ];
 }

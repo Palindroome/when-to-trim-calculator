@@ -4,7 +4,7 @@ import { createFormatter, type Messages } from '../i18n';
 import { en } from '../i18n/en';
 import { pl } from '../i18n/pl';
 import type { StoredPiece } from '../storage/pieces';
-import { renderPieceList, type View } from './render';
+import { renderPieceList, renderSummaries, type SummaryInput, type View } from './render';
 
 const view = (m: Messages): View => ({ m, params: DEFAULT_PARAMS, fmt: createFormatter(m, 30) });
 const start = new Date(2026, 2, 4, 9, 0).getTime();
@@ -60,5 +60,40 @@ describe('renderPieceList plan sentence', () => {
   ])('falls back to the stored label for an unexpected plan (%s)', (_, plan) => {
     const p = piece({ plan: plan as StoredPiece['plan'], label: 'Etykieta <b>' });
     expect(planLine(view(en), p)).toBe('Etykieta &lt;b&gt;');
+  });
+});
+
+describe('renderSummaries', () => {
+  const input: SummaryInput = {
+    name: '',
+    piece: { massG: 500, shape: 'cyl', wallMm: 6, baseMm: 9, clay: 'stone', bat: 'wood', wetness: 'normal', stage: 'trim' },
+    conditions: { temp: 20, rh: 50, airflow: 'light', night: false, nightTemp: 15, nightRh: 60, dampTemp: 15, dampRh: 88 },
+    thrownMs: start,
+    whenMs: new Date(2026, 2, 6, 10, 0).getTime(),
+  };
+
+  it('summarises the three form sections in Polish', () => {
+    expect(renderSummaries(view(pl), input)).toEqual([
+      'Kubek / cylinder · 500 g · ścianka 6 mm, dno 9 mm · Kamionka gładka',
+      '20 °C, 50% · Lekki ruch (ludzie, wentylacja)',
+      'Wytoczona śr 4.03 09:00 · trymowanie pt 6.03 10:00',
+    ]);
+  });
+
+  it('adds the name and night values, falls back to the wall for an empty base, uses a decimal comma', () => {
+    const [piece, conditions, schedule] = renderSummaries(view(pl), {
+      ...input,
+      name: 'kubki',
+      piece: { ...input.piece, wallMm: 6.5, baseMm: undefined },
+      conditions: { ...input.conditions, night: true },
+      whenMs: NaN,
+    });
+    expect(piece).toBe('kubki · Kubek / cylinder · 500 g · ścianka 6,5 mm, dno 6,5 mm · Kamionka gładka');
+    expect(conditions).toBe('20 °C, 50% · Lekki ruch (ludzie, wentylacja) · noc 15 °C, 60%');
+    expect(schedule).toBe('Wytoczona śr 4.03 09:00 · trymowanie –');
+  });
+
+  it('follows the language', () => {
+    expect(renderSummaries(view(en), input)[2]).toBe('Thrown Wed 4 Mar 09:00 · trim Fri 6 Mar 10:00');
   });
 });

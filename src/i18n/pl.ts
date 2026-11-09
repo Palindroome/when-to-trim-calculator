@@ -35,6 +35,29 @@ export const pl = {
     pieces: 'Moje prace i kalibracja',
   },
 
+  wizard: {
+    label: 'Przewodnik krok po kroku',
+    progress: (step: number, total: number, title: string): string => `Krok ${step} z ${total}: ${title}`,
+    next: 'Dalej',
+    back: 'Wstecz',
+    finish: 'Pokaż wynik',
+    skip: 'Pomiń – pokaż cały formularz',
+    reopen: 'Przeprowadź mnie krok po kroku',
+  },
+
+  /** sections 1–3 collapsed to one line after the wizard */
+  summary: {
+    edit: 'Zmień',
+    collapse: 'Zwiń',
+    editLabel: (section: string): string => `Zmień: ${section}`,
+    collapseLabel: (section: string): string => `Zwiń: ${section}`,
+    piece: (name: string, shape: string, mass: string, wall: string, base: string, clay: string): string =>
+      [name, shape, `${mass} g`, `ścianka ${wall} mm, dno ${base} mm`, clay].filter(Boolean).join(' · '),
+    conditions: (temp: string, rh: string, airflow: string, night?: { temp: string; rh: string }): string =>
+      [`${temp} °C, ${rh}%`, airflow, night && `noc ${night.temp} °C, ${night.rh}%`].filter(Boolean).join(' · '),
+    schedule: (thrown: string, when: string): string => `Wytoczona ${thrown} · trymowanie ${when}`,
+  },
+
   fields: {
     name: 'Nazwa (opcjonalnie)',
     namePlaceholder: 'np. kubki z czwartku',
