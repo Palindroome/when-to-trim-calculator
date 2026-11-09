@@ -36,12 +36,23 @@ export const en: Messages = {
   wizard: {
     label: 'Step-by-step guide',
     progress: (step: number, total: number, title: string): string => `Step ${step} of ${total}: ${title}`,
-    resultStep: 'Result',
     next: 'Next',
     back: 'Back',
-    finish: 'Done – show the full form',
+    finish: 'Show the result',
     skip: 'Skip – show the full form',
     reopen: 'Walk me through it step by step',
+  },
+
+  summary: {
+    edit: 'Edit',
+    collapse: 'Collapse',
+    editLabel: (section: string): string => `Edit: ${section}`,
+    collapseLabel: (section: string): string => `Collapse: ${section}`,
+    piece: (name: string, shape: string, mass: string, wall: string, base: string, clay: string): string =>
+      [name, shape, `${mass} g`, `walls ${wall} mm, base ${base} mm`, clay].filter(Boolean).join(' · '),
+    conditions: (temp: string, rh: string, airflow: string, night?: { temp: string; rh: string }): string =>
+      [`${temp} °C, ${rh}%`, airflow, night && `night ${night.temp} °C, ${night.rh}%`].filter(Boolean).join(' · '),
+    schedule: (thrown: string, when: string): string => `Thrown ${thrown} · trim ${when}`,
   },
 
   fields: {

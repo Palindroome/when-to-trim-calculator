@@ -189,3 +189,18 @@ main:not(.wizard) .wizard-only,main.wizard .full-only{display:none}
 main.wizard>section:not(.current){display:none}
 main.wizard{display:block;max-width:720px}
 main.wizard #result{position:static;max-height:none;overflow:visible;padding:0;margin:0}
+
+/* ---------- summary cards: after the wizard, sections 1-3 collapse to one line until opened ---------- */
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin:0 0 var(--space-4)}
+.card-head h2{margin:0}
+.card[data-step]{position:relative}
+.toggle{flex:none}
+.summary{margin:0;color:var(--text-muted);font-size:var(--text-sm);font-variant-numeric:tabular-nums}
+main:not(.compact) .compact-only,main.wizard .compact-only{display:none}
+main.compact:not(.wizard) .card[data-step]:not(.collapsed) .summary{display:none}
+main.compact:not(.wizard) .collapsed .card-body{display:none}
+main.compact:not(.wizard) .collapsed .card-head{margin-bottom:var(--space-2)}
+main.compact:not(.wizard) .collapsed{cursor:pointer}
+main.compact:not(.wizard) .collapsed:hover{border-color:var(--border-strong)}
+/* the whole collapsed card is the toggle's click target */
+main.compact:not(.wizard) .collapsed .toggle::after{content:"";position:absolute;inset:0;border-radius:var(--radius-lg)}

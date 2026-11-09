@@ -65,7 +65,8 @@ src/
     form.ts           reads inputs; formConditionsSource
     render.ts         HTML for result, pieces, calibration, weight check
     app.ts            state + event wiring
-    wizard.ts         first-run wizard: shows the [data-step] sections one at a time, then the full form
+    wizard.ts         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
+    cards.ts          after the wizard, sections 1-3 collapse to one-line summaries that open on click
 e2e/                  Playwright suite (runs against the prototype and the build; tests for intended fixes and the build's design skip on the prototype)
 reference/index.html  original prototype
 ```

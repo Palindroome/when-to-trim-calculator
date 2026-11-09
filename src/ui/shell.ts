@@ -36,7 +36,12 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
   </div>
 
   <section class="card" data-step>
-    <h2><span class="n">1</span>${m.sections.piece}</h2>
+    <div class="card-head">
+      <h2><span class="n">1</span>${m.sections.piece}</h2>
+      <button type="button" class="ghost toggle compact-only" aria-expanded="true" aria-controls="body-1"></button>
+    </div>
+    <p class="summary compact-only"></p>
+    <div class="card-body" id="body-1">
     <div class="grid">
       <div class="full"><label for="name">${f.name}</label><input id="name" placeholder="${f.namePlaceholder}"></div>
       <div><label for="mass">${f.mass}</label><div class="unit"><input id="mass" type="text" inputmode="decimal" autocomplete="off" value="500"><span>${u.grams}</span></div></div>
@@ -63,10 +68,16 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
           ${options(STAGES, o.stage, 'trim')}
         </select></div>
     </div>
+    </div>
   </section>
 
   <section class="card" data-step>
-    <h2><span class="n">2</span>${m.sections.conditions}</h2>
+    <div class="card-head">
+      <h2><span class="n">2</span>${m.sections.conditions}</h2>
+      <button type="button" class="ghost toggle compact-only" aria-expanded="true" aria-controls="body-2"></button>
+    </div>
+    <p class="summary compact-only"></p>
+    <div class="card-body" id="body-2">
     <div class="grid">
       <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="text" inputmode="decimal" autocomplete="off" value="20"><span>${u.celsius}</span></div></div>
       <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="text" inputmode="decimal" autocomplete="off" value="50"><span>${u.percent}</span></div></div>
@@ -82,10 +93,16 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
       <div><label for="dtemp">${f.dampTemp}</label><div class="unit"><input id="dtemp" type="text" inputmode="decimal" autocomplete="off" value="15"><span>${u.celsius}</span></div></div>
       <div><label for="drh">${f.dampRh}</label><div class="unit"><input id="drh" type="text" inputmode="decimal" autocomplete="off" value="88"><span>${u.percent}</span></div></div>
     </div>
+    </div>
   </section>
 
   <section class="card" data-step>
-    <h2><span class="n">3</span>${m.sections.schedule}</h2>
+    <div class="card-head">
+      <h2><span class="n">3</span>${m.sections.schedule}</h2>
+      <button type="button" class="ghost toggle compact-only" aria-expanded="true" aria-controls="body-3"></button>
+    </div>
+    <p class="summary compact-only"></p>
+    <div class="card-body" id="body-3">
     <div class="grid dates">
       <div><label for="thrown">${f.thrown}</label><input id="thrown" type="datetime-local"></div>
       <div><label for="when">${f.when}</label><input id="when" type="datetime-local"></div>
@@ -93,9 +110,10 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
     <div class="chips" id="quick">
       ${QUICK_DAYS.map((d) => `<button class="chip" data-d="${d}">${m.quickDate(d)}</button>`).join('\n      ')}
     </div>
+    </div>
   </section>
 
-  <section id="result" data-step></section>
+  <section id="result"></section>
   <nav class="wizard-nav wizard-only" aria-label="${m.wizard.label}">
     <button type="button" class="ghost" id="wizard-back">${m.wizard.back}</button>
     <button type="button" class="main" id="wizard-next">${m.wizard.next}</button>

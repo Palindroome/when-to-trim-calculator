@@ -9,10 +9,10 @@ export const PROTOTYPE = process.env.E2E_TARGET === 'prototype';
 
 export async function openApp(page: Page, opts: { now?: string; storage?: string | null; wizard?: boolean } = {}): Promise<void> {
   await page.clock.setFixedTime(new Date(opts.now ?? NOW));
-  // Most tests need the full form: mark the first-run wizard as done unless the test is about the wizard.
+  // Most tests need the full, expanded form: mark the first-run wizard as skipped unless the test is about it.
   if (!opts.wizard) {
     await page.addInitScript((key) => {
-      if (localStorage.getItem(key) === null) localStorage.setItem(key, 'done');
+      if (localStorage.getItem(key) === null) localStorage.setItem(key, 'skipped');
     }, WIZARD_KEY);
   }
   // Keep the test hermetic: external web fonts are not needed for behaviour.
