@@ -24,7 +24,7 @@ export function renderShell(m: Messages, locales: readonly string[]): string {
   const u = m.units;
   const o = m.options;
   return `
-  <header class="top">
+  <header class="masthead">
     <h1>${m.heading}</h1>
     <div class="toolbar">${languageSwitch(m, locales)}</div>
   </header>

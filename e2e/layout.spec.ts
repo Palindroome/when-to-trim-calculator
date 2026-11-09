@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openApp } from './helpers';
+import { fill, openApp } from './helpers';
 
 test.describe('layout', () => {
   test('desktop: centred 640px column, two-column form grid', async ({ page }) => {
@@ -59,6 +59,20 @@ test.describe('layout', () => {
       els.map((e) => (e.id ? `#${e.id}` : (e.querySelector('h2')?.textContent ?? e.querySelector('summary')?.textContent ?? '').trim())),
     );
     expect(order).toEqual(['1Praca', '2Warunki', '3Termin', '#result', '4Sprawdź wagą', '5Moje prace i kalibracja', 'Jak to liczy (i czego jeszcze nie umie)']);
+  });
+
+  test('phone: a long piece name keeps the status badge on its row', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await openApp(page);
+    await fill(page, 'Nazwa (opcjonalnie)', 'Bardzo długa nazwa pracy na czwartkowe kubki z uchem');
+    await page.getByRole('button', { name: 'Zapisz tę pracę z planem' }).click();
+    const top = page.locator('#pieces .piece .top');
+    const name = (await top.locator('b').boundingBox())!;
+    const badge = (await top.locator('.badge').boundingBox())!;
+    // beside the name: vertically overlapping it and to its right, not on a line of its own
+    expect(badge.y + badge.height).toBeGreaterThan(name.y);
+    expect(badge.y).toBeLessThan(name.y + name.height);
+    expect(badge.x).toBeGreaterThanOrEqual(name.x + name.width);
   });
 
   test('on-target bars are highlighted', async ({ page }) => {
