@@ -12,6 +12,8 @@ Orchestrate `docs/agent-workflow.md` for: $ARGUMENTS
      - If it matches an open issue, ask the user whether to use that issue.
      - If it does not, and the task is non-trivial, ask the user whether the `issue-writer` agent should file an issue first, or whether to proceed without one.
 2. **Implement and validate.** Spawn the `implementer` agent with the issue number (or the task text). The implementer owns the validation loop: up to 3 rounds, a fresh `validator` each round, and fixes in between.
+   - Validation reports stay between the implementer, the validator and you. Nobody posts them on the issue, and neither do you.
+   - When restarting work after `status:changes-requested`, pass the implementer the open findings from the last validation report of the previous run (from this conversation, or ask the user for them).
 3. **Relay validation if needed.** Subagents usually cannot spawn agents themselves. If the implementer returns `READY FOR VALIDATION`:
    - spawn a fresh `validator` with exactly what the implementer passed: the branch, the issue or task, "round k of 3", and the previous report if there is one;
    - resume the same implementer (SendMessage to its id) with the validator's report, unchanged;
