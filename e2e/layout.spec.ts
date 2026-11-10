@@ -14,7 +14,15 @@ test.describe('layout', () => {
       const when = await page.locator('#when').boundingBox();
       expect(when?.y).toBe(thrown?.y);
 
-      // after scrolling to "5 Moje prace", and at the very end of the page, the whole result is inside the window
+      // at the end of <main> the whole result is inside the window
+      await page.evaluate(() => document.querySelector('main')!.scrollIntoView({ block: 'end' }));
+      expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+      const atMainEnd = await page.locator('#result').evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
+      expect(atMainEnd.top).toBeGreaterThanOrEqual(0);
+      expect(atMainEnd.bottom).toBeLessThanOrEqual(900);
+
+      // after scrolling to "5 Moje prace", and at the very end of the page, the result stays above the site
+      // footer and inside the window, moved up by no more than the part of the footer that is in view
       for (const scroll of [
         () => document.getElementById('pieces')!.closest('section')!.scrollIntoView({ block: 'start' }),
         () => window.scrollTo(0, document.documentElement.scrollHeight),
@@ -22,8 +30,9 @@ test.describe('layout', () => {
         await page.evaluate(scroll);
         expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
         const r = await page.locator('#result').evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
-        expect(r.top).toBeGreaterThanOrEqual(0);
-        expect(r.bottom).toBeLessThanOrEqual(900);
+        const footerTop = await page.locator('footer').evaluate((el) => el.getBoundingClientRect().top);
+        expect(r.top).toBeGreaterThanOrEqual(Math.min(0, footerTop - 900));
+        expect(r.bottom).toBeLessThanOrEqual(Math.min(900, footerTop));
       }
     });
 

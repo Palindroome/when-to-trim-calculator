@@ -26,6 +26,7 @@ const locale = resolveLocale({
 
 startApp({
   root,
+  footer: document.querySelector<HTMLElement>('footer') ?? undefined,
   messages: getMessages(locale),
   locales: LOCALES,
   onLocaleChange: saveLanguage,
