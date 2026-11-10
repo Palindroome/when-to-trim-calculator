@@ -2,7 +2,7 @@
 
 A calculator for potters. It estimates when a freshly thrown piece reaches leather-hard and is ready to trim. It also suggests how to cover the piece (open, loosely bagged, damp room, fully bagged, box) so that it hits the date you want. Each saved piece you rate ("too wet / just right / too dry") calibrates the model to your studio. The data stays in your browser's localStorage.
 
-Built with Vite and strict TypeScript, with no framework. The original single-file prototype is kept in `reference/index.html`. It is the behavioural reference for the e2e suite.
+Built with Vite and strict TypeScript, with no framework. The original single-file prototype is in git history, in the `reference` folder at commit `f4ac746`.
 
 ## Commands
 
@@ -14,7 +14,6 @@ npm run preview           # serve dist/
 npm run typecheck         # tsc, strict
 npm test                  # unit tests (Vitest), pure logic only
 npm run test:e2e          # Playwright e2e against the production build
-npm run test:e2e:prototype  # the same e2e suite against reference/index.html
 ```
 
 The first Playwright run needs a browser: `npx playwright install chromium`. On Linux it also needs the system libraries: `sudo npx playwright install-deps chromium`.
@@ -23,7 +22,7 @@ The build uses `base: './'`, so `dist/` works from any sub-path, for example Git
 
 ### Visual regression check (optional)
 
-The build has its own design, so screenshots are compared with an earlier run of the build, not with the prototype.
+Screenshots are compared with an earlier run of the build.
 
 ```bash
 VISUAL=1 npx playwright test e2e/visual.spec.ts --update-snapshots  # baseline from the build, before a change
@@ -67,8 +66,7 @@ src/
     app.ts            state + event wiring
     wizard.ts         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
     cards.ts          after the wizard, sections 1-3 collapse to one-line summaries that open on click
-e2e/                  Playwright suite (runs against the prototype and the build; tests for intended fixes and the build's design skip on the prototype)
-reference/index.html  original prototype
+e2e/                  Playwright suite (runs against the production build)
 scripts/agent/        helper scripts for the agent workflow (issue, worktree, checks, viewport, hygiene, labels); see CLAUDE.md
 ```
 
