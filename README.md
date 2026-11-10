@@ -34,7 +34,7 @@ Each state is captured in the light and the dark colour scheme (`light-…png`, 
 ## Structure
 
 ```
-index.html            page skeleton (colour-scheme metas, inline script applying a stored theme before first paint, font preload, <main>); everything else is rendered by src/
+index.html            page skeleton (colour-scheme metas, inline script applying a stored theme before first paint, font preload, <main>, <footer>); everything else is rendered by src/
 public/fonts/         self-hosted Inter variable font (Latin subset) and its OFL licence
 src/
   main.ts             composition root: picks language, params, storage, conditions source, models
@@ -61,6 +61,7 @@ src/
     wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
   ui/
     shell.ts          static page markup from the catalog
+    footer.ts         site footer: author's profile links with inline SVG icons
     form.ts           reads inputs; formConditionsSource
     render.ts         HTML for result, pieces, calibration, weight check
     app.ts            state + event wiring

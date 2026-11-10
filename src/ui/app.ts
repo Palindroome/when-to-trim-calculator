@@ -14,6 +14,7 @@ import { calibrationSamples, type PieceRepository, type StoredPiece } from '../s
 import type { Theme } from '../storage/preferences';
 import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
+import { renderFooter } from './footer';
 import { readName, readPieceInput, readThrownMs, readWeightInputs, readWhenMs, toLocalInput } from './form';
 import { renderCalibration, renderSummaries, renderPieceList, renderResult, renderWeight, planText, type View } from './render';
 import { renderShell, type ThemeChoice } from './shell';
@@ -22,6 +23,8 @@ import { createWizard } from './wizard';
 
 export interface AppDeps {
   root: HTMLElement;
+  /** page footer, re-rendered with the language; optional so pages without one still work */
+  footer?: HTMLElement;
   /** initial language */
   messages: Messages;
   /** languages offered by the switch, by locale code */
@@ -260,6 +263,7 @@ export function startApp(deps: AppDeps): void {
     document.documentElement.lang = m.lang;
     document.title = m.title;
     root.innerHTML = renderShell(m, Object.keys(deps.locales), theme ?? 'system');
+    if (deps.footer) deps.footer.innerHTML = renderFooter(m);
     wizard.mount(m);
     cards.mount(m);
     byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');

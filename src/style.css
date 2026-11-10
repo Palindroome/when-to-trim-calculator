@@ -212,6 +212,19 @@ details ul{margin:var(--space-3) 0 0;padding-left:var(--space-5)}
 details p,details li{font-size:var(--text-md);color:var(--text-muted)}
 details li{margin:var(--space-2) 0}
 
+/* ---------- site footer: outside <main>, aligned with its content box ---------- */
+.site-footer{max-width:720px;margin:0 auto;padding:0 var(--space-4) var(--space-5);font-size:var(--text-sm)}
+.site-footer ul{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-5);margin:0;padding:var(--space-4) 0 0;list-style:none;border-top:1px solid var(--border)}
+.site-footer a{display:inline-flex;align-items:center;gap:var(--space-2);min-height:var(--control-h-sm);color:var(--text-muted);text-decoration:none;border-radius:var(--radius-sm)}
+.site-footer a:hover{color:var(--text);text-decoration:underline}
+.site-footer a:focus-visible{outline:var(--ring-width) solid var(--ring);outline-offset:var(--ring-width)}
+.site-footer svg{flex:none}
+@media (pointer:coarse){.site-footer a{min-height:var(--control-h)}}
+@media (min-width:1024px){
+  .site-footer{max-width:1200px;padding:0 var(--space-6) var(--space-6)}
+  main.wizard+.site-footer{max-width:720px}
+}
+
 /* ---------- first-run wizard: one section at a time, single column at every width ---------- */
 .wizard-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-2) var(--space-3);margin:0 0 var(--space-4)}
 .wizard-progress{margin:0;font-size:var(--text-sm);font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums}

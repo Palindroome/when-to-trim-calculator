@@ -225,6 +225,14 @@ export const en: Messages = {
     ],
   },
 
+  footer: {
+    label: 'Author online',
+    github: 'GitHub',
+    githubLabel: 'GitHub – author’s profile',
+    instagram: 'Instagram',
+    instagramLabel: 'Instagram – author’s profile (@palindroom)',
+  },
+
   /** Inputs for the locale-aware formatter (../i18n/format.ts). */
   format: {
     weekdaysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],

@@ -229,6 +229,15 @@ export const pl = {
     ],
   },
 
+  /** Site footer: links to the author's profiles; each `…Label` starts with the visible link text. */
+  footer: {
+    label: 'Autor w sieci',
+    github: 'GitHub',
+    githubLabel: 'GitHub – profil autora',
+    instagram: 'Instagram',
+    instagramLabel: 'Instagram – profil autora (@palindroom)',
+  },
+
   /** Inputs for the locale-aware formatter (../i18n/format.ts). */
   format: {
     weekdaysShort: ['nd', 'pn', 'wt', 'śr', 'czw', 'pt', 'sob'],
