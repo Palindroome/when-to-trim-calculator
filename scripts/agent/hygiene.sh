@@ -35,7 +35,9 @@ done < <(git log --format='%h|%an <%ae>|%cn <%ce>' "$range")
 clean && echo "ok: identity $me"
 
 ai_re='co-authored-by|anthropic|\bclaude\b|\bAI[ -](assist|generated)'
-hits=$(git log --format=%B "$range" | grep -inE "$ai_re")
+# The project paths CLAUDE.md and .claude/ contain the word and may be named in messages.
+paths_re='\.claude/|CLAUDE\.md'
+hits=$(git log --format=%B "$range" | sed -E "s#$paths_re##g" | grep -inE "$ai_re")
 [[ -z "$hits" ]] && echo "ok: no AI attribution in commit messages" || bad "AI attribution in commit messages:"$'\n'"$hits"
 # Paths such as .claude/ and CLAUDE.md legitimately contain the word; only added lines are checked.
 hits=$(git diff "origin/main...$B" | grep -E '^\+[^+]' | grep -iE "$ai_re" | grep -viE '\.claude/|CLAUDE\.md|claude-(code|opus|sonnet|haiku)')
