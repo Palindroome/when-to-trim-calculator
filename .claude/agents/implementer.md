@@ -92,13 +92,12 @@ bash $S/worktree.sh <branch>   # W=~/wtc-worktrees/<branch>
 
 ```bash
 bash $W/scripts/agent/check.sh               # typecheck, unit, e2e, build
-bash $W/scripts/agent/check.sh --prototype   # also the prototype suite, only when reference/ or e2e/ changed
 bash $W/scripts/agent/check.sh unit          # a single step while iterating
 ```
 
 - `check.sh` prints one line per step and the failure tail; the full logs are in the directory it prints. Don't re-run a passing suite just to see its output.
 - For UI changes, run `bash $W/scripts/agent/viewport.sh` (320/375/1280 px: no horizontal overflow, `#result` renders, no console errors). Add `--shots /tmp/<dir>` if you want screenshots to look at.
-- **Test servers.** Other agents may be testing in other worktrees at the same time, and a server on the default ports (4173/4174) may belong to one of them. Never reuse a running server.
+- **Test servers.** Other agents may be testing in other worktrees at the same time, and a server on the default port (4173) may belong to one of them. Never reuse a running server.
   - The scripts pick a free port and stop their own servers.
   - For your own Playwright runs (for example re-recording `e2e/golden.json`), put the command in a scratch `.sh` with `. ~/.nvm/nvm.sh` and `E2E_PORT=<free port>`.
   - Kill only processes you started.

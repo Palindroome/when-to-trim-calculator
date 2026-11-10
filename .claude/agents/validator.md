@@ -29,7 +29,7 @@ Read files in `V` through `\\wsl.localhost\ubuntu-22.04\home\antek\wtc-worktrees
 
 ## Test servers
 
-Other agents may be testing in other worktrees at the same time, and a server on the default ports (4173/4174) may belong to one of them. Never reuse a running server.
+Other agents may be testing in other worktrees at the same time, and a server on the default port (4173) may belong to one of them. Never reuse a running server.
 - `check.sh` and `viewport.sh` pick a free port and stop their own servers.
 - For your own probes, write a scratch `.sh` that picks a free port, starts `node_modules/.bin/vite preview` (not `npx`: killing the wrapper leaves vite running) and kills it at the end.
 - Never kill a process you did not start.
@@ -39,7 +39,7 @@ Other agents may be testing in other worktrees at the same time, and a server on
 1. **Spec.** Run `bash $S/issue.sh N` once, and re-read `/tmp/wtc-issue-N.md` with Read after that. Go through each acceptance criterion and verify it with evidence: a command output, a measurement or a test name. "Looks fine" is not evidence.
 2. **Automated checks** on a clean install:
    ```bash
-   bash $V/scripts/agent/check.sh               # add --prototype when the change touches reference/ or e2e/
+   bash $V/scripts/agent/check.sh
    ```
    Record the pass/fail counts it prints.
 3. **Behaviour.**

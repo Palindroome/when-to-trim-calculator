@@ -1,10 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { PROTOTYPE, fill, openApp } from './helpers';
+import { fill, openApp } from './helpers';
 
 test.describe('layout', () => {
-  test.describe('page columns (build only)', () => {
-    test.skip(PROTOTYPE, 'the prototype keeps its single 640px column');
-
+  test.describe('page columns', () => {
     test('1280px: the result is sticky in the right column and stays in view', async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openApp(page);

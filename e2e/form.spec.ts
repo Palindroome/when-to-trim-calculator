@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { PROTOTYPE, choose, field, fill, openApp, setNight, snapshot, type Field } from './helpers';
+import { choose, field, fill, openApp, setNight, snapshot, type Field } from './helpers';
 
 test.describe('page shell', () => {
   test('title, language and headings', async ({ page }) => {
@@ -75,7 +75,6 @@ test.describe('inputs and defaults', () => {
   });
 
   test('numeric fields are text inputs with a decimal keypad', async ({ page }) => {
-    test.skip(PROTOTYPE, 'the prototype uses type=number, see #2');
     await openApp(page);
     // type=text so a typed decimal comma reaches the parser; limits are clamped in code, not by min/max
     for (const l of [
@@ -152,7 +151,6 @@ test.describe('inputs and defaults', () => {
 });
 
 test.describe('decimal comma', () => {
-  test.skip(PROTOTYPE, 'the prototype drops the decimal comma, see #2');
   // Typed key by key, as a user would: some browsers silently drop the comma in type=number inputs.
   const cases: { label: Field; comma: string; dot: string; setup?: (page: Page) => Promise<void> }[] = [
     { label: 'Masa po toczeniu', comma: '500,5', dot: '500.5' },

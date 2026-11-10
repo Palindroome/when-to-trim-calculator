@@ -4,8 +4,7 @@
 # in the directory printed at the end.
 #
 #   check.sh                 typecheck, unit, e2e, build
-#   check.sh --prototype     the same, plus e2e against reference/index.html
-#   check.sh unit e2e        only the named steps (typecheck|unit|e2e|prototype|build)
+#   check.sh unit e2e        only the named steps (typecheck|unit|e2e|build)
 #
 # Each Playwright run gets its own free port (E2E_PORT), so it never reuses a
 # server from another worktree. Exit code is non-zero if any step failed.
@@ -14,8 +13,7 @@
 steps=()
 for a in "$@"; do
   case $a in
-    --prototype) steps=(typecheck unit e2e prototype build) ;;
-    typecheck|unit|e2e|prototype|build) steps+=("$a") ;;
+    typecheck|unit|e2e|build) steps+=("$a") ;;
     *) die "unknown step: $a" ;;
   esac
 done
@@ -36,7 +34,6 @@ for s in "${steps[@]}"; do
     typecheck) npm run -s typecheck >"$log" 2>&1 ;;
     unit) npm run -s test:unit >"$log" 2>&1 ;;
     e2e) E2E_PORT=$(free_port) npm run -s test:e2e >"$log" 2>&1 ;;
-    prototype) E2E_PORT=$(free_port) npm run -s test:e2e:prototype >"$log" 2>&1 ;;
     build) npm run -s build >"$log" 2>&1 ;;
   esac
   rc=$?
