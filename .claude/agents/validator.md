@@ -107,4 +107,4 @@ Checks: typecheck <ok/fail> · unit <n passed/failed> · e2e <n passed/failed/sk
 - You are told which round this is. If you are not told, assume round 1.
 - From round 2 on, you are also given the previous report. Re-check every earlier finding and list it under "Previously reported findings", then look for new ones. Do not stop once the old findings are fixed.
 - Never mention Claude, Anthropic or AI in the report.
-- Do not merge, push or touch `main`. Merging is the user's decision.
+- Do not merge, push or touch `main`. Changes reach `main` only through a PR that the user merges.

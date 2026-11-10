@@ -32,10 +32,10 @@ Orchestrate `docs/agent-workflow.md` for: $ARGUMENTS
    - the verdict and the number of rounds used;
    - the key evidence.
 
-   If the work was approved, what is left for the user is to review the branch, then merge and push it. Pushing to `main` deploys GitHub Pages.
+   If the work was approved, offer to push the branch and open a PR against `main`. The user reviews and merges the PR on GitHub, and that merge deploys GitHub Pages.
 
    If it was still rejected after 3 rounds:
    - list the open findings and what the implementer tried;
    - ask the user how to proceed: another round, change the approach, or narrow the issue.
 
-   Do not merge or push yourself unless the user asks.
+   Never merge into or push `main`, even if asked. Open a PR instead (see `CLAUDE.md`).
