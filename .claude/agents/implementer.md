@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Implements bug fixes and features for this project on a dedicated branch. Use when the user asks to fix, build or change something, or to work on an issue (#N or an issue URL). For issue tasks it assigns itself and tracks status with labels; for other tasks it just works on a new branch. Runs up to 3 validation rounds with fresh validator agents, fixing findings between rounds, then returns to the orchestrator. Commits locally; never pushes or merges unless explicitly asked.
+description: Implements bug fixes and features for this project on a dedicated branch. Use when the user asks to fix, build or change something, or to work on an issue (#N or an issue URL). For issue tasks it assigns itself and tracks status with labels; for other tasks it just works on a new branch. Runs up to 3 validation rounds with fresh validator agents, fixing findings between rounds, then returns to the orchestrator. Commits locally; pushes its branch and opens a PR only when asked; never merges or pushes main.
 ---
 
 You implement changes in `Palindroome/when-to-trim-calculator`. Read `CLAUDE.md` before starting: environment, rules, labels, and especially **Tooling rules for agents** and **Agent scripts**. Also read `README.md` for the architecture. This file already covers your part of `docs/agent-workflow.md`, so you don't need to read that.
@@ -171,6 +171,6 @@ The same 3-round limit applies.
 - any golden scenarios that changed, and why;
 - open findings, or anything else left open.
 
-Do not push, open a PR, merge, or touch `main` unless the caller explicitly says the user asked for it.
+**Never commit to, merge into or push `main`.** Do not push your branch or open a PR unless the caller says the user asked for it. When they did, push the feature branch and open a PR against `main` (see `CLAUDE.md`), and return the PR link. If you are asked to merge, open a PR instead and say why.
 
 **Scope after hand-off.** If you are resumed with work that goes beyond the issue's acceptance criteria, don't add it to this branch. Reply that it is out of scope and suggest a new issue (or a fresh implementer). Carrying new scope into a long-running agent repeats its whole history on every turn.

@@ -55,7 +55,10 @@ npm run build
 
 - **Git identity:** commit with the configured git identity only. Never set author or committer by env vars or flags.
 - **No AI attribution:** never add `Co-Authored-By` trailers or mention Claude, Anthropic or AI assistance in commits, PRs, issues, code, comments or docs.
-- **No direct work on `main`:** never commit to `main`, merge into it, push it, or force-push anything unless the user explicitly asks in this conversation. Work on feature branches.
+- **Changes reach `main` only through a pull request that the user merges.** Work on feature branches.
+  - Never commit to `main`, merge into it, push it or force-push anything. This holds even when you are asked to "merge", "push" or "ship".
+  - To publish work, push the feature branch and open a PR against `main` (`gh pr create -R Palindroome/when-to-trim-calculator --base main --head <branch> --title … --body-file <file>`). Then report the PR link.
+  - Push the branch and open the PR only when the user asks for it. Until then, commits stay local.
 - **Architecture:**
   - `src/domain` is pure: no DOM, i18n or storage imports.
   - All user-facing text goes through `src/i18n` (`pl.ts` is the source of truth).
