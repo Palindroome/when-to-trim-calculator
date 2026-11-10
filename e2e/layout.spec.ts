@@ -85,9 +85,11 @@ test.describe('layout', () => {
     await openApp(page);
     await fill(page, 'Nazwa (opcjonalnie)', 'Bardzo długa nazwa pracy na czwartkowe kubki z uchem');
     await page.getByRole('button', { name: 'Zapisz tę pracę z planem' }).click();
-    const top = page.locator('#pieces .piece .top');
-    const name = (await top.locator('b').boundingBox())!;
-    const badge = (await top.locator('.badge').boundingBox())!;
+    // both boxes in one evaluate, so they share one scroll offset while the list is still smooth-scrolling into view
+    const { name, badge } = await page.locator('#pieces .piece .top').evaluate((top) => ({
+      name: top.querySelector('b')!.getBoundingClientRect().toJSON() as DOMRect,
+      badge: top.querySelector('.badge')!.getBoundingClientRect().toJSON() as DOMRect,
+    }));
     // beside the name: vertically overlapping it and to its right, not on a line of its own
     expect(badge.y + badge.height).toBeGreaterThan(name.y);
     expect(badge.y).toBeLessThan(name.y + name.height);
