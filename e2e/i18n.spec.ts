@@ -193,15 +193,20 @@ test.describe('language switch', () => {
       for (const lang of ['pl', 'en']) {
         if (lang === 'en') await toEnglish(page);
         const h1 = (await page.getByRole('heading', { level: 1 }).boundingBox())!;
+        const head = (await page.locator('.masthead').boundingBox())!;
+        const bar = (await page.locator('.masthead .toolbar').boundingBox())!;
         for (const name of ['Polski', 'English'] as const) {
           const b = (await langButton(page, name).boundingBox())!;
           expect(b.width).toBeGreaterThanOrEqual(24);
           expect(b.height).toBeGreaterThanOrEqual(24);
           expect(b.x + b.width).toBeLessThanOrEqual(width);
-          // top right: on the heading's row, or above it when it wraps
+          // top right: on the heading's row, or above it when it wraps, in the toolbar flush with the right edge
+          // (the theme switch follows it, so on phones the language switch itself may start left of centre)
           expect(b.y).toBeLessThanOrEqual(h1.y + h1.height);
-          expect(b.x).toBeGreaterThan(width / 2);
+          expect(b.x).toBeGreaterThanOrEqual(bar.x);
         }
+        expect(Math.abs(bar.x + bar.width - (head.x + head.width))).toBeLessThanOrEqual(1);
+        expect(bar.x).toBeGreaterThan(head.x);
         const { scrollWidth, clientWidth } = await page.evaluate(() => ({
           scrollWidth: document.documentElement.scrollWidth,
           clientWidth: document.documentElement.clientWidth,

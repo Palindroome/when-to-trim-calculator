@@ -29,16 +29,16 @@ VISUAL=1 npx playwright test e2e/visual.spec.ts --update-snapshots  # baseline f
 VISUAL=1 npx playwright test e2e/visual.spec.ts                     # compare after the change (VISUAL_STRICT=1: pixel-exact)
 ```
 
-Baselines go to `e2e/__screenshots__/`. That folder is git-ignored because the images depend on the machine.
+Each state is captured in the light and the dark colour scheme (`light-…png`, `dark-…png`). Baselines go to `e2e/__screenshots__/`. That folder is git-ignored because the images depend on the machine.
 
 ## Structure
 
 ```
-index.html            page skeleton (font preload, <main>); everything else is rendered by src/
+index.html            page skeleton (colour-scheme metas, inline script applying a stored theme before first paint, font preload, <main>); everything else is rendered by src/
 public/fonts/         self-hosted Inter variable font (Latin subset) and its OFL licence
 src/
   main.ts             composition root: picks language, params, storage, conditions source, models
-  style.css           design tokens (one :root block: type, space, radii, colour roles, shadows) + components
+  style.css           design tokens (one :root block: type, space, radii, colour roles, shadows; dark values as --d-*) + components
   domain/             pure logic, no DOM; unit-tested
     types.ts          ids (Cover, ShapeId, ...), Piece, Conditions, Plan
     params.ts         ModelParams + DEFAULT_PARAMS: every model constant in one typed object
@@ -57,7 +57,7 @@ src/
     index.ts          locale registry, getMessages(), resolveLocale() (initial language)
   storage/
     pieces.ts         StoredPiece (v1 format), PieceRepository, LocalStoragePieceRepository
-    preferences.ts    chosen UI language (`kiedy-trymowac-lang`)
+    preferences.ts    chosen UI language (`kiedy-trymowac-lang`) and theme (`kiedy-trymowac-theme`)
     wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
   ui/
     shell.ts          static page markup from the catalog
@@ -86,6 +86,7 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
   Weekday and month names, decimal separator, duration wording and the date-time pattern live in the `format` section of the catalog.
 
   Saved pieces store their plan sentence (`label`) in the language that was active at save time. The piece list re-renders it from `plan` in the current language and falls back to `label` for unexpected plan shapes.
+- **Colour schemes.** Components use only the colour-role tokens in `src/style.css`. Dark mode overrides those same tokens with the `--d-*` values, either when the system prefers dark (`prefers-color-scheme`) or when `data-theme="dark"` is set on `<html>`; `data-theme="light"` forces the light values. The `System | Light | Dark` switch next to the language switch sets that attribute and stores `light` / `dark` under `kiedy-trymowac-theme` (System removes the key). A new component that uses the tokens works in both schemes without extra CSS; a new colour role needs a light value and a `--d-*` value assigned in both dark blocks.
 - **Fitted parameters.** Every coefficient is in `ModelParams` (`src/domain/params.ts`): evaporation coefficient, cover factors, shape/clay/surface factors, wetness/stage offsets, window bounds, planner and tip thresholds. Pass a different object to `startApp`.
 - **Trained models.** There are two seams:
   - `RateModel` (`domain/physics.ts`) predicts grams per hour for a cover, time, piece and conditions. Replace `physicalRateModel` to change the drying physics itself.

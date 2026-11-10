@@ -4,7 +4,7 @@ import { DEFAULT_PARAMS } from './domain/params';
 import { physicalRateModel } from './domain/physics';
 import { getMessages, LOCALES, resolveLocale } from './i18n';
 import { LocalStoragePieceRepository } from './storage/pieces';
-import { loadLanguage, saveLanguage } from './storage/preferences';
+import { loadLanguage, loadTheme, saveLanguage, saveTheme } from './storage/preferences';
 import { LocalStorageWizardStore } from './storage/wizard';
 import { startApp } from './ui/app';
 import { formConditionsSource } from './ui/form';
@@ -29,6 +29,8 @@ startApp({
   messages: getMessages(locale),
   locales: LOCALES,
   onLocaleChange: saveLanguage,
+  theme: loadTheme(),
+  onThemeChange: saveTheme,
   params,
   repository,
   wizard: new LocalStorageWizardStore(),

@@ -27,6 +27,14 @@ export const pl = {
     names: { pl: 'Polski', en: 'English' } satisfies Record<string, string>,
   },
 
+  /** Colour scheme switch: button names (icons only on screen, these are the accessible names and tooltips). */
+  theme: {
+    label: 'Motyw',
+    system: 'Systemowy',
+    light: 'Jasny',
+    dark: 'Ciemny',
+  },
+
   sections: {
     piece: 'Praca',
     conditions: 'Warunki',
