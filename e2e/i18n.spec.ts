@@ -1,8 +1,6 @@
-// English UI and the PL | EN switch. Build only: the prototype is Polish-only.
+// English UI and the PL | EN switch.
 import { expect, test, type Page } from '@playwright/test';
-import { PROTOTYPE, STORAGE_KEY, choose, fill, openApp, setNight, snapshot } from './helpers';
-
-test.skip(PROTOTYPE, 'the prototype has no language switch');
+import { STORAGE_KEY, choose, fill, openApp, setNight, snapshot } from './helpers';
 
 const LANG_KEY = 'kiedy-trymowac-lang';
 const SAVE_EN = 'Save this piece with its plan';

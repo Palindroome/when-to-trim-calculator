@@ -1,9 +1,7 @@
-// First-run wizard and the summary cards it leads to (build only; the prototype has neither).
+// First-run wizard and the summary cards it leads to.
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { PROTOTYPE, STORAGE_KEY, WIZARD_KEY, fill, openApp, snapshot, type Snapshot } from './helpers';
-
-test.skip(PROTOTYPE, 'the wizard exists only in the build');
+import { STORAGE_KEY, WIZARD_KEY, fill, openApp, snapshot, type Snapshot } from './helpers';
 
 const GOLDEN = JSON.parse(readFileSync(new URL('./golden.json', import.meta.url), 'utf-8')) as Record<string, Snapshot>;
 

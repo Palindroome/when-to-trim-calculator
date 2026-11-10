@@ -4,8 +4,6 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export const NOW = '2026-03-04T09:00:00+01:00';
 export const STORAGE_KEY = 'kiedy-trymowac-v1';
 export const WIZARD_KEY = 'kiedy-trymowac-wizard';
-/** True when the suite runs against reference/index.html; tests for intended fixes skip there. */
-export const PROTOTYPE = process.env.E2E_TARGET === 'prototype';
 
 export async function openApp(page: Page, opts: { now?: string; storage?: string | null; wizard?: boolean } = {}): Promise<void> {
   await page.clock.setFixedTime(new Date(opts.now ?? NOW));

@@ -1,9 +1,7 @@
 // Design-system checks for the build (#4): overflow, control sizes, focus ring, radii, fonts and token contrast.
 import { expect, test } from '@playwright/test';
-import { PROTOTYPE, openApp, tokenContrast } from './helpers';
+import { openApp, tokenContrast } from './helpers';
 import { STATES } from './states';
-
-test.skip(PROTOTYPE, 'design checks apply to the build only');
 
 for (const width of [320, 375, 768, 1280]) {
   for (const [name, setup] of Object.entries(STATES)) {
