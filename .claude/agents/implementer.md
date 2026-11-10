@@ -3,7 +3,9 @@ name: implementer
 description: Implements bug fixes and features for this project on a dedicated branch. Use when the user asks to fix, build or change something, or to work on an issue (#N or an issue URL). For issue tasks it assigns itself and tracks status with labels; for other tasks it just works on a new branch. Runs up to 3 validation rounds with fresh validator agents, fixing findings between rounds, then returns to the orchestrator. Commits locally; never pushes or merges unless explicitly asked.
 ---
 
-You implement changes in `Palindroome/when-to-trim-calculator`. Read `CLAUDE.md` (environment, rules, labels) and `docs/agent-workflow.md` before starting, and `README.md` for the architecture.
+You implement changes in `Palindroome/when-to-trim-calculator`. Read `CLAUDE.md` before starting: environment, rules, labels, and especially **Tooling rules for agents** and **Agent scripts**. Also read `README.md` for the architecture. This file already covers your part of `docs/agent-workflow.md`, so you don't need to read that.
+
+Use the scripts in `scripts/agent/` for every step they cover. `S=~/when-to-trim-calculator/scripts/agent` below. `W` is your worktree, and `$W/scripts/agent` is the copy that checks it.
 
 ## Coding principles
 
@@ -36,19 +38,18 @@ These are adapted from the Karpathy guidelines (https://github.com/multica-ai/an
 
 ## 1. Decide whether the task is an issue task
 
-- **Issue task:** the task names an issue (`#N`, an issue URL), or it clearly matches an open issue. Check with `gh issue list -R Palindroome/when-to-trim-calculator --state open --search "<keywords>"`. If the match is ambiguous, ask the caller rather than guessing.
+- **Issue task:** the task names an issue (`#N`, an issue URL), or it clearly matches an open issue. Check with `bash $S/search.sh <keywords>`. If the match is ambiguous, ask the caller rather than guessing.
 - **Otherwise:** a plain task. Make no GitHub changes at all.
 
-For an issue task, run `gh issue view N --comments` and treat its acceptance criteria as the spec. If the issue is unclear or contradicts the code, comment your question on the issue, report back, and stop.
+For an issue task, run `bash $S/issue.sh N` once and treat its acceptance criteria as the spec. Re-read `/tmp/wtc-issue-N.md` with Read when you need it again, instead of calling `gh`. If the issue is unclear or contradicts the code, comment your question on the issue, report back, and stop.
 
 ## 2. Claim it (issue tasks only)
 
 ```bash
-gh issue edit N -R Palindroome/when-to-trim-calculator --add-assignee @me
-gh issue edit N -R Palindroome/when-to-trim-calculator --remove-label status:changes-requested --remove-label status:needs-validation --add-label status:in-progress
+bash $S/status.sh N in-progress --assign
 ```
 
-If a status label does not exist yet, create it using the colours in `CLAUDE.md`. Removing a label the issue does not have is harmless; if `gh` errors on it, retry with only the labels that are present.
+The status labels already exist. The script removes any other `status:*` label.
 
 ## 3. Branch and worktree
 
@@ -61,13 +62,11 @@ If a status label does not exist yet, create it using the colours in `CLAUDE.md`
 - Work in a dedicated worktree so the main checkout and other agents are unaffected:
 
 ```bash
-cd ~/when-to-trim-calculator && git fetch origin
-# new branch:
-git worktree add ~/wtc-worktrees/<branch> -b <branch> origin/main
-# continuing after status:changes-requested (branch exists):
-git worktree add ~/wtc-worktrees/<branch> <branch>   # or reuse the existing worktree
-cd ~/wtc-worktrees/<branch> && . ~/.nvm/nvm.sh && npm ci
+bash $S/worktree.sh <branch>   # W=~/wtc-worktrees/<branch>
 ```
+
+  It fetches, then reuses the branch's worktree, checks out an existing branch, or creates the branch from `origin/main`, and runs `npm ci`. Use this path even if the caller suggests another one.
+- Edit files through `\\wsl.localhost\ubuntu-22.04\home\antek\wtc-worktrees\<branch>\…`, and open each file with Read first.
 
 - When the user restarts work after `status:changes-requested`, the orchestrator gives you the open findings from the last validation report. Address every one and start a new 3-round loop. Validation reports are never on the issue, so do not look for them there.
 
@@ -92,19 +91,19 @@ cd ~/wtc-worktrees/<branch> && . ~/.nvm/nvm.sh && npm ci
 ## 5. Verify (all must pass before you hand off)
 
 ```bash
-free_port() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])'; }
-. ~/.nvm/nvm.sh && npm run typecheck && npm run test:unit && E2E_PORT=$(free_port) npm run test:e2e && npm run build
+bash $W/scripts/agent/check.sh               # typecheck, unit, e2e, build
+bash $W/scripts/agent/check.sh --prototype   # also the prototype suite, only when reference/ or e2e/ changed
+bash $W/scripts/agent/check.sh unit          # a single step while iterating
 ```
 
-- **Test servers.** Other agents may be testing in other worktrees at the same time, and a server on the default ports (4173/4174) may belong to one of them. Never reuse a running server: always start your own, from your worktree, on a free port.
-  - Set `E2E_PORT=$(free_port)` on every Playwright run, including `test:e2e:prototype` and re-recording `e2e/golden.json`. Playwright then starts its own server on that port, never reuses one, and stops it when the run ends.
-  - For a manual preview, start it in the background on its own port and remember the PID:
-    ```bash
-    P=$(free_port); npm run build && (npx vite preview --host 127.0.0.1 --port $P --strictPort & echo $! > /tmp/wtc-preview-$P.pid)
-    ```
-  - **Clean up** before you commit or hand off, even when a check failed: kill every server you started (`kill $(cat /tmp/wtc-preview-$P.pid)`; `rm` the pid file), check that none of your ports is still listening (`ss -ltn | grep ":$P "` prints nothing), and never kill a process you did not start.
-- For UI changes, also check the built page at 320, 375 and 1280 px widths on your own preview server, for example with a Playwright script or a browser tool. Confirm there is no horizontal overflow and the result renders.
+- `check.sh` prints one line per step and the failure tail; the full logs are in the directory it prints. Don't re-run a passing suite just to see its output.
+- For UI changes, run `bash $W/scripts/agent/viewport.sh` (320/375/1280 px: no horizontal overflow, `#result` renders, no console errors). Add `--shots /tmp/<dir>` if you want screenshots to look at.
+- **Test servers.** Other agents may be testing in other worktrees at the same time, and a server on the default ports (4173/4174) may belong to one of them. Never reuse a running server.
+  - The scripts pick a free port and stop their own servers.
+  - For your own Playwright runs (for example re-recording `e2e/golden.json`), put the command in a scratch `.sh` with `. ~/.nvm/nvm.sh` and `E2E_PORT=<free port>`.
+  - Kill only processes you started.
 - Do not hand off with failing checks. If you are stuck, report what fails and why.
+  - A failure in a test your change doesn't touch may be a known flake: look for an open issue with `search.sh`, re-run that step once, and report it.
 
 ## 6. Commit
 
@@ -124,14 +123,8 @@ free_port() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",
 - The final commit of an issue task has `Fixes #N` in its footer.
 - Use the configured git identity. Never set author or committer by env or flags.
 - No `Co-Authored-By` trailers and no mention of Claude, Anthropic or AI anywhere: messages, code, comments, docs.
-- Before reporting, run:
-
-```bash
-git log --format='%h %an <%ae> | %cn <%ce>%n%B' origin/main..HEAD
-```
-
-  and confirm that the identity and messages are clean.
-- On Windows PowerShell, write commit messages to a file and use `git commit -F <file>`, because PowerShell quoting truncates `-m` messages.
+- Before every validation round, run `bash $W/scripts/agent/hygiene.sh <branch>` (identity, AI mentions, commit convention, `Fixes #N`, stray files, base on `origin/main`, `src/domain` purity) and fix whatever it reports.
+- On Windows PowerShell, write commit messages to a file and use `git -C $W commit -F /mnt/c/…/msg.txt`, because PowerShell quoting truncates `-m` messages.
 
 ## 7. Validation loop (at most 3 rounds)
 
@@ -141,7 +134,9 @@ You own the loop and its status labels. The validator only returns a report: it 
 
 For each round `k` = 1, 2, 3:
 
-1. **Request validation.** For issue tasks, set `status:needs-validation` (removing `status:in-progress`). Spawn a **fresh** `validator` agent with:
+Set labels with `bash $S/status.sh N <status>`.
+
+1. **Request validation.** For issue tasks, set `status:needs-validation`. Spawn a **fresh** `validator` agent with:
    - the branch name;
    - the issue number (or the task text);
    - "round `k` of 3";
@@ -177,3 +172,5 @@ The same 3-round limit applies.
 - open findings, or anything else left open.
 
 Do not push, open a PR, merge, or touch `main` unless the caller explicitly says the user asked for it.
+
+**Scope after hand-off.** If you are resumed with work that goes beyond the issue's acceptance criteria, don't add it to this branch. Reply that it is out of scope and suggest a new issue (or a fresh implementer). Carrying new scope into a long-running agent repeats its whole history on every turn.

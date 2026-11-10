@@ -4,9 +4,41 @@
 
 ## Environment
 
-- The repo lives in WSL Ubuntu at `~/when-to-trim-calculator`. If your shell is Windows PowerShell, run Linux commands as `wsl -e bash -lc '<cmd>'`. PowerShell 5.1 mangles embedded double quotes and `|`, so for anything non-trivial write a `.sh` script and run `wsl -e bash -l /mnt/c/.../script.sh`.
-- Node comes from nvm and is not on PATH in non-interactive shells: start commands with `. ~/.nvm/nvm.sh;`.
+- The repo lives in WSL Ubuntu at `~/when-to-trim-calculator`. If your shell is Windows PowerShell, run Linux commands as `wsl -e bash -lc '<cmd>'`. Windows tools see the files at `\\wsl.localhost\ubuntu-22.04\home\antek\…`.
+- Node comes from nvm and is not on PATH in non-interactive shells: start commands with `. ~/.nvm/nvm.sh;` (the agent scripts do this themselves).
 - `gh` is installed and logged in (account Palindroome) in WSL.
+
+## Tooling rules for agents
+
+Past runs lost most of their turns to the same few problems. Follow these rules:
+
+- **Use the agent scripts** (next section) instead of writing your own setup, check, label or probe commands.
+- **No inline shell with special characters from PowerShell.** PowerShell 5.1 mangles `"`, `|`, `(`, `$(`, `<`, `>` and commas inside `wsl -e bash -lc '…'` (for example `--jq ".a, .b"`, `grep "a\|b"`, `python3 -c "…"`). Anything beyond plain words goes in a `.sh` file in your scratchpad, run with `wsl -e bash -l /mnt/c/…/x.sh`.
+- **Open a file with Read before you Edit or Write it.** Use the `\\wsl.localhost\ubuntu-22.04\home\antek\…` path. Viewing it with `cat`/`sed` in WSL does not count, and the edit is rejected.
+- **Run scripts with `bash <script>`.** Editing a file through the `\\wsl.localhost` path drops its exec bit.
+- **Read the issue once.** Plain `gh issue view N` prints nothing in this setup. Use `scripts/agent/issue.sh N` and re-read `/tmp/wtc-issue-N.md` later.
+- **The `status:*` labels exist on GitHub.** Do not try to create them.
+- **Subagents:** do not call `update_plan` or `wrap_up`. They are blocked.
+- **Worktrees:** use `~/wtc-worktrees/<branch>` through `worktree.sh`. Never use the Agent tool's `isolation: "worktree"`, which fails on this WSL repo.
+- **Keep tool output small.** Pipe through `tail`/`grep`, and never print whole files you can Read. A `grep` with no match exits 1, which is not an error.
+
+## Agent scripts
+
+Run them with `wsl -e bash -l <checkout>/scripts/agent/<script> <args>`. Arguments are plain words, so they need no quoting. The `<checkout>` is:
+- `~/when-to-trim-calculator` for `issue.sh`, `search.sh`, `new-issue.sh`, `status.sh` and `worktree.sh`;
+- your worktree for `check.sh`, `viewport.sh` and `hygiene.sh`, which act on the checkout they live in.
+
+| Script | Does |
+|---|---|
+| `issue.sh N` | prints issue N with its comments, and saves it to `/tmp/wtc-issue-N.md` |
+| `search.sh <words>` | lists open and closed issues matching the words (duplicate check) |
+| `new-issue.sh <body.md> <label>…` | files an issue; the first line of the file is the title; checks that the labels exist |
+| `status.sh N <in-progress\|needs-validation\|validated\|changes-requested> [--assign]` | sets the single `status:*` label (and claims the issue) |
+| `worktree.sh <branch>` | reuses or creates `~/wtc-worktrees/<branch>` from `origin/main`, then runs `npm ci` |
+| `worktree.sh --validate <branch>` / `--main` / `--remove <path>` | fresh detached worktree for validation or for reproducing on `origin/main`; removal |
+| `check.sh [--prototype] [steps…]` | typecheck, unit, e2e (own free port), build; one line per step, plus the failure tail |
+| `viewport.sh [--shots DIR] [--keep]` | builds and serves on a free port; checks 320/375/1280 px for overflow, a rendered `#result` and console errors; stops its server |
+| `hygiene.sh <branch> [N]` | base on `origin/main`, identity, AI mentions, commit convention, `Fixes #N`, stray files, `src/domain` purity |
 
 ## Commands
 
@@ -73,7 +105,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) with a scope:
   - `Fixes #N` on the commit that completes an issue;
   - `Refs #N` for partial work;
   - `BREAKING CHANGE: …`, plus `!` after the scope, when the stored data format or a public interface changes incompatibly.
-- On Windows PowerShell, write the message to a file and use `git commit -F <file>`.
+- On Windows PowerShell, write the message to a file and use `git commit -F <file>` (`-F /mnt/c/…` from WSL).
 
 ## GitHub labels
 

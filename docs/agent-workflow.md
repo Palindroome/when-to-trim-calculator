@@ -100,6 +100,19 @@ Validation reports and hand-off reports never go to the issue. They pass only be
 - A push to `main` deploys to GitHub Pages automatically.
 - Remove worktrees for merged branches: `git worktree remove ~/wtc-worktrees/<branch>`.
 
+## Tooling
+
+All three agents use the helper scripts in `scripts/agent/` (listed in `CLAUDE.md` under "Agent scripts"). The scripts cover:
+- reading and searching issues;
+- filing issues;
+- setting status labels;
+- creating worktrees;
+- running the checks;
+- the 320/375/1280 px viewport probe;
+- branch hygiene.
+
+They exist because inline shell commands from PowerShell into WSL break on quoting. Writing the same helpers again in every run cost most of the turns in early runs.
+
 ## Running the workflow
 
 In Claude Code, ask for an agent by name, e.g. "use the issue-writer to file …", "use the implementer on #3", "use the validator on fix/3-…". The `/issue-flow <issue-number or task>` skill runs the whole thing end to end: implementer, then up to 3 validation rounds, then a report. It relays between implementer and validator when the implementer cannot spawn agents itself, and asks the user if work is still rejected after 3 rounds.

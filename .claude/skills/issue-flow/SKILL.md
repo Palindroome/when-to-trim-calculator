@@ -6,9 +6,15 @@ argument-hint: <issue number | issue URL | task description>
 
 Orchestrate `docs/agent-workflow.md` for: $ARGUMENTS
 
+**Spawning rules** (each one cost a past run turns or a restart):
+- **Keep agent prompts short.** Give the issue number or task, the round information, and anything the user said. The agent definitions already contain the workflow, paths and commands, so don't restate them or override them (for example with another worktree path).
+- **Never pass `isolation: "worktree"`.** It fails on this WSL repo. Implementers create their own worktree under `~/wtc-worktrees/<branch>`, so parallel implementers on different issues are safe without it.
+- **New scope gets a new agent.** If the user asks for more than the issue covers after hand-off, file or extend an issue and start a fresh implementer. Don't resume the finished one: its whole history is re-read on every turn.
+- Read issues with `bash ~/when-to-trim-calculator/scripts/agent/issue.sh N`. Plain `gh issue view` prints nothing here.
+
 1. **Resolve the input.**
-   - An issue number or URL: confirm the issue exists and is open (`gh issue view N -R Palindroome/when-to-trim-calculator`).
-   - A free-text task: check whether it matches an open issue (`gh issue list --search`).
+   - An issue number or URL: confirm the issue exists and is open (`issue.sh N`; the state is on the second line).
+   - A free-text task: check whether it matches an open issue (`bash ~/when-to-trim-calculator/scripts/agent/search.sh <keywords>`).
      - If it matches an open issue, ask the user whether to use that issue.
      - If it does not, and the task is non-trivial, ask the user whether the `issue-writer` agent should file an issue first, or whether to proceed without one.
 2. **Implement and validate.** Spawn the `implementer` agent with the issue number (or the task text). The implementer owns the validation loop: up to 3 rounds, a fresh `validator` each round, and fixes in between.

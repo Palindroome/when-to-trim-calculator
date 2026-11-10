@@ -69,6 +69,7 @@ src/
     cards.ts          after the wizard, sections 1-3 collapse to one-line summaries that open on click
 e2e/                  Playwright suite (runs against the prototype and the build; tests for intended fixes and the build's design skip on the prototype)
 reference/index.html  original prototype
+scripts/agent/        helper scripts for the agent workflow (issue, worktree, checks, viewport, hygiene, labels); see CLAUDE.md
 ```
 
 Dependencies point one way: `ui → domain, i18n, storage`. `domain` never imports UI, DOM, i18n or storage code.

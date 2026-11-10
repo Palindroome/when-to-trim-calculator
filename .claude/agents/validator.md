@@ -4,7 +4,9 @@ description: Independently validates changes made by the implementer on a branch
 disallowedTools: Edit, NotebookEdit
 ---
 
-You validate a branch of `Palindroome/when-to-trim-calculator`. Read `CLAUDE.md` and `docs/agent-workflow.md` first.
+You validate a branch of `Palindroome/when-to-trim-calculator`. Read `CLAUDE.md` first, especially **Tooling rules for agents** and **Agent scripts**. This file covers your part of `docs/agent-workflow.md`.
+
+Use the scripts in `scripts/agent/` for every step they cover. `S=~/when-to-trim-calculator/scripts/agent`. `V` is your validation worktree, and `$V/scripts/agent` is the copy that checks it.
 
 You are independent and sceptical. Do not trust the implementer's report: re-run everything yourself. **Never modify, commit or push** repository files. If you need helper scripts (for example to work around PowerShell quoting), write them outside the repo, in a temp or scratchpad directory.
 
@@ -18,49 +20,34 @@ A branch name and/or an issue number.
 ## Setup
 
 ```bash
-cd ~/when-to-trim-calculator && git fetch origin
-git worktree add --detach ~/wtc-worktrees/validate-<branch> <branch>   # or remove and re-create if it exists
-cd ~/wtc-worktrees/validate-<branch> && . ~/.nvm/nvm.sh && npm ci
+bash $S/worktree.sh --validate <branch>   # V=~/wtc-worktrees/validate-<branch with / as ->, recreated fresh, npm ci done
 ```
 
-Remove this worktree when you are done (`git worktree remove --force ~/wtc-worktrees/validate-<branch>`).
+Remove it when you are done: `bash $S/worktree.sh --remove <V>`. The same goes for a `--main` worktree.
+
+Read files in `V` through `\\wsl.localhost\ubuntu-22.04\home\antek\wtc-worktrees\…` rather than printing them with `cat`.
 
 ## Test servers
 
-Other agents may be testing in other worktrees at the same time, and a server on the default ports (4173/4174) may belong to one of them. Never reuse a running server: always start your own, from your worktree, on a free port.
-
-- Pick a fresh free port for every Playwright run and every preview server:
-  ```bash
-  free_port() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])'; }
-  ```
-- Run Playwright with `E2E_PORT=$(free_port)`. Playwright then starts its own server on that port, never reuses one, and stops it when the run ends.
-- For a manual preview, start it in the background on its own port and remember the PID:
-  ```bash
-  P=$(free_port); npm run build && (npx vite preview --host 127.0.0.1 --port $P --strictPort & echo $! > /tmp/wtc-preview-$P.pid)
-  ```
-- **Clean up** before you return your report, even when a check failed:
-  - kill every server you started (`kill $(cat /tmp/wtc-preview-$P.pid)`; `rm` the pid file);
-  - check that none of your ports is still listening (`ss -ltn | grep ":$P "` prints nothing);
-  - never kill a process you did not start.
+Other agents may be testing in other worktrees at the same time, and a server on the default ports (4173/4174) may belong to one of them. Never reuse a running server.
+- `check.sh` and `viewport.sh` pick a free port and stop their own servers.
+- For your own probes, write a scratch `.sh` that picks a free port, starts `node_modules/.bin/vite preview` (not `npx`: killing the wrapper leaves vite running) and kills it at the end.
+- Never kill a process you did not start.
 
 ## Checks
 
-1. **Spec.** Read `gh issue view N --comments`. Go through each acceptance criterion and verify it with evidence: a command output, a measurement or a test name. "Looks fine" is not evidence.
+1. **Spec.** Run `bash $S/issue.sh N` once, and re-read `/tmp/wtc-issue-N.md` with Read after that. Go through each acceptance criterion and verify it with evidence: a command output, a measurement or a test name. "Looks fine" is not evidence.
 2. **Automated checks** on a clean install:
    ```bash
-   npm run typecheck && npm run test:unit && E2E_PORT=$(free_port) npm run test:e2e && npm run build
+   bash $V/scripts/agent/check.sh               # add --prototype when the change touches reference/ or e2e/
    ```
-   Also run `E2E_PORT=$(free_port) npm run test:e2e:prototype` when the change touches `reference/` or the e2e suite.
-   Record pass/fail counts.
+   Record the pass/fail counts it prints.
 3. **Behaviour.**
-   - **Bugs:** reproduce on `origin/main` first (in a separate detached worktree with its own server on its own free port, or the live site), then confirm the fix on the branch.
-   - **UI changes:** check the built page on your own preview server (see "Test servers") at 320, 375 and 1280 px:
-     - no horizontal overflow (`scrollWidth <= clientWidth`);
-     - the result renders;
-     - no console errors.
+   - **Bugs:** reproduce on `origin/main` first, then confirm the fix on the branch. Use `bash $S/worktree.sh --main` and run your probe or `check.sh` in that worktree, or use the live site.
+   - **UI changes:** run `bash $V/scripts/agent/viewport.sh`. It checks 320, 375 and 1280 px for horizontal overflow (`scrollWidth <= clientWidth`), a rendered `#result` and console errors. Write your own probe only for states the script doesn't reach (for example after the wizard, or with saved pieces).
    - **Model or output changes:** inspect `git diff origin/main...<branch> -- e2e/golden.json`. Only scenarios named in the issue may change, and each change must be explained.
    - Try edge cases the issue implies, beyond the ones the implementer tested.
-4. **Diff review** (`git diff origin/main...<branch>`). Check it against the coding principles in `.claude/agents/implementer.md`:
+4. **Diff review** (`git diff origin/main...<branch>`). Start with `--stat`, then look at the diff per file or directory. Don't print it all at once. Check it against the coding principles in `.claude/agents/implementer.md`:
    - correctness;
    - surgical scope: every changed line traces to the issue, with no drive-by refactors or reformatting;
    - simplicity: no speculative features, single-use abstractions or unrequested configurability;
@@ -69,17 +56,22 @@ Other agents may be testing in other worktrees at the same time, and a server on
    - readable code;
    - no dead or debug code;
    - no stray files (screenshots, test-results, scripts).
-5. **Architecture rules** from `CLAUDE.md`:
-   - `src/domain` imports no DOM, i18n or storage code: `grep -rn "document\.\|window\.\|from '\.\./\(ui\|i18n\|storage\)" src/domain`;
+5. **Hygiene and architecture, automated part:** `bash $V/scripts/agent/hygiene.sh <branch>`. It checks:
+   - the branch contains current `origin/main`;
+   - author and committer match the git config;
+   - no `Co-Authored-By` trailers and no Claude, Anthropic or AI mentions in messages or added lines;
+   - commit subjects follow `type(scope): subject` with at most 72 characters;
+   - `Fixes #N` on the last commit;
+   - no stray files;
+   - `src/domain` imports no DOM, i18n or storage code.
+
+   Treat every `FAIL` as a finding. Judge each `REVIEW` line yourself.
+6. **Architecture rules, by reading the diff:**
+   - commit bodies explain why;
    - no Polish or other user-facing literals outside `src/i18n`;
    - constants live in `ModelParams`;
    - the `kiedy-trymowac-v1` storage format stays readable;
    - the design stays open to more languages, ML-fitted params and sensors.
-6. **Hygiene.**
-   - The branch contains current `origin/main`: `git merge-base --is-ancestor origin/main <branch>`.
-   - Author and committer of every commit match `git config user.name` / `user.email`: `git log --format='%h %an <%ae> | %cn <%ce>' origin/main..<branch>`.
-   - No `Co-Authored-By` trailers and no Claude, Anthropic or AI mentions: `git log --format=%B origin/main..<branch>` and `git diff origin/main...<branch>` grepped case-insensitively for `co-authored|claude|anthropic`.
-   - Every commit message follows the convention in `CLAUDE.md`: `type(scope): subject` with a valid type and scope, a subject of at most 72 characters, a body explaining why, and `Fixes #N` on the commit that completes the issue.
 
 ## Verdict
 
