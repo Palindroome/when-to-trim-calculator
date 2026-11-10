@@ -11,11 +11,12 @@ import { COVERS, type Cover, type FeedbackKind, type Piece } from '../domain/typ
 import { assessWeight } from '../domain/weight';
 import { createFormatter, type Messages } from '../i18n';
 import { calibrationSamples, type PieceRepository, type StoredPiece } from '../storage/pieces';
+import type { Theme } from '../storage/preferences';
 import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
 import { readName, readPieceInput, readThrownMs, readWeightInputs, readWhenMs, toLocalInput } from './form';
 import { renderCalibration, renderSummaries, renderPieceList, renderResult, renderWeight, planText, type View } from './render';
-import { renderShell } from './shell';
+import { renderShell, type ThemeChoice } from './shell';
 import { createSummaryCards } from './cards';
 import { createWizard } from './wizard';
 
@@ -27,6 +28,10 @@ export interface AppDeps {
   locales: Readonly<Record<string, Messages>>;
   /** called with the locale code when the user picks a language */
   onLocaleChange: (code: string) => void;
+  /** theme chosen earlier (null: follow the system); index.html has already applied it */
+  theme: Theme | null;
+  /** called when the user picks a theme (null: System) */
+  onThemeChange: (theme: Theme | null) => void;
   params: ModelParams;
   repository: PieceRepository;
   wizard: WizardStore;
@@ -233,6 +238,20 @@ export function startApp(deps: AppDeps): void {
     root.querySelector<HTMLElement>(`[data-lang="${code}"]`)?.focus();
   }
 
+  // ---------- theme ----------
+  let theme = deps.theme;
+
+  /** Applies the choice at once through `data-theme` on <html>; no re-render, nothing is recomputed. */
+  function switchTheme(choice: ThemeChoice): void {
+    theme = choice === 'system' ? null : choice;
+    if (theme) document.documentElement.dataset.theme = theme;
+    else delete document.documentElement.dataset.theme;
+    root.querySelectorAll<HTMLButtonElement>('[data-theme-choice]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.themeChoice === choice));
+    });
+    deps.onThemeChange(theme);
+  }
+
   // ---------- render ----------
   /** (Re)builds the page in `messages`; `form` restores the inputs after a language switch. */
   function render(messages: Messages, form: FormState | null): void {
@@ -240,7 +259,7 @@ export function startApp(deps: AppDeps): void {
     view = { m, params, fmt: createFormatter(m, params.horizonHours / 24) };
     document.documentElement.lang = m.lang;
     document.title = m.title;
-    root.innerHTML = renderShell(m, Object.keys(deps.locales));
+    root.innerHTML = renderShell(m, Object.keys(deps.locales), theme ?? 'system');
     wizard.mount(m);
     cards.mount(m);
     byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');
@@ -260,6 +279,9 @@ export function startApp(deps: AppDeps): void {
   function wire(): void {
     root.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((b) => {
       b.onclick = () => switchLanguage(b.dataset.lang ?? '');
+    });
+    root.querySelectorAll<HTMLButtonElement>('[data-theme-choice]').forEach((b) => {
+      b.onclick = () => switchTheme(b.dataset.themeChoice as ThemeChoice);
     });
     chips().forEach((c) => {
       c.onclick = () => {

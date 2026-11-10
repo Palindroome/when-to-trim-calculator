@@ -25,6 +25,13 @@ export const en: Messages = {
     names: { pl: 'Polski', en: 'English' },
   },
 
+  theme: {
+    label: 'Theme',
+    system: 'System',
+    light: 'Light',
+    dark: 'Dark',
+  },
+
   sections: {
     piece: 'Piece',
     conditions: 'Conditions',

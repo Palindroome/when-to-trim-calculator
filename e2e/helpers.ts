@@ -128,11 +128,40 @@ export async function snapshot(page: Page, saveLabel = 'Zapisz tę pracę z plan
  * Any CSS colour syntax works, so the same check serves every colour scheme.
  */
 export async function tokenContrast(page: Page, fg: string, bg: string): Promise<number> {
-  return page.evaluate(
-    ([a, b]) => {
-      const luminance = (token: string): number => {
+  const [a, b] = await page.evaluate(
+    (tokens) =>
+      tokens.map((token) => {
         const value = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
         if (!value) throw new Error(`token ${token} is not defined`);
+        return value;
+      }),
+    [fg, bg],
+  );
+  return colorContrast(page, a!, b!);
+}
+
+/** A computed colour property of the first element matching `selector`, e.g. `['.fill', 'backgroundColor']`. */
+export type ElementColor = [selector: string, property: 'color' | 'backgroundColor' | 'borderTopColor'];
+
+/** WCAG 2.x contrast ratio between colours of rendered elements, so a component that bypasses the tokens is caught too. */
+export async function elementContrast(page: Page, fg: ElementColor, bg: ElementColor): Promise<number> {
+  const [a, b] = await page.evaluate(
+    (refs) =>
+      refs.map(([selector, property]) => {
+        const el = document.querySelector(selector);
+        if (!el) throw new Error(`${selector} not found`);
+        return getComputedStyle(el)[property];
+      }),
+    [fg, bg],
+  );
+  return colorContrast(page, a!, b!);
+}
+
+/** WCAG 2.x contrast ratio between two opaque CSS colours, parsed by the browser. */
+async function colorContrast(page: Page, fg: string, bg: string): Promise<number> {
+  return page.evaluate(
+    ([a, b]) => {
+      const luminance = (value: string): number => {
         const ctx = document.createElement('canvas').getContext('2d')!;
         ctx.fillStyle = value;
         ctx.fillRect(0, 0, 1, 1);
