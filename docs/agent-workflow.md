@@ -24,7 +24,8 @@ How work moves from an idea to a validated branch. Three project agents take par
      │
      ├─ approved (any round) → implementer sets status:validated
      │                         → hand-off report to orchestrator
-     │                         → user reviews, merges, pushes
+     │                         → PR from the branch (when the user asks)
+     │                         → user reviews and merges the PR
      │
      └─ still rejected after round 3 → implementer sets status:changes-requested
                                        → hand-off report + all reports to orchestrator
@@ -71,7 +72,9 @@ Validation reports and hand-off reports never go to the issue. They pass only be
   5. When the user restarts work after `status:changes-requested`, the orchestrator passes the open findings to the implementer, since they are not on the issue.
 - **Spawning limits:** Claude Code subagents usually cannot spawn agents. An implementer running as a subagent returns `READY FOR VALIDATION` instead. The orchestrator then spawns the validator and resumes the same implementer with the report. The loop and the 3-round limit are unchanged.
 - **Hand-off report** (to the orchestrator only): the branch and commits, the verdict and rounds used, assumptions, what changed, the tests and check results, golden changes, and open items.
-- **Never:** push, open PRs, merge or touch `main`, unless the user asked for that in the conversation.
+- **Never** commit to, merge into or push `main`.
+  - The implementer pushes its feature branch and opens a PR only when the user asks for that in the conversation.
+  - Merging is always the user's job, on GitHub.
 
 ## 3. Validating (`validator`)
 
@@ -96,8 +99,9 @@ Validation reports and hand-off reports never go to the issue. They pass only be
 
 ## 4. Merge and release (user)
 
-- The user reviews the validated branch, then merges and pushes it themselves or asks an agent to do so explicitly.
-- A push to `main` deploys to GitHub Pages automatically.
+- When the user asks, an agent pushes the validated feature branch and opens a PR against `main`.
+- The user reviews and merges the PR on GitHub. No agent ever merges into or pushes `main`, even when asked to; it opens a PR instead.
+- A merge to `main` deploys to GitHub Pages automatically.
 - Remove worktrees for merged branches: `git worktree remove ~/wtc-worktrees/<branch>`.
 
 ## Tooling
