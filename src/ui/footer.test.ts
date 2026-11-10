@@ -14,6 +14,17 @@ describe('renderFooter', () => {
     expect(html).not.toContain('target=');
   });
 
+  it('offers problem reports on GitHub or Instagram and links the MIT licence', () => {
+    for (const m of [pl, en]) {
+      const html = renderFooter(m);
+      expect(html).toContain(`<a href="https://github.com/Palindroome/when-to-trim-calculator/issues/new">${m.footer.report}</a>`);
+      expect(html).toContain(`<a href="https://www.instagram.com/palindroom/">${m.footer.message}</a>`);
+      expect(html).toContain(`<a href="https://github.com/Palindroome/when-to-trim-calculator/blob/main/LICENSE">${m.footer.licence}</a>`);
+    }
+    expect(renderFooter(pl)).toContain('Coś nie działa albo wynik wygląda na błędny?');
+    expect(renderFooter(en)).toContain('free to use under the');
+  });
+
   it('takes its labels from the catalog', () => {
     for (const m of [pl, en]) {
       const html = renderFooter(m);

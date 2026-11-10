@@ -1,13 +1,25 @@
-// Site footer with the author's profile links.
+// Site footer: the author's profile links, where to report a problem, and the licence.
 import { expect, test, type Page } from '@playwright/test';
 import { openApp, tokenContrast } from './helpers';
 
 const GITHUB = 'https://github.com/Palindroome';
 const INSTAGRAM = 'https://www.instagram.com/palindroom/';
+const ISSUES = 'https://github.com/Palindroome/when-to-trim-calculator/issues/new';
+const LICENCE = 'https://github.com/Palindroome/when-to-trim-calculator/blob/main/LICENSE';
 
 const links = (page: Page) => {
   const footer = page.getByRole('contentinfo');
   return { footer, github: footer.getByRole('link', { name: /^GitHub/ }), instagram: footer.getByRole('link', { name: /^Instagram/ }) };
+};
+
+/** The contact and licence links in the footer's sentences, Polish names. */
+const textLinks = (page: Page) => {
+  const footer = page.getByRole('contentinfo');
+  return [
+    footer.getByRole('link', { name: 'Zgłoś problem na GitHubie', exact: true }),
+    footer.getByRole('link', { name: 'napisz na Instagramie', exact: true }),
+    footer.getByRole('link', { name: 'licencji MIT', exact: true }),
+  ];
 };
 
 test.describe('site footer', () => {
@@ -46,6 +58,26 @@ test.describe('site footer', () => {
     await expect(github).toHaveAttribute('href', GITHUB);
     await expect(instagram).toHaveAttribute('href', INSTAGRAM);
     expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
+    await expect(footer.getByRole('link', { name: 'Report a problem on GitHub', exact: true })).toHaveAttribute('href', ISSUES);
+    await expect(footer.getByRole('link', { name: 'send a message on Instagram', exact: true })).toHaveAttribute('href', INSTAGRAM);
+    await expect(footer.getByRole('link', { name: 'MIT licence', exact: true })).toHaveAttribute('href', LICENCE);
+    await expect(footer).toContainText('Something not working, or does a result look wrong? Report a problem on GitHub or send a message on Instagram.');
+    await expect(footer).toContainText('The calculator is free to use under the MIT licence.');
+  });
+
+  test('invites problem reports on GitHub or Instagram and links the MIT licence', async ({ page }) => {
+    await openApp(page);
+    const footer = page.getByRole('contentinfo');
+    const [report, message, licence] = textLinks(page);
+    await expect(report!).toHaveAttribute('href', ISSUES);
+    await expect(message!).toHaveAttribute('href', INSTAGRAM);
+    await expect(licence!).toHaveAttribute('href', LICENCE);
+    await expect(footer).toContainText('Coś nie działa albo wynik wygląda na błędny? Zgłoś problem na GitHubie lub napisz na Instagramie.');
+    await expect(footer).toContainText('Z kalkulatora można korzystać bezpłatnie na licencji MIT.');
+    // links inside the sentences are underlined, not told apart by colour alone
+    for (const l of [report!, message!, licence!]) {
+      expect(await l.evaluate((el) => getComputedStyle(el).textDecorationLine)).toBe('underline');
+    }
   });
 
   for (const colorScheme of ['light', 'dark'] as const) {
@@ -82,16 +114,20 @@ test.describe('site footer', () => {
     test.describe(`${width}px phone (coarse pointer)`, () => {
       test.use({ viewport: { width, height }, hasTouch: true, isMobile: true });
 
-      test('no horizontal scroll, links inside the viewport and at least 44px tall', async ({ page }) => {
+      test('no horizontal scroll, links inside the viewport and at least 44px tall, in both languages', async ({ page }) => {
         await openApp(page);
         expect(await page.evaluate(() => matchMedia('(pointer:coarse)').matches)).toBe(true);
-        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-        const { github, instagram } = links(page);
-        for (const link of [github, instagram]) {
-          const box = (await link.boundingBox())!;
-          expect(box.x).toBeGreaterThanOrEqual(0);
-          expect(box.x + box.width).toBeLessThanOrEqual(width);
-          expect(box.height).toBeGreaterThanOrEqual(44);
+        for (const lang of ['pl', 'en']) {
+          if (lang === 'en') await page.getByRole('button', { name: 'English' }).click();
+          expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+          const all = page.getByRole('contentinfo').getByRole('link');
+          await expect(all).toHaveCount(5);
+          for (const link of await all.all()) {
+            const box = (await link.boundingBox())!;
+            expect(box.x).toBeGreaterThanOrEqual(0);
+            expect(box.x + box.width).toBeLessThanOrEqual(width);
+            expect(box.height).toBeGreaterThanOrEqual(44);
+          }
         }
       });
     });

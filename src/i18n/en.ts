@@ -231,6 +231,12 @@ export const en: Messages = {
     githubLabel: 'GitHub – author’s profile',
     instagram: 'Instagram',
     instagramLabel: 'Instagram – author’s profile (@palindroom)',
+    contactHtml: (report: string, message: string): string =>
+      `Something not working, or does a result look wrong? ${report} or ${message}.`,
+    report: 'Report a problem on GitHub',
+    message: 'send a message on Instagram',
+    licenceHtml: (licence: string): string => `The calculator is free to use under the ${licence}.`,
+    licence: 'MIT licence',
   },
 
   /** Inputs for the locale-aware formatter (../i18n/format.ts). */

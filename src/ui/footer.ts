@@ -2,6 +2,8 @@ import type { Messages } from '../i18n';
 
 const GITHUB_URL = 'https://github.com/Palindroome';
 const INSTAGRAM_URL = 'https://www.instagram.com/palindroom/';
+const ISSUE_URL = 'https://github.com/Palindroome/when-to-trim-calculator/issues/new';
+const LICENCE_URL = 'https://github.com/Palindroome/when-to-trim-calculator/blob/main/LICENSE';
 
 // Single-path brand glyphs (GitHub mark, Instagram glyph) on a 24×24 grid; they take the text colour.
 const GITHUB_ICON =
@@ -12,8 +14,14 @@ const INSTAGRAM_ICON =
 const link = (href: string, icon: string, text: string, label: string): string =>
   `<li><a href="${href}" aria-label="${label}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="${icon}"/></svg>${text}</a></li>`;
 
-/** Content of the page's `<footer>`: links to the author's profiles. */
+const inline = (href: string, text: string): string => `<a href="${href}">${text}</a>`;
+
+/** Content of the page's `<footer>`: links to the author's profiles, where to report a problem, the licence. */
 export function renderFooter(m: Messages): string {
   const f = m.footer;
-  return `<nav aria-label="${f.label}"><ul>${link(GITHUB_URL, GITHUB_ICON, f.github, f.githubLabel)}${link(INSTAGRAM_URL, INSTAGRAM_ICON, f.instagram, f.instagramLabel)}</ul></nav>`;
+  return (
+    `<nav aria-label="${f.label}"><ul>${link(GITHUB_URL, GITHUB_ICON, f.github, f.githubLabel)}${link(INSTAGRAM_URL, INSTAGRAM_ICON, f.instagram, f.instagramLabel)}</ul></nav>` +
+    `<p>${f.contactHtml(inline(ISSUE_URL, f.report), inline(INSTAGRAM_URL, f.message))}</p>` +
+    `<p>${f.licenceHtml(inline(LICENCE_URL, f.licence))}</p>`
+  );
 }

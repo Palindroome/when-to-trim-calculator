@@ -4,6 +4,8 @@ A calculator for potters. It estimates when a freshly thrown piece reaches leath
 
 Built with Vite and strict TypeScript, with no framework. The original single-file prototype is in git history, in the `reference` folder at commit `f4ac746`.
 
+Licensed under the MIT licence (see [LICENSE](LICENSE)). The bundled Inter font has its own OFL licence (`public/fonts/`).
+
 ## Commands
 
 ```bash

@@ -236,6 +236,13 @@ export const pl = {
     githubLabel: 'GitHub – profil autora',
     instagram: 'Instagram',
     instagramLabel: 'Instagram – profil autora (@palindroom)',
+    /** `report` and `message` are the link texts placed into `contactHtml`, `licence` into `licenceHtml` */
+    contactHtml: (report: string, message: string): string =>
+      `Coś nie działa albo wynik wygląda na błędny? ${report} lub ${message}.`,
+    report: 'Zgłoś problem na GitHubie',
+    message: 'napisz na Instagramie',
+    licenceHtml: (licence: string): string => `Z kalkulatora można korzystać bezpłatnie na ${licence}.`,
+    licence: 'licencji MIT',
   },
 
   /** Inputs for the locale-aware formatter (../i18n/format.ts). */
