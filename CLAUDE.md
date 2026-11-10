@@ -36,7 +36,7 @@ Run them with `wsl -e bash -l <checkout>/scripts/agent/<script> <args>`. Argumen
 | `status.sh N <in-progress\|needs-validation\|validated\|changes-requested> [--assign]` | sets the single `status:*` label (and claims the issue) |
 | `worktree.sh <branch>` | reuses or creates `~/wtc-worktrees/<branch>` from `origin/main`, then runs `npm ci` |
 | `worktree.sh --validate <branch>` / `--main` / `--remove <path>` | fresh detached worktree for validation or for reproducing on `origin/main`; removal |
-| `check.sh [--prototype] [steps…]` | typecheck, unit, e2e (own free port), build; one line per step, plus the failure tail |
+| `check.sh [steps…]` | typecheck, unit, e2e (own free port), build; one line per step, plus the failure tail |
 | `viewport.sh [--shots DIR] [--keep]` | builds and serves on a free port; checks 320/375/1280 px for overflow, a rendered `#result` and console errors; stops its server |
 | `hygiene.sh <branch> [N]` | base on `origin/main`, identity, AI mentions, commit convention, `Fixes #N`, stray files, `src/domain` purity |
 
@@ -47,7 +47,6 @@ npm ci
 npm run typecheck
 npm run test:unit
 npm run test:e2e              # builds, then runs Playwright against the build
-npm run test:e2e:prototype    # same suite against reference/index.html
 npm run build
 ```
 
