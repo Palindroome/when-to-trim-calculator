@@ -3,6 +3,7 @@ import { geometricMeanCalibrator } from './domain/calibration';
 import { DEFAULT_PARAMS } from './domain/params';
 import { physicalRateModel } from './domain/physics';
 import { getMessages, LOCALES, resolveLocale } from './i18n';
+import { LocalStorageActivityStore } from './storage/activity';
 import { LocalStoragePieceRepository } from './storage/pieces';
 import { loadLanguage, loadTheme, saveLanguage, saveTheme } from './storage/preferences';
 import { LocalStorageWizardStore } from './storage/wizard';
@@ -35,6 +36,7 @@ startApp({
   params,
   repository,
   wizard: new LocalStorageWizardStore(),
+  activity: new LocalStorageActivityStore(),
   conditions: formConditionsSource,
   rateModel: physicalRateModel(params),
   calibrator: geometricMeanCalibrator,

@@ -11,6 +11,7 @@ import { COVERS, type Cover, type FeedbackKind, type Piece } from '../domain/typ
 import { assessWeight } from '../domain/weight';
 import { createFormatter, type Messages } from '../i18n';
 import { calibrationSamples, type PieceRepository, type StoredPiece } from '../storage/pieces';
+import type { ActivityStore } from '../storage/activity';
 import type { Theme } from '../storage/preferences';
 import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
@@ -19,6 +20,7 @@ import { readName, readPieceInput, readThrownMs, readWeightInputs, readWhenMs, t
 import { renderCalibration, renderSummaries, renderPieceList, renderResult, renderWeight, planText, type View } from './render';
 import { renderShell, type ThemeChoice } from './shell';
 import { createSummaryCards } from './cards';
+import { createWelcome, shouldWelcome } from './welcome';
 import { createWizard } from './wizard';
 
 export interface AppDeps {
@@ -38,6 +40,10 @@ export interface AppDeps {
   params: ModelParams;
   repository: PieceRepository;
   wizard: WizardStore;
+  /** time of the last interaction, for the welcome screen */
+  activity: ActivityStore;
+  /** pause after which the welcome screen is shown again (default: 1 hour) */
+  idleResetMs?: number;
   conditions: ConditionsSource;
   rateModel: RateModel;
   calibrator: CalibratorFactory;
@@ -47,6 +53,10 @@ export interface AppDeps {
 /** Default trim date offered on load: thrown + 2 days, at 10:00. */
 const DEFAULT_QUICK_DAYS = 2;
 const QUICK_DATE_HOUR = 10;
+/** Welcome screen again after this long without interaction. */
+const DEFAULT_IDLE_RESET_MS = 60 * 60 * 1000;
+/** Interactions are written to storage at most this often. */
+const ACTIVITY_SAVE_MS = 60 * 1000;
 
 /** Plan that can be saved with the current inputs. */
 interface Saveable {
@@ -77,6 +87,20 @@ export function startApp(deps: AppDeps): void {
 
   const cards = createSummaryCards(root, deps.wizard.load() === 'done');
   const wizard = createWizard(root, deps.wizard, (outcome) => cards.set(outcome === 'done'));
+  const welcome = createWelcome(root, {
+    pieceCount: () => pieces.length,
+    onNew: () => {
+      render(m, null);
+      wizard.start();
+    },
+    onPieces: () => {
+      wizard.close();
+      const list = byId('pieces');
+      list.scrollIntoView({ block: 'start' });
+      list.tabIndex = -1;
+      list.focus({ preventScroll: true });
+    },
+  });
 
   const chips = (): NodeListOf<HTMLButtonElement> => root.querySelectorAll<HTMLButtonElement>('#quick .chip');
 
@@ -266,6 +290,7 @@ export function startApp(deps: AppDeps): void {
     if (deps.footer) deps.footer.innerHTML = renderFooter(m);
     wizard.mount(m);
     cards.mount(m);
+    welcome.mount(m);
     byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');
     if (form) {
       restoreForm(form);
@@ -311,7 +336,31 @@ export function startApp(deps: AppDeps): void {
     });
   }
 
+  // ---------- activity / welcome screen ----------
+  const idleMs = deps.idleResetMs ?? DEFAULT_IDLE_RESET_MS;
+  // kept in memory as well, so a page whose storage fails does not welcome on every return to the tab
+  let lastActive = deps.activity.load();
+  let lastSaved: number | null = null;
+
+  function recordActivity(): void {
+    const t = now();
+    lastActive = t;
+    if (lastSaved !== null && t - lastSaved < ACTIVITY_SAVE_MS) return;
+    lastSaved = t;
+    deps.activity.save(t);
+  }
+
+  function checkIdle(): void {
+    if (!welcome.open && shouldWelcome(lastActive, now(), idleMs)) welcome.show();
+  }
+
   // ---------- init ----------
   render(deps.messages, null);
   conditions.subscribe?.(compute);
+  for (const type of ['input', 'change', 'click']) root.addEventListener(type, recordActivity);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkIdle();
+  });
+  window.addEventListener('pageshow', checkIdle);
+  checkIdle();
 }

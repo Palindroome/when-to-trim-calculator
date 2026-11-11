@@ -53,6 +53,24 @@ export const pl = {
     reopen: 'Przeprowadź mnie krok po kroku',
   },
 
+  /** shown on the first visit and after a long pause */
+  welcome: {
+    title: 'Zaplanuj trymowanie',
+    intro: [
+      'Kalkulator szacuje, kiedy świeżo wytoczona praca osiągnie stan skórzasty i będzie gotowa do trymowania.',
+      'Podpowiada też, jak ją przykryć, żeby zdążyła na wybrany termin.',
+    ],
+    stepsTitle: 'Jak to działa',
+    steps: [
+      'Opisz pracę: masę, kształt, grubość ścianki i dna, masę ceramiczną.',
+      'Podaj warunki w pracowni: temperaturę, wilgotność i ruch powietrza.',
+      'Wybierz termin i zapisz plan. Po trymowaniu oceń wynik – z każdą oceną kalkulator lepiej zna Twoją pracownię.',
+    ],
+    privacy: 'Prace i kalibracja są zapisywane tylko w tej przeglądarce.',
+    start: 'Nowa praca',
+    pieces: (n: number): string => `Moje prace (${n})`,
+  },
+
   /** sections 1–3 collapsed to one line after the wizard */
   summary: {
     edit: 'Zmień',

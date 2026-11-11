@@ -6,6 +6,10 @@ import { byId } from './dom';
 export interface Wizard {
   /** binds the controls of a freshly rendered shell (first render and after a language switch) */
   mount(m: Messages): void;
+  /** opens the wizard at step 1 and moves focus to its heading */
+  start(): void;
+  /** shows the whole page without recording an outcome */
+  close(): void;
 }
 
 export function createWizard(root: HTMLElement, store: WizardStore, onEnd: (outcome: WizardOutcome) => void): Wizard {
@@ -53,12 +57,19 @@ export function createWizard(root: HTMLElement, store: WizardStore, onEnd: (outc
       end('skipped');
       focus(focusTarget(0));
     };
-    byId('wizard-open').onclick = () => {
-      open = true;
-      show(0, true);
-    };
+    byId('wizard-open').onclick = start;
     show(open ? step : 0, false);
   }
 
-  return { mount };
+  function start(): void {
+    open = true;
+    show(0, true);
+  }
+
+  function close(): void {
+    open = false;
+    show(0, false);
+  }
+
+  return { mount, start, close };
 }

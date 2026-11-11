@@ -49,6 +49,19 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
     <h1>${m.heading}</h1>
     <div class="toolbar">${languageSwitch(m, locales)}${themeSwitch(m, theme)}</div>
   </header>
+  <div class="card welcome-screen" role="region" aria-labelledby="welcome-title">
+    <h2 id="welcome-title">${m.welcome.title}</h2>
+    ${m.welcome.intro.map((s) => `<p>${s}</p>`).join('\n    ')}
+    <h3>${m.welcome.stepsTitle}</h3>
+    <ol>
+      ${m.welcome.steps.map((s) => `<li>${s}</li>`).join('\n      ')}
+    </ol>
+    <p class="muted">${m.welcome.privacy}</p>
+    <div class="welcome-actions">
+      <button type="button" class="main" id="welcome-new">${m.welcome.start}</button>
+      <button type="button" class="ghost" id="welcome-pieces"></button>
+    </div>
+  </div>
   <p class="lead">${m.lead}</p>
   <div class="wizard-bar">
     <p class="wizard-progress wizard-only" id="wizard-progress" aria-live="polite"></p>

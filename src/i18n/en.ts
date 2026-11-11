@@ -50,6 +50,23 @@ export const en: Messages = {
     reopen: 'Walk me through it step by step',
   },
 
+  welcome: {
+    title: 'Plan your trimming',
+    intro: [
+      'The calculator estimates when a freshly thrown piece reaches leather-hard and is ready to trim.',
+      'It also suggests how to cover it so that it is ready on the day you want.',
+    ],
+    stepsTitle: 'How it works',
+    steps: [
+      'Describe the piece: mass, shape, wall and base thickness, clay.',
+      'Enter the studio conditions: temperature, humidity and airflow.',
+      'Pick a date and save the plan. After trimming, rate the result – every rating teaches the calculator about your studio.',
+    ],
+    privacy: 'Pieces and calibration are stored only in this browser.',
+    start: 'New piece',
+    pieces: (n: number): string => `My pieces (${n})`,
+  },
+
   summary: {
     edit: 'Edit',
     collapse: 'Collapse',

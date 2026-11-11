@@ -229,7 +229,7 @@ details li{margin:var(--space-2) 0}
 }
 @media (min-width:1024px){
   .site-footer{max-width:1200px;padding:0 var(--space-6) var(--space-6)}
-  main.wizard+.site-footer{max-width:720px}
+  main.wizard+.site-footer,main.welcome+.site-footer{max-width:720px}
 }
 
 /* ---------- first-run wizard: one section at a time, single column at every width ---------- */
@@ -242,6 +242,17 @@ main:not(.wizard) .wizard-only,main.wizard .full-only{display:none}
 main.wizard>section:not(.current){display:none}
 main.wizard{display:block;max-width:720px}
 main.wizard #result{position:static;max-height:none;overflow:visible;padding:0;margin:0}
+
+/* ---------- welcome screen: only the masthead and the introduction, single column ---------- */
+main:not(.welcome) .welcome-screen,main.welcome>:not(.masthead):not(.welcome-screen){display:none}
+main.welcome{display:block;max-width:720px}
+.welcome-screen{margin-top:var(--space-4)}
+.welcome-screen p,.welcome-screen li{margin:0 0 var(--space-3)}
+.welcome-screen h3{font-size:var(--text-md);font-weight:600;margin:var(--space-5) 0 var(--space-3)}
+.welcome-screen ol{margin:0 0 var(--space-4);padding-left:var(--space-5)}
+.welcome-actions{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-5)}
+.welcome-actions button{flex:1 1 auto;width:auto;min-height:var(--control-h)}
+.welcome-actions button[hidden]{display:none}
 
 /* ---------- summary cards: after the wizard, sections 1-3 collapse to one line until opened ---------- */
 .card-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);margin:0 0 var(--space-4)}
