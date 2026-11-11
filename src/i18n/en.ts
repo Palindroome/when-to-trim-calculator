@@ -47,7 +47,27 @@ export const en: Messages = {
     back: 'Back',
     finish: 'Show the result',
     skip: 'Skip – show the full form',
-    reopen: 'Walk me through it step by step',
+  },
+
+  welcome: {
+    title: 'Plan your piece’s drying',
+    intro: [
+      'The calculator estimates when a freshly thrown piece will be ready for the next stage: attaching handles, trimming or carving.',
+      'It also suggests how to cover it so that it is ready on the day you want.',
+    ],
+    stepsTitle: 'How it works',
+    steps: [
+      'Describe the piece: mass, shape, wall and base thickness, clay.',
+      'Enter the studio conditions: temperature, humidity and airflow.',
+      'Pick a date and save the plan. When the piece reaches that stage, rate the result – every rating teaches the calculator about your studio.',
+    ],
+    privacy:
+      "Your pieces are saved in this browser on this device and stay after you close it. They're removed only if you clear your browsing data. We don't send them anywhere.",
+    start: 'New piece',
+    pieces: (n: number): string => `My pieces (${n})`,
+    details: 'Details',
+    detailsLabel: (name: string): string => `Details: ${name}`,
+    back: 'New piece',
   },
 
   summary: {
@@ -249,7 +269,7 @@ export const en: Messages = {
       '<b>Leather-hard</b> is a loss of about 5–7% of the mass since throwing, depending on the clay body, wetness and target. The trimming window is roughly ±1–1.5 percentage points around that value.',
       '<b>A thick base, porcelain, a plastic bat and a closed form</b> make it take longer. Plaster shortens it.',
       'All factors are <b>starting assumptions</b>. Every saved piece rated “too wet / just right / too dry” corrects the multiplier for its covering.',
-      'Data is stored only in this browser. In a later version, BLE sensors on the shelf and in the damp room could enter the temperature and humidity.',
+      "Your pieces are saved in this browser on this device and stay after you close it. They're removed only if you clear your browsing data. We don't send them anywhere. In a later version, BLE sensors on the shelf and in the damp room could enter the temperature and humidity.",
     ],
   },
 

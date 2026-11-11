@@ -10,7 +10,7 @@ const next = (page: Page) => page.getByRole('button', { name: 'Dalej' });
 const back = (page: Page) => page.getByRole('button', { name: 'Wstecz' });
 const finish = (page: Page) => page.getByRole('button', { name: 'Pokaż wynik' });
 const skip = (page: Page) => page.getByRole('button', { name: 'Pomiń – pokaż cały formularz' });
-const reopen = (page: Page) => page.getByRole('button', { name: 'Przeprowadź mnie krok po kroku' });
+const newPiece = (page: Page) => page.locator('.wizard-bar').getByRole('button', { name: 'Nowa praca' });
 const toggle = (page: Page, n: number) => page.locator('main > section[data-step]').nth(n - 1).locator('.toggle');
 const summary = (page: Page, n: number) => page.locator('main > section[data-step]').nth(n - 1).locator('.summary');
 const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
@@ -39,7 +39,8 @@ test.describe('wizard', () => {
     await expect(progress(page)).toHaveAttribute('aria-live', 'polite');
     await expect(back(page)).toBeHidden();
     await expect(skip(page)).toBeVisible();
-    await expect(reopen(page)).toBeHidden();
+    await expect(newPiece(page)).toBeVisible();
+    await expect(page.locator('#wizard-open')).toHaveCount(0);
     await expect(toggle(page, 1)).toBeHidden();
     await expect(summary(page, 1)).toBeHidden();
   });
@@ -117,10 +118,11 @@ test.describe('wizard', () => {
     await expect(progress(page)).toBeHidden();
   });
 
-  test('the wizard can be re-opened from the full form', async ({ page }) => {
+  test('the wizard can be re-opened from the full form through the welcome screen', async ({ page }) => {
     await openApp(page);
     expect(await visibleSections(page)).toEqual(ALL);
-    await reopen(page).click();
+    await newPiece(page).click();
+    await page.locator('.welcome-screen').getByRole('button', { name: 'Nowa praca' }).click();
     expect(await visibleSections(page)).toEqual(['1Praca']);
     await expect(progress(page)).toHaveText('Krok 1 z 3: Praca');
     expect(await focused(page)).toBe('1Praca');

@@ -61,6 +61,7 @@ src/
     pieces.ts         StoredPiece (v1 format), PieceRepository, LocalStoragePieceRepository
     preferences.ts    chosen UI language (`kiedy-trymowac-lang`) and theme (`kiedy-trymowac-theme`)
     wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
+    activity.ts       ActivityStore: time of the last interaction, for the welcome screen (own key, `kiedy-trymowac-last-active`)
   ui/
     shell.ts          static page markup from the catalog
     footer.ts         site footer: author's profile links with inline SVG icons
@@ -69,6 +70,7 @@ src/
     app.ts            state + event wiring (including the calendar dialogs of "Termin")
     wizard.ts         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
     cards.ts          after the wizard, sections 1-3 collapse to one-line summaries that open on click
+    welcome.ts        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction
 e2e/                  Playwright suite (runs against the production build)
 scripts/agent/        helper scripts for the agent workflow (issue, worktree, checks, viewport, hygiene, labels); see CLAUDE.md
 ```

@@ -99,11 +99,25 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
     <h1>${m.heading}</h1>
     <div class="toolbar">${languageSwitch(m, locales)}${themeSwitch(m, theme)}</div>
   </header>
+  <div class="card welcome-screen" role="region" aria-labelledby="welcome-title">
+    <h2 id="welcome-title">${m.welcome.title}</h2>
+    ${m.welcome.intro.map((s) => `<p>${s}</p>`).join('\n    ')}
+    <h3>${m.welcome.stepsTitle}</h3>
+    <ol>
+      ${m.welcome.steps.map((s) => `<li>${s}</li>`).join('\n      ')}
+    </ol>
+    <p class="muted">${m.welcome.privacy}</p>
+    <div class="welcome-actions">
+      <button type="button" class="main" id="welcome-new">${m.welcome.start}</button>
+      <button type="button" class="ghost" id="welcome-pieces" aria-expanded="false" aria-controls="welcome-list"></button>
+    </div>
+    <ul class="welcome-list" id="welcome-list" hidden></ul>
+  </div>
   <p class="lead">${m.lead}</p>
   <div class="wizard-bar">
+    <button type="button" class="ghost" id="welcome-back">${m.welcome.back}</button>
     <p class="wizard-progress wizard-only" id="wizard-progress" aria-live="polite"></p>
     <button type="button" class="ghost wizard-only" id="wizard-skip">${m.wizard.skip}</button>
-    <button type="button" class="ghost full-only" id="wizard-open">${m.wizard.reopen}</button>
   </div>
 
   <section class="card" data-step>

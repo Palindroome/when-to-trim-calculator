@@ -4,14 +4,28 @@ import { expect, type Locator, type Page } from '@playwright/test';
 export const NOW = '2026-03-04T09:00:00+01:00';
 export const STORAGE_KEY = 'kiedy-trymowac-v1';
 export const WIZARD_KEY = 'kiedy-trymowac-wizard';
+export const ACTIVITY_KEY = 'kiedy-trymowac-last-active';
 
-export async function openApp(page: Page, opts: { now?: string; storage?: string | null; wizard?: boolean } = {}): Promise<void> {
-  await page.clock.setFixedTime(new Date(opts.now ?? NOW));
+export async function openApp(
+  page: Page,
+  opts: { now?: string; storage?: string | null; wizard?: boolean; welcome?: boolean } = {},
+): Promise<void> {
+  const now = new Date(opts.now ?? NOW);
+  await page.clock.setFixedTime(now);
   // Most tests need the full, expanded form: mark the first-run wizard as skipped unless the test is about it.
   if (!opts.wizard) {
     await page.addInitScript((key) => {
       if (localStorage.getItem(key) === null) localStorage.setItem(key, 'skipped');
     }, WIZARD_KEY);
+  }
+  // ...and no welcome screen: record recent activity unless the test is about it.
+  if (!opts.welcome) {
+    await page.addInitScript(
+      ([key, value]) => {
+        if (localStorage.getItem(key) === null) localStorage.setItem(key, value);
+      },
+      [ACTIVITY_KEY, String(now.getTime())] as const,
+    );
   }
   // Keep the test hermetic: external web fonts are not needed for behaviour.
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
