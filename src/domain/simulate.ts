@@ -46,5 +46,4 @@ export function simulate(plan: Plan, ctx: DryingContext, targetsPct: readonly nu
 }
 
 /** Hours to reach a single target loss. */
-export const hoursToLoss = (plan: Plan, ctx: DryingContext, targetPct: number): number =>
-  simulate(plan, ctx, [targetPct])[0]!;
+export const hoursToLoss = (plan: Plan, ctx: DryingContext, targetPct: number): number => simulate(plan, ctx, [targetPct])[0]!;

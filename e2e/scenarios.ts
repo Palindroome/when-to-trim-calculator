@@ -18,13 +18,11 @@ export async function applySteps(page: Page, steps: Step[]): Promise<void> {
     if ('fill' in s) {
       if (s.fill === 'Wytoczona' || s.fill === 'Chcę trymować') await setDateTime(page, s.fill, s.value);
       else await fill(page, s.fill, s.value);
-    }
-    else if ('type' in s) {
+    } else if ('type' in s) {
       const input = field(page, s.type);
       await input.fill('');
       await input.pressSequentially(s.value);
-    }
-    else if ('select' in s) await choose(page, s.select, s.value);
+    } else if ('select' in s) await choose(page, s.select, s.value);
     else if ('night' in s) await setNight(page, s.night);
     else await page.locator('#quick').getByRole('button', { name: s.chip, exact: true }).click();
   }
@@ -111,19 +109,11 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     name: 'night mode with custom night values',
-    steps: [
-      { night: true },
-      { fill: 'Temperatura nocą (22–7)', value: '10' },
-      { fill: 'Wilgotność nocą', value: '80' },
-    ],
+    steps: [{ night: true }, { fill: 'Temperatura nocą (22–7)', value: '10' }, { fill: 'Wilgotność nocą', value: '80' }],
   },
   {
     name: 'night values ignored when night off',
-    steps: [
-      { night: true },
-      { fill: 'Temperatura nocą (22–7)', value: '5' },
-      { night: false },
-    ],
+    steps: [{ night: true }, { fill: 'Temperatura nocą (22–7)', value: '5' }, { night: false }],
   },
   {
     name: 'damp room custom, stage soft',
@@ -135,10 +125,7 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     name: 'thrown earlier, trim tomorrow',
-    steps: [
-      { fill: 'Wytoczona', value: '2026-03-02T18:30' },
-      { chip: 'jutro' },
-    ],
+    steps: [{ fill: 'Wytoczona', value: '2026-03-02T18:30' }, { chip: 'jutro' }],
   },
   {
     name: 'big porcelain closed form, long wait (mould tip)',

@@ -340,7 +340,9 @@ export function startApp(deps: AppDeps): void {
    */
   function showMonth(id: DateTimeId, utcDay: Date): void {
     if (isNaN(utcDay.getTime())) return;
-    byId(`${id}-cal-heading`).textContent = new Intl.DateTimeFormat(m.lang, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(utcDay);
+    byId(`${id}-cal-heading`).textContent = new Intl.DateTimeFormat(m.lang, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+      utcDay,
+    );
   }
 
   /** A day picked in the calendar: store it, close the dialog (focus returns to the button), recalculate. */

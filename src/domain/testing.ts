@@ -32,13 +32,7 @@ export const DEFAULT_CONDITIONS: Conditions = {
 export const START = new Date(2026, 2, 4, 9, 0).getTime();
 
 export function makeContext(
-  over: {
-    input?: Partial<PieceInput>;
-    conditions?: Partial<Conditions>;
-    params?: ModelParams;
-    model?: RateModel;
-    startMs?: number;
-  } = {},
+  over: { input?: Partial<PieceInput>; conditions?: Partial<Conditions>; params?: ModelParams; model?: RateModel; startMs?: number } = {},
 ): DryingContext {
   const params = over.params ?? DEFAULT_PARAMS;
   return {

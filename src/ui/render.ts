@@ -20,12 +20,7 @@ const CHART = { deadlineHeadroom: 1.6, noDeadlineHours: 48, minFiniteHours: 24, 
 
 export function planText(v: View, o: PlanOption, startMs: number): string {
   if (o.kind === 'single') return v.m.plan.single(o.cover);
-  return v.m.plan.twoPhase(
-    o.first,
-    v.fmt.duration(o.switchAfterHours),
-    v.fmt.dateTime(startMs + o.switchAfterHours * MS_PER_HOUR),
-    o.then,
-  );
+  return v.m.plan.twoPhase(o.first, v.fmt.duration(o.switchAfterHours), v.fmt.dateTime(startMs + o.switchAfterHours * MS_PER_HOUR), o.then);
 }
 
 const isCover = (w: unknown): w is Cover => COVERS.includes(w as Cover);
@@ -184,8 +179,7 @@ export function renderCalibration(v: View, calibration: Record<Cover, CoverCalib
   if (!rows.length) return '';
   return `<table><tr><th>${m.calibration.cover}</th><th>${m.calibration.multiplier}</th><th>${m.calibration.count}</th></tr>${rows
     .map(
-      (r) =>
-        `<tr><td>${m.covers.label[r.c]}</td><td>${m.calibration.value(fmt.decimal(r.multiplier, 2))}</td><td>${r.samples}</td></tr>`,
+      (r) => `<tr><td>${m.covers.label[r.c]}</td><td>${m.calibration.value(fmt.decimal(r.multiplier, 2))}</td><td>${r.samples}</td></tr>`,
     )
     .join('')}</table>
          <p class="muted">${m.calibration.noteHtml}</p>`;
@@ -227,7 +221,12 @@ export function renderSummaries(v: View, s: SummaryInput): [string, string, stri
   const { piece: p, conditions: c } = s;
   return [
     m.summary.piece(s.name, m.options.shape[p.shape], n(p.massG), n(p.wallMm), n(p.baseMm ?? p.wallMm), m.options.clay[p.clay]),
-    m.summary.conditions(n(c.temp), n(c.rh), m.options.airflow[c.airflow], c.night ? { temp: n(c.nightTemp), rh: n(c.nightRh) } : undefined),
+    m.summary.conditions(
+      n(c.temp),
+      n(c.rh),
+      m.options.airflow[c.airflow],
+      c.night ? { temp: n(c.nightTemp), rh: n(c.nightRh) } : undefined,
+    ),
     m.summary.schedule(fmt.dateTime(s.thrownMs), isFinite(s.whenMs) ? fmt.dateTime(s.whenMs) : m.result.noDeadline),
   ];
 }

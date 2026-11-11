@@ -79,13 +79,23 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
       let hi = H;
       for (let i = 0; i < cfg.bisectionSteps; i++) {
         const mid = (lo + hi) / 2;
-        const t = hoursToLoss([{ cover: a, hours: mid }, { cover: b, hours: Infinity }], ctx, target);
+        const t = hoursToLoss(
+          [
+            { cover: a, hours: mid },
+            { cover: b, hours: Infinity },
+          ],
+          ctx,
+          target,
+        );
         if (t > H) lo = mid;
         else hi = mid;
       }
       const x = (lo + hi) / 2;
       if (x < cfg.minFirstPhaseHours) continue;
-      const plan: Plan = [{ cover: a, hours: x }, { cover: b, hours: Infinity }];
+      const plan: Plan = [
+        { cover: a, hours: x },
+        { cover: b, hours: Infinity },
+      ];
       twoPhase.push({ kind: 'twoPhase', first: a, then: b, switchAfterHours: x, plan, hours: hoursToLoss(plan, ctx, target) });
     }
   }

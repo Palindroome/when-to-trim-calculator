@@ -35,7 +35,10 @@ test.describe('site footer', () => {
     await expect(instagram).toHaveAttribute('href', INSTAGRAM);
     await expect(github).toHaveAccessibleName('GitHub – profil autora');
     await expect(instagram).toHaveAccessibleName('Instagram – profil autora (@palindroom)');
-    for (const [link, text] of [[github, 'GitHub'], [instagram, 'Instagram']] as const) {
+    for (const [link, text] of [
+      [github, 'GitHub'],
+      [instagram, 'Instagram'],
+    ] as const) {
       await expect(link).toHaveText(text);
       await expect(link.locator('svg')).toHaveCount(1);
       await expect(link.locator('svg[aria-hidden="true"][focusable="false"]')).toHaveCount(1);
@@ -61,7 +64,9 @@ test.describe('site footer', () => {
     await expect(footer.getByRole('link', { name: 'Report a problem on GitHub', exact: true })).toHaveAttribute('href', ISSUES);
     await expect(footer.getByRole('link', { name: 'send a message on Instagram', exact: true })).toHaveAttribute('href', INSTAGRAM);
     await expect(footer.getByRole('link', { name: 'MIT licence', exact: true })).toHaveAttribute('href', LICENCE);
-    await expect(footer).toContainText('Something not working, or does a result look wrong? Report a problem on GitHub or send a message on Instagram.');
+    await expect(footer).toContainText(
+      'Something not working, or does a result look wrong? Report a problem on GitHub or send a message on Instagram.',
+    );
     await expect(footer).toContainText('The calculator is free to use under the MIT licence.');
   });
 
@@ -110,7 +115,10 @@ test.describe('site footer', () => {
     });
   }
 
-  for (const [width, height] of [[320, 640], [375, 812]] as const) {
+  for (const [width, height] of [
+    [320, 640],
+    [375, 812],
+  ] as const) {
     test.describe(`${width}px phone (coarse pointer)`, () => {
       test.use({ viewport: { width, height }, hasTouch: true, isMobile: true });
 
@@ -142,11 +150,18 @@ test.describe('site footer', () => {
   test('1280px: spans the content width below both columns', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openApp(page);
-    const bottom = (sel: string) => page.locator(sel).last().evaluate((el) => el.getBoundingClientRect().bottom + window.scrollY);
-    const footerBox = await page.getByRole('contentinfo').locator('ul').evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      return { top: r.top + window.scrollY, left: r.left, right: r.right };
-    });
+    const bottom = (sel: string) =>
+      page
+        .locator(sel)
+        .last()
+        .evaluate((el) => el.getBoundingClientRect().bottom + window.scrollY);
+    const footerBox = await page
+      .getByRole('contentinfo')
+      .locator('ul')
+      .evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { top: r.top + window.scrollY, left: r.left, right: r.right };
+      });
     expect(footerBox.top).toBeGreaterThanOrEqual(await bottom('#result'));
     expect(footerBox.top).toBeGreaterThanOrEqual(await bottom('main > section.card'));
     // same left and right edges as the content: the form column on the left, the result column on the right

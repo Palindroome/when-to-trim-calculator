@@ -23,7 +23,7 @@ describe('derivePiece', () => {
   it('derives area, slowness and loss targets for the default cylinder', () => {
     const p = derivePiece(DEFAULT_INPUT, P);
     expect(p.mass).toBe(500);
-    expect(p.area).toBeCloseTo((500 / 1.9 / 0.6) * 1.6 / 1e4, 12);
+    expect(p.area).toBeCloseTo(((500 / 1.9 / 0.6) * 1.6) / 1e4, 12);
     expect(p.slow).toBeCloseTo(Math.pow(1.5, 0.6), 12);
     expect(p).toMatchObject({ lossPct: 6, softPct: 5, hardPct: 7.5 });
   });
@@ -31,7 +31,7 @@ describe('derivePiece', () => {
   it('clamps mass, wall and base to their minimums', () => {
     const p = derivePiece({ ...DEFAULT_INPUT, massG: 5, wallMm: 1, baseMm: 0 }, P);
     expect(p.mass).toBe(20);
-    expect(p.area).toBeCloseTo((20 / 1.9 / 0.2) * 1.6 / 1e4, 12);
+    expect(p.area).toBeCloseTo(((20 / 1.9 / 0.2) * 1.6) / 1e4, 12);
     expect(p.slow).toBe(1); // base 2 / wall 2
   });
 
@@ -65,10 +65,7 @@ describe('physical rate model', () => {
 
   it('open drying uses the airflow factor and vapour deficit', () => {
     const vpd = psat(20) * 0.5;
-    expect(model.rate('open', at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo(
-      (5.1 * piece.area * vpd * 1.6) / piece.slow,
-      12,
-    );
+    expect(model.rate('open', at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo((5.1 * piece.area * vpd * 1.6) / piece.slow, 12);
   });
 
   it('partial cover uses the square root of airflow, full cover none', () => {
@@ -125,7 +122,16 @@ describe('simulate', () => {
   it('switches phases at the boundary', () => {
     const ctx = makeContext({ model: constantRateModel({ open: 4, box: 1 }) });
     // 4 h open = 16 g, remaining 14 g at 1 g/h = 14 h
-    expect(hoursToLoss([{ cover: 'open', hours: 4 }, { cover: 'box', hours: Infinity }], ctx, 6)).toBeCloseTo(18, 9);
+    expect(
+      hoursToLoss(
+        [
+          { cover: 'open', hours: 4 },
+          { cover: 'box', hours: Infinity },
+        ],
+        ctx,
+        6,
+      ),
+    ).toBeCloseTo(18, 9);
   });
 
   it('gives Infinity beyond the 30-day horizon', () => {
@@ -214,7 +220,15 @@ describe('planDrying with allowed covers', () => {
   };
 
   it('no options, all covers or an empty list give the same result as before', () => {
-    for (const [h, stage] of [[49, 'trim'], [25, 'trim'], [2, 'trim'], [24 * 20, 'trim'], [95.75, 'trim'], [96, 'trim'], [49, 'soft']] as const) {
+    for (const [h, stage] of [
+      [49, 'trim'],
+      [25, 'trim'],
+      [2, 'trim'],
+      [24 * 20, 'trim'],
+      [95.75, 'trim'],
+      [96, 'trim'],
+      [49, 'soft'],
+    ] as const) {
       const base = planDrying(ctx, h, stage);
       expect(base.excludedWouldMeet).toBe(false);
       expect(planDrying(ctx, h, stage, { allowed: all })).toEqual(base);
@@ -295,7 +309,10 @@ describe('dominantCover', () => {
     expect(dominantCover([{ cover: 'box', hours: Infinity }], 12)).toBe('box');
   });
   it('is the second cover unless the first phase is longer than 12 h', () => {
-    const plan = (h: number) => [{ cover: 'open' as const, hours: h }, { cover: 'full' as const, hours: Infinity }];
+    const plan = (h: number) => [
+      { cover: 'open' as const, hours: h },
+      { cover: 'full' as const, hours: Infinity },
+    ];
     expect(dominantCover(plan(3.5), 12)).toBe('full');
     expect(dominantCover(plan(12), 12)).toBe('full');
     expect(dominantCover(plan(12.5), 12)).toBe('open');
@@ -396,7 +413,10 @@ describe('tipsFor', () => {
   it('dry air or draught only when the plan starts open', () => {
     expect(tipsFor(rec, piece, { ...DEFAULT_CONDITIONS, airflow: 'draft' }, P)).toEqual(['dryAirRim']);
     expect(tipsFor(rec, piece, { ...DEFAULT_CONDITIONS, temp: 26, rh: 30 }, P)).toEqual(['dryAirRim']);
-    const boxed = { status: 'onTarget' as const, option: { ...openPlan, cover: 'box' as const, plan: [{ cover: 'box' as const, hours: Infinity }] } };
+    const boxed = {
+      status: 'onTarget' as const,
+      option: { ...openPlan, cover: 'box' as const, plan: [{ cover: 'box' as const, hours: Infinity }] },
+    };
     expect(tipsFor(boxed, piece, { ...DEFAULT_CONDITIONS, airflow: 'draft' }, P)).toEqual([]);
   });
   it('uses unclamped humidity (RH > 100 never counts as dry)', () => {

@@ -7,8 +7,7 @@ const DEFAULT_PLAN = 'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń c
 
 const pieces = (page: Page) => page.locator('#pieces .piece');
 const saveBtn = (page: Page) => page.getByRole('button', { name: 'Zapisz tę pracę z planem' });
-const stored = (page: Page) =>
-  page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), STORAGE_KEY);
+const stored = (page: Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), STORAGE_KEY);
 
 async function at(page: Page, iso: string) {
   await page.clock.setFixedTime(new Date(iso));
@@ -67,9 +66,7 @@ test.describe('saved pieces', () => {
     await page.getByRole('button', { name: 'jutro' }).click();
     await saveBtn(page).click();
     await expect(pieces(page).locator('b')).toHaveText(['Praca 2', 'Praca 1']);
-    await expect(pieces(page).first().locator('.meta')).toContainText(
-      'Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.',
-    );
+    await expect(pieces(page).first().locator('.meta')).toContainText('Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.');
     // single-wrap plan: stored with h:null and dominant = that wrap
     const data = await stored(page);
     expect(data.pieces[0].plan).toEqual([{ w: 'partial', h: null }]);
@@ -156,8 +153,7 @@ test.describe('saved pieces', () => {
         '71.9171% | target 26.7273%',
         '100% | target 26.7273%',
       ],
-      legend:
-        'Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.',
+      legend: 'Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.',
       alts: [
         'Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem włóż do zamkniętego pudełka.',
         'Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.',
@@ -206,9 +202,7 @@ test.describe('saved pieces', () => {
     await setDateTime(page, 'Chcę trymować', '2026-03-04T11:00');
     await expect(page.locator('.rec .k')).toHaveText('Uwaga');
     await saveBtn(page).click();
-    await expect(pieces(page).locator('.meta')).toHaveText(
-      'Zostaw odkrytą od razu.Toczona śr 4.03 09:00 · prognoza śr 4.03 14:43',
-    );
+    await expect(pieces(page).locator('.meta')).toHaveText('Zostaw odkrytą od razu.Toczona śr 4.03 09:00 · prognoza śr 4.03 14:43');
     const s = (await stored(page)).pieces[0];
     expect(s.plan).toEqual([{ w: 'open', h: null }]);
     expect(s.dom).toBe('open');
@@ -260,15 +254,34 @@ test.describe('storage robustness', () => {
     const data = {
       pieces: [
         {
-          id: 'abc', name: 'miski', start, mass: 800, lossPct: 6,
-          plan: [{ w: 'box', h: null }], label: 'Włóż do zamkniętego pudełka od razu.', dom: 'box',
-          predH: 100, calUsed: 1, ws: 90, we: 120,
+          id: 'abc',
+          name: 'miski',
+          start,
+          mass: 800,
+          lossPct: 6,
+          plan: [{ w: 'box', h: null }],
+          label: 'Włóż do zamkniętego pudełka od razu.',
+          dom: 'box',
+          predH: 100,
+          calUsed: 1,
+          ws: 90,
+          we: 120,
           fb: { kind: 'wet', actualH: 80, sample: 0.96, at: start + 80 * 3.6e6 },
         },
         {
-          id: 'def', name: 'talerze', start, mass: 900, lossPct: 6,
-          plan: [{ w: 'box', h: null }], label: 'Włóż do zamkniętego pudełka od razu.', dom: 'box',
-          predH: 200, calUsed: 1, ws: 190, we: 220, fb: null,
+          id: 'def',
+          name: 'talerze',
+          start,
+          mass: 900,
+          lossPct: 6,
+          plan: [{ w: 'box', h: null }],
+          label: 'Włóż do zamkniętego pudełka od razu.',
+          dom: 'box',
+          predH: 200,
+          calUsed: 1,
+          ws: 190,
+          we: 220,
+          fb: null,
         },
       ],
     };
@@ -285,7 +298,18 @@ test.describe('storage robustness', () => {
 
   test('feedback samples that are not positive are ignored by calibration', async ({ page }) => {
     const start = new Date('2026-03-01T12:00:00+01:00').getTime();
-    const base = { start, mass: 500, lossPct: 6, plan: [{ w: 'open', h: null }], label: 'x', dom: 'open', predH: 5, calUsed: 1, ws: 1, we: 2 };
+    const base = {
+      start,
+      mass: 500,
+      lossPct: 6,
+      plan: [{ w: 'open', h: null }],
+      label: 'x',
+      dom: 'open',
+      predH: 5,
+      calUsed: 1,
+      ws: 1,
+      we: 2,
+    };
     const data = {
       pieces: [
         { ...base, id: 'a', name: 'a', fb: { kind: 'ok', actualH: 5, sample: 0, at: start } },

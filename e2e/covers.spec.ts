@@ -150,7 +150,10 @@ test.describe('covering methods filter', () => {
     await page.keyboard.press('Tab');
     await expect(box(page, 'Worek częściowo')).toBeFocused();
     // the focus ring is drawn on the visible pill
-    const ring = await page.locator('.pill .face').nth(1).evaluate((el) => parseFloat(getComputedStyle(el).outlineWidth));
+    const ring = await page
+      .locator('.pill .face')
+      .nth(1)
+      .evaluate((el) => parseFloat(getComputedStyle(el).outlineWidth));
     expect(ring).toBeGreaterThanOrEqual(2);
   });
 

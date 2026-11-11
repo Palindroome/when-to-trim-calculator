@@ -6,9 +6,7 @@ export type WeightAssessment =
   | {
       state: 'wet';
       lossPct: number;
-      estimate:
-        | { kind: 'observedRate'; gramsPerHour: number; remainingHours: number }
-        | { kind: 'model'; remainingHours: number };
+      estimate: { kind: 'observedRate'; gramsPerHour: number; remainingHours: number } | { kind: 'model'; remainingHours: number };
     }
   | { state: 'ok'; lossPct: number }
   | { state: 'dry'; lossPct: number };

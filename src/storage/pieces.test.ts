@@ -72,11 +72,8 @@ describe('LocalStoragePieceRepository', () => {
 
 describe('calibrationSamples', () => {
   it('takes rated pieces, attributed to their dominant cover', () => {
-    expect(
-      calibrationSamples([
-        piece(),
-        piece({ dom: 'full', fb: { kind: 'ok', actualH: 3, sample: 1.2, at: 0 } }),
-      ]),
-    ).toEqual([{ cover: 'full', value: 1.2 }]);
+    expect(calibrationSamples([piece(), piece({ dom: 'full', fb: { kind: 'ok', actualH: 3, sample: 1.2, at: 0 } })])).toEqual([
+      { cover: 'full', value: 1.2 },
+    ]);
   });
 });

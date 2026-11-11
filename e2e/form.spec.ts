@@ -109,7 +109,9 @@ test.describe('inputs and defaults', () => {
 
   test('date-time pickers: a day button with a calendar and a 24 h text field, no native date inputs', async ({ page }) => {
     await openApp(page);
-    await expect(page.locator('#body-3 input[type="datetime-local"], #body-3 input[type="time"], #body-3 input[type="date"], #body-3 select')).toHaveCount(0);
+    await expect(
+      page.locator('#body-3 input[type="datetime-local"], #body-3 input[type="time"], #body-3 input[type="date"], #body-3 select'),
+    ).toHaveCount(0);
     for (const [legend, id, day] of [
       ['Wytoczona', 'thrown', 'dziś · śr 4.03'],
       ['Chcę trymować', 'when', 'pt 6.03'],
@@ -174,9 +176,9 @@ test.describe('inputs and defaults', () => {
     test(`select "${label}" offers the expected options`, async ({ page }) => {
       await openApp(page);
       const sel = field(page, label as Parameters<typeof field>[1]);
-      const actual = await sel.locator('option').evaluateAll((os) =>
-        os.map((o) => [(o as HTMLOptionElement).value, (o.textContent ?? '').trim()]),
-      );
+      const actual = await sel
+        .locator('option')
+        .evaluateAll((os) => os.map((o) => [(o as HTMLOptionElement).value, (o.textContent ?? '').trim()]));
       expect(actual).toEqual(opts);
     });
   }
@@ -574,10 +576,12 @@ test.describe('date-time keyboard use', () => {
     await page.locator('#thrown-day-btn').focus();
     const order: string[] = [];
     for (let i = 0; i < 12; i++) {
-      order.push(await page.evaluate(() => {
-        const e = document.activeElement as HTMLElement;
-        return e.id || e.textContent!.trim();
-      }));
+      order.push(
+        await page.evaluate(() => {
+          const e = document.activeElement as HTMLElement;
+          return e.id || e.textContent!.trim();
+        }),
+      );
       await page.keyboard.press('Tab');
     }
     expect(order).toEqual([

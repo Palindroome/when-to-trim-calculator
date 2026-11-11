@@ -62,9 +62,7 @@ test.describe('weight check', () => {
       await openApp(page);
       await fill(page, 'Masa teraz', '490');
       await choose(page, 'Przez ten czas była', w);
-      await expect(state(page)).toHaveText(
-        `Utrata 2,0%: jeszcze za miękka. W tym opatuleniu potrzeba jeszcze ok. ${eta}.`,
-      );
+      await expect(state(page)).toHaveText(`Utrata 2,0%: jeszcze za miękka. W tym opatuleniu potrzeba jeszcze ok. ${eta}.`);
     });
   }
 

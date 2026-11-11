@@ -11,19 +11,37 @@ const back = (page: Page) => page.getByRole('button', { name: 'Wstecz' });
 const finish = (page: Page) => page.getByRole('button', { name: 'Pokaż wynik' });
 const skip = (page: Page) => page.getByRole('button', { name: 'Pomiń – pokaż cały formularz' });
 const newPiece = (page: Page) => page.locator('.wizard-bar').getByRole('button', { name: 'Nowa praca' });
-const toggle = (page: Page, n: number) => page.locator('main > section[data-step]').nth(n - 1).locator('.toggle');
-const summary = (page: Page, n: number) => page.locator('main > section[data-step]').nth(n - 1).locator('.summary');
+const toggle = (page: Page, n: number) =>
+  page
+    .locator('main > section[data-step]')
+    .nth(n - 1)
+    .locator('.toggle');
+const summary = (page: Page, n: number) =>
+  page
+    .locator('main > section[data-step]')
+    .nth(n - 1)
+    .locator('.summary');
 const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
 const visibleSections = (page: Page) =>
-  page.locator('main > section:visible').evaluateAll((els) =>
-    els.map((e) => (e.id ? `#${e.id}` : (e.querySelector('h2')?.textContent ?? e.querySelector('summary')?.textContent ?? '').trim())),
-  );
+  page
+    .locator('main > section:visible')
+    .evaluateAll((els) =>
+      els.map((e) => (e.id ? `#${e.id}` : (e.querySelector('h2')?.textContent ?? e.querySelector('summary')?.textContent ?? '').trim())),
+    );
 const focused = (page: Page) =>
   page.evaluate(() => {
     const a = document.activeElement;
     return a?.id ? `#${a.id}` : (a?.getAttribute('aria-label') ?? a?.textContent?.trim());
   });
-const ALL = ['1Praca', '2Warunki', '3Termin', '#result', '4Sprawdź wagą', '5Moje prace i kalibracja', 'Jak to liczy (i czego jeszcze nie umie)'];
+const ALL = [
+  '1Praca',
+  '2Warunki',
+  '3Termin',
+  '#result',
+  '4Sprawdź wagą',
+  '5Moje prace i kalibracja',
+  'Jak to liczy (i czego jeszcze nie umie)',
+];
 
 async function walkThrough(page: Page): Promise<void> {
   await next(page).click();
@@ -136,7 +154,10 @@ test.describe('summary cards', () => {
     await openApp(page, { wizard: true });
     await walkThrough(page);
     // anywhere on the collapsed card (here: its summary line) opens it
-    await page.locator('main > section[data-step]').first().click({ position: { x: 40, y: 70 } });
+    await page
+      .locator('main > section[data-step]')
+      .first()
+      .click({ position: { x: 40, y: 70 } });
     await expect(toggle(page, 1)).toHaveAttribute('aria-expanded', 'true');
     await expect(toggle(page, 1)).toHaveText('Zwiń');
     await expect(toggle(page, 1)).toHaveAttribute('aria-label', 'Zwiń: Praca');

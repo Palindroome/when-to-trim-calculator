@@ -9,9 +9,14 @@ const BG = { light: '#f4ede3', dark: '#171412' } as const;
 const scheme = (page: Page) =>
   page.evaluate(() => {
     const s = getComputedStyle(document.documentElement);
-    return { colorScheme: s.colorScheme, bg: s.getPropertyValue('--bg').trim().toLowerCase(), body: getComputedStyle(document.body).backgroundColor };
+    return {
+      colorScheme: s.colorScheme,
+      bg: s.getPropertyValue('--bg').trim().toLowerCase(),
+      body: getComputedStyle(document.body).backgroundColor,
+    };
   });
-const themeButton = (page: Page, name: string) => page.getByRole('group', { name: /^(Motyw|Theme)$/ }).getByRole('button', { name, exact: true });
+const themeButton = (page: Page, name: string) =>
+  page.getByRole('group', { name: /^(Motyw|Theme)$/ }).getByRole('button', { name, exact: true });
 const storedRaw = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
 const dataTheme = (page: Page) => page.evaluate(() => document.documentElement.dataset.theme ?? null);
 
@@ -202,17 +207,28 @@ test.describe('theme switch', () => {
     expect(await dataTheme(page)).toBe('light');
   });
 
-  for (const [width, height] of [[320, 640], [375, 812], [1280, 900]] as const) {
+  for (const [width, height] of [
+    [320, 640],
+    [375, 812],
+    [1280, 900],
+  ] as const) {
     test(`${width}px: the toolbar is top right (language, then theme), targets are large enough, nothing overflows`, async ({ page }) => {
       await page.setViewportSize({ width, height });
       await page.emulateMedia({ colorScheme: 'dark' });
       await openApp(page);
       const box = async (name: string) => (await page.getByRole('group', { name, exact: true }).boundingBox())!;
-      const [lang, theme, head, h1] = [await box('Język'), await box('Motyw'), (await page.locator('.masthead').boundingBox())!, (await page.getByRole('heading', { level: 1 }).boundingBox())!];
+      const [lang, theme, head, h1] = [
+        await box('Język'),
+        await box('Motyw'),
+        (await page.locator('.masthead').boundingBox())!,
+        (await page.getByRole('heading', { level: 1 }).boundingBox())!,
+      ];
       expect(theme.x).toBeGreaterThan(lang.x + lang.width - 1);
       expect(Math.abs(theme.x + theme.width - (head.x + head.width))).toBeLessThanOrEqual(1);
       expect(theme.y).toBeLessThanOrEqual(h1.y + h1.height);
-      for (const b of await page.locator('[data-theme-choice]').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().toJSON()))) {
+      for (const b of await page
+        .locator('[data-theme-choice]')
+        .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().toJSON()))) {
         expect(b.width).toBeGreaterThanOrEqual(24);
         expect(b.height).toBeGreaterThanOrEqual(24);
       }
