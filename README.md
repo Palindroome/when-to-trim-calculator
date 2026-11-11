@@ -29,7 +29,7 @@ The build uses `base: './'`, so `dist/` works from any sub-path, for example Git
 
 ### Continuous integration
 
-`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`: lint (with the format check), typecheck, unit, e2e (Chromium, with `playwright-report/` uploaded on failure), build, and shellcheck for `scripts/agent/`. The `ci-result` job fails unless all of them passed, so it is the one check to require in branch protection. `dependency-review.yml` rejects PRs that add high/critical vulnerabilities or non-MIT-compatible licences. Dependabot (`.github/dependabot.yml`) opens weekly update PRs for npm and for the SHA-pinned actions.
+`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`: lint (with the format check), typecheck, unit, e2e (Chromium, with `playwright-report/` uploaded on failure), build, and shellcheck for `scripts/agent/`. The `ci-result` job fails unless all of them passed, so it is the one check to require in branch protection. Dependabot (`.github/dependabot.yml`) opens weekly update PRs for npm and for the SHA-pinned actions.
 
 ### Visual regression check (optional)
 
