@@ -91,7 +91,7 @@ bash $S/worktree.sh <branch>   # W=~/wtc-worktrees/<branch>
 ## 5. Verify (all must pass before you hand off)
 
 ```bash
-bash $W/scripts/agent/check.sh               # typecheck, unit, e2e, build
+bash $W/scripts/agent/check.sh               # lint (+ format check), typecheck, unit, e2e, build
 bash $W/scripts/agent/check.sh unit          # a single step while iterating
 ```
 
@@ -119,6 +119,7 @@ bash $W/scripts/agent/check.sh unit          # a single step while iterating
   ```
 
 - Choose the type from what the commit does, not from the issue label. A bug issue can contain a `test(e2e): …` commit followed by a `fix(ui): …` commit. When test-first, commit the failing test together with the fix, or put it immediately before the fix.
+- Before committing, run `npm run lint:fix` and `npm run format` in `$W`, and review what they changed.
 - The final commit of an issue task has `Fixes #N` in its footer.
 - Use the configured git identity. Never set author or committer by env or flags.
 - No `Co-Authored-By` trailers and no mention of Claude, Anthropic or AI anywhere: messages, code, comments, docs.
