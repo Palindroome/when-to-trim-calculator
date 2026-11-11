@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { choose, fill, openApp } from './helpers';
+import { choose, fill, openApp, setDateTime } from './helpers';
 
 const out = (page: import('@playwright/test').Page) => page.locator('#wout');
 const state = (page: import('@playwright/test').Page) => page.locator('#wout .state');
@@ -70,7 +70,7 @@ test.describe('weight check', () => {
 
   test('uses the observed drying rate once more than 30 minutes have passed', async ({ page }) => {
     await openApp(page);
-    await fill(page, 'Wytoczona', '2026-03-03T09:00');
+    await setDateTime(page, 'Wytoczona', '2026-03-03T09:00');
     await fill(page, 'Masa teraz', '490');
     await expect(state(page)).toHaveText('Utrata 2,0%: jeszcze za miękka. Przy obecnym tempie (0,4 g/h) zostało ok. 2 d.');
     await fill(page, 'Masa teraz', '480');
@@ -82,7 +82,7 @@ test.describe('weight check', () => {
 
   test('falls back to the model when only 20 minutes have passed', async ({ page }) => {
     await openApp(page);
-    await fill(page, 'Wytoczona', '2026-03-04T08:40');
+    await setDateTime(page, 'Wytoczona', '2026-03-04T08:40');
     await fill(page, 'Masa teraz', '480');
     await expect(state(page)).toHaveText('Utrata 4,0%: jeszcze za miękka. W tym opatuleniu potrzeba jeszcze ok. 2 h.');
   });

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { fill, setNight } from './helpers';
+import { fill, setDateTime, setNight } from './helpers';
 
 /** Page states used by the screenshot and design checks. */
 export const STATES: Record<string, (page: Page) => Promise<void>> = {
@@ -9,7 +9,7 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
     await fill(page, 'Masa teraz', '490');
   },
   error: async (page) => {
-    await fill(page, 'Chcę trymować', '2026-03-01T10:00');
+    await setDateTime(page, 'Chcę trymować', '2026-03-01T10:00');
   },
   'tips-and-pieces': async (page) => {
     await page.getByLabel('Kształt', { exact: true }).selectOption('closed');

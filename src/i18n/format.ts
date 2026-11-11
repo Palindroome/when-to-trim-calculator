@@ -5,6 +5,8 @@ export interface Formatter {
   duration(hours: number): string;
   /** Short local date-time such as "śr 4.03 10:00" or "Wed 4 Mar 10:00". */
   dateTime(ms: number): string;
+  /** Short local date such as "śr 4.03" or "Wed 4 Mar". */
+  date(ms: number): string;
   /** Fixed decimals with the locale's separator. */
   decimal(x: number, digits: number): string;
 }
@@ -33,6 +35,10 @@ export function createFormatter(m: Messages, horizonDays: number): Formatter {
         pad(d.getMinutes()),
         String(f.monthsShort[d.getMonth()]),
       );
+    },
+    date(ms) {
+      const d = new Date(ms);
+      return f.date(String(f.weekdaysShort[d.getDay()]), d.getDate(), pad(d.getMonth() + 1), String(f.monthsShort[d.getMonth()]));
     },
     decimal(x, digits) {
       return x.toFixed(digits).replace('.', f.decimalSeparator);

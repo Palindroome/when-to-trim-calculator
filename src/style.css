@@ -24,6 +24,8 @@
   --track:var(--surface-2); --fill:var(--accent);
   --shadow-1:0 1px 2px rgb(28 25 23 / .06);
   --shadow-2:0 1px 3px rgb(28 25 23 / .08), 0 8px 24px rgb(28 25 23 / .06);
+  /* dims the page behind a modal dialog */
+  --scrim:rgb(28 25 23 / .4);
   /* dark values, defined once and assigned by the two dark blocks below */
   --d-bg:#171412; --d-surface:#211d1a; --d-surface-2:#2b2622;
   --d-border:#3d3632; --d-border-strong:#57504a; --d-input-border:#8c847d;
@@ -31,6 +33,7 @@
   --d-accent:#e2805f; --d-accent-hover:#eb9678; --d-accent-contrast:#1c1917; --d-accent-soft:#3b241b;
   --d-ok:#a3d9ad; --d-ok-soft:#18291c; --d-warn:#f2c779; --d-warn-soft:#33270f; --d-wet:#a3c8ea; --d-wet-soft:#15243a;
   --d-fill:#9a918a;
+  --d-scrim:rgb(0 0 0 / .6);
 }
 /* dark: follows the system unless Light is chosen, or chosen explicitly (data-theme on <html>) */
 @media (prefers-color-scheme:dark){
@@ -43,6 +46,7 @@
     --ok:var(--d-ok); --ok-soft:var(--d-ok-soft); --warn:var(--d-warn); --warn-soft:var(--d-warn-soft); --wet:var(--d-wet); --wet-soft:var(--d-wet-soft);
     --track:var(--d-border); --fill:var(--d-fill);
     --shadow-1:none; --shadow-2:none;
+    --scrim:var(--d-scrim);
   }
 }
 :root[data-theme="dark"]{
@@ -54,6 +58,7 @@
   --ok:var(--d-ok); --ok-soft:var(--d-ok-soft); --warn:var(--d-warn); --warn-soft:var(--d-warn-soft); --wet:var(--d-wet); --wet-soft:var(--d-wet-soft);
   --track:var(--d-border); --fill:var(--d-fill);
   --shadow-1:none; --shadow-2:none;
+  --scrim:var(--d-scrim);
 }
 
 *{box-sizing:border-box}
@@ -95,8 +100,54 @@ h2 .n{color:var(--text-muted);font-size:var(--text-sm);font-weight:500;font-vari
 
 /* ---------- form ---------- */
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4)}
-.dates{display:flex;flex-wrap:wrap}
-.dates>div{flex:1 1 0}
+/* section 3: two day + time pickers, side by side when each gets about 280px */
+.dates{display:flex;flex-wrap:wrap;gap:var(--space-5) var(--space-4)}
+.datetime{flex:1 1 17.5rem;min-width:0;margin:0;padding:0;border:0}
+.datetime legend{padding:0;margin-bottom:var(--space-1);font-size:var(--text-sm);font-weight:600;color:var(--text)}
+.datetime label{color:var(--text-muted)}
+/* the time drops below the day when the day button would get too narrow for "yesterday · Mon 24 May" */
+.dt-row{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.dt-day{flex:1 1 14rem;min-width:0}
+.dt-time{flex:none;width:calc(6ch + 2 * var(--space-3) + 2px)}
+/* day button: looks like the other fields, opens the calendar */
+.day-btn{display:flex;align-items:center;justify-content:space-between;gap:var(--space-1);width:100%;min-height:var(--control-h);margin:0;padding:var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  font-family:inherit;font-size:var(--text-md);line-height:var(--leading-tight);text-align:left;color:var(--text);background:var(--surface);border:1px solid var(--input-border);border-radius:var(--radius-md);cursor:pointer}
+.day-btn:hover{border-color:var(--text-muted)}
+.day-btn span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day-btn svg{flex:none;color:var(--text-muted)}
+/* calendar dialog (Cally); a bottom sheet on phones. Day cells are 44px: 7 × 44 = 308px fits a 320px screen */
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+dialog.calendar{padding:0;max-width:none;max-height:none;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-2)}
+dialog.calendar::backdrop{background:var(--scrim)}
+@media (max-width:479px){dialog.calendar{width:100%;margin:auto 0 0;border-width:1px 0 0;border-radius:var(--radius-lg) var(--radius-lg) 0 0}}
+calendar-date{display:block;margin:0 auto;padding:var(--space-3) var(--space-1) var(--space-4);font-size:var(--text-md)}
+calendar-date::part(header){padding:0 var(--space-1)}
+calendar-date::part(heading){font-size:var(--text-md);font-weight:600;color:var(--text)}
+calendar-date::part(button){width:var(--control-h);height:var(--control-h);padding:0;color:var(--text);background:var(--surface);border:1px solid var(--input-border);border-radius:var(--radius-md);cursor:pointer}
+calendar-date::part(button):hover{background:var(--surface-2)}
+/* a paging button past min/max: Cally adds the part "disabled" (and aria-disabled) */
+calendar-date::part(disabled){cursor:not-allowed}
+calendar-date::part(disabled):hover{background:var(--surface)}
+calendar-date::part(button):focus-visible{outline:var(--ring-width) solid var(--ring);outline-offset:var(--ring-width)}
+calendar-date svg{display:block}
+calendar-month{--color-accent:var(--accent);--color-text-on-accent:var(--accent-contrast)}
+calendar-month::part(heading){display:none}
+calendar-month::part(table){font-size:var(--text-md)}
+calendar-month::part(th){width:var(--control-h);height:var(--control-h-sm);font-size:var(--text-sm);font-weight:500;color:var(--text-muted)}
+/* day buttons carry the parts "button day …"; the weekday headers also have "day", so style "button" */
+calendar-month::part(button){width:var(--control-h);height:var(--control-h);border-radius:var(--radius-md);color:var(--text);cursor:pointer}
+calendar-month::part(button):hover:enabled{background:var(--surface-2)}
+/* days past min/max (future throwing days) are disabled buttons */
+calendar-month::part(button):disabled{cursor:not-allowed}
+calendar-month::part(today){font-weight:700;text-decoration:underline;text-underline-offset:3px}
+calendar-month::part(thrown){box-shadow:inset 0 0 0 var(--line-strong) var(--accent)}
+calendar-month::part(button):focus-visible{outline:var(--ring-width) solid var(--ring);outline-offset:calc(-1 * var(--ring-width));background:var(--surface-2);color:var(--text)}
+calendar-month::part(selected){background:var(--accent);color:var(--accent-contrast)}
+calendar-month::part(selected):focus-visible{outline-color:var(--text);background:var(--accent);color:var(--accent-contrast)}
+/* as specific as the hover rule above and later, so the selected day keeps its accent on hover */
+calendar-month::part(selected):hover:enabled{background:var(--accent-hover);color:var(--accent-contrast)}
+.dt-time input[aria-invalid="true"]{border-color:var(--warn);border-width:var(--line-strong)}
+.field-msg{margin:var(--space-1) 0 0;font-size:var(--text-sm);color:var(--warn)}
 .full{grid-column:1/-1}
 @media (max-width:479px){.grid{grid-template-columns:minmax(0,1fr)}}
 label{display:block;font-size:var(--text-sm);font-weight:500;color:var(--text);margin-bottom:var(--space-1)}
@@ -115,21 +166,14 @@ select{appearance:none;padding-right:var(--space-7);cursor:pointer;
   color:var(--text-muted);background:var(--surface-2);border-radius:var(--radius-sm);padding:0 var(--space-2);font-size:var(--text-xs);line-height:var(--leading)}
 .unit input{padding-right:var(--space-7)}
 
-/* quick dates: a segmented control */
-.chips{display:flex;margin-top:var(--space-4)}
-.chip{flex:1 1 auto;min-height:var(--control-h);margin:0 0 0 -1px;padding:var(--space-1) var(--space-2);font-family:inherit;font-size:var(--text-sm);font-weight:500;line-height:var(--leading-tight);
-  color:var(--text);background:var(--surface);border:1px solid var(--input-border);border-radius:0;cursor:pointer;position:relative}
-.chip:first-child{margin-left:0;border-radius:var(--radius-md) 0 0 var(--radius-md)}
-.chip:last-child{border-radius:0 var(--radius-md) var(--radius-md) 0}
+/* quick dates: separate buttons that wrap (each picker is too narrow for connected segments) */
+.chips{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-3)}
+.chip{flex:1 1 auto;min-height:var(--control-h);margin:0;padding:var(--space-1) var(--space-3);font-family:inherit;font-size:var(--text-sm);font-weight:500;line-height:var(--leading-tight);white-space:nowrap;
+  color:var(--text);background:var(--surface);border:1px solid var(--input-border);border-radius:var(--radius-md);cursor:pointer;position:relative}
 .chip:hover{background:var(--surface-2)}
 .chip:active{transform:scale(.97)}
 .chip.on{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);z-index:1}
 .chip:focus-visible{z-index:2}
-/* too narrow for five connected segments: separate buttons that wrap */
-@media (max-width:479px){
-  .chips{flex-wrap:wrap;gap:var(--space-2)}
-  .chip,.chip:first-child,.chip:last-child{margin:0;border-radius:var(--radius-md);white-space:nowrap;padding:var(--space-1) var(--space-3)}
-}
 
 /* night checkbox as a switch */
 .check{display:flex;gap:var(--space-3);align-items:center;min-height:var(--control-h);margin:0;font-size:var(--text-md);font-weight:400;color:var(--text);cursor:pointer}
