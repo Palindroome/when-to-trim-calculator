@@ -154,8 +154,7 @@ export async function snapshot(page: Page, saveLabel = 'Zapisz tę pracę z plan
     const l = result.locator(sel);
     return (await l.count()) ? norm((await l.first().textContent()) ?? '') : '';
   };
-  const all = async (sel: string): Promise<string[]> =>
-    (await result.locator(sel).allInnerTexts()).map(norm);
+  const all = async (sel: string): Promise<string[]> => (await result.locator(sel).allInnerTexts()).map(norm);
   return {
     kind: await raw('.rec .k'),
     big: await text('.rec .big'),

@@ -1,8 +1,8 @@
 import { en } from './en';
-import { pl, type Messages } from './pl';
+import { type Messages, pl } from './pl';
 
-export type { Messages } from './pl';
 export { createFormatter, type Formatter } from './format';
+export type { Messages } from './pl';
 
 /** Registered UI languages. Add new catalogs here (each must satisfy `Messages`). */
 export const LOCALES: Record<string, Messages> = { pl, en };

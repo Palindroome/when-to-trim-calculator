@@ -1,4 +1,4 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 import { fill, openApp, setDateTime } from './helpers';
 
 test.describe('layout', () => {
@@ -70,7 +70,13 @@ test.describe('layout', () => {
   };
   const rects = (l: Locator): Promise<DOMRect[]> => l.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
 
-  for (const [width, height] of [[320, 640], [375, 812], [414, 896], [480, 900], [1280, 900]] as const) {
+  for (const [width, height] of [
+    [320, 640],
+    [375, 812],
+    [414, 896],
+    [480, 900],
+    [1280, 900],
+  ] as const) {
     test(`${width}px: no horizontal scroll, date-time controls and the open calendar fully visible, 44px targets`, async ({ page }) => {
       await page.setViewportSize({ width, height });
       await openApp(page);
@@ -92,7 +98,9 @@ test.describe('layout', () => {
         expect(box!.x + box!.width).toBeLessThanOrEqual(clientWidth);
         expect(box!.y + box!.height).toBeLessThanOrEqual(height);
         // every day and both paging buttons are inside the window and at least 44px
-        const targets = dialog.locator('calendar-month button[part~="day"], calendar-date [part~="previous"], calendar-date [part~="next"]');
+        const targets = dialog.locator(
+          'calendar-month button[part~="day"], calendar-date [part~="previous"], calendar-date [part~="next"]',
+        );
         expect(await targets.count()).toBeGreaterThanOrEqual(28 + 2);
         await expectInside(await rects(targets), clientWidth, height);
         await page.keyboard.press('Escape');
@@ -124,10 +132,20 @@ test.describe('layout', () => {
 
   test('result block sits between "Termin" and "Sprawdź wagą"', async ({ page }) => {
     await openApp(page);
-    const order = await page.locator('main > section').evaluateAll((els) =>
-      els.map((e) => (e.id ? `#${e.id}` : (e.querySelector('h2')?.textContent ?? e.querySelector('summary')?.textContent ?? '').trim())),
-    );
-    expect(order).toEqual(['1Praca', '2Warunki', '3Termin', '#result', '4Sprawdź wagą', '5Moje prace i kalibracja', 'Jak to liczy (i czego jeszcze nie umie)']);
+    const order = await page
+      .locator('main > section')
+      .evaluateAll((els) =>
+        els.map((e) => (e.id ? `#${e.id}` : (e.querySelector('h2')?.textContent ?? e.querySelector('summary')?.textContent ?? '').trim())),
+      );
+    expect(order).toEqual([
+      '1Praca',
+      '2Warunki',
+      '3Termin',
+      '#result',
+      '4Sprawdź wagą',
+      '5Moje prace i kalibracja',
+      'Jak to liczy (i czego jeszcze nie umie)',
+    ]);
   });
 
   test('phone: a long piece name keeps the status badge on its row', async ({ page }) => {

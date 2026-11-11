@@ -22,16 +22,21 @@ test('controls: 16px text, 44px primary controls, buttons at least 24×24', asyn
   await openApp(page);
   await STATES['tips-and-pieces']!(page);
   const controls = await page.locator('input:visible, select:visible').evaluateAll((els) =>
-    els.map((el) => ({ id: el.id, font: parseFloat(getComputedStyle(el).fontSize), h: el.getBoundingClientRect().height, sw: el.getAttribute('role') === 'switch' })),
+    els.map((el) => ({
+      id: el.id,
+      font: parseFloat(getComputedStyle(el).fontSize),
+      h: el.getBoundingClientRect().height,
+      sw: el.getAttribute('role') === 'switch',
+    })),
   );
   expect(controls.length).toBeGreaterThan(10);
   for (const c of controls) {
     expect(c.font, c.id).toBeGreaterThanOrEqual(16);
     if (!c.sw) expect(c.h, c.id).toBeGreaterThanOrEqual(44);
   }
-  const buttons = await page.locator('button:visible').evaluateAll((els) =>
-    els.map((el) => ({ text: el.textContent, cls: el.className, ...el.getBoundingClientRect().toJSON() })),
-  );
+  const buttons = await page
+    .locator('button:visible')
+    .evaluateAll((els) => els.map((el) => ({ text: el.textContent, cls: el.className, ...el.getBoundingClientRect().toJSON() })));
   expect(buttons.some((b) => b.cls.includes('ghost'))).toBe(true);
   for (const b of buttons) {
     expect(b.width, b.text!).toBeGreaterThanOrEqual(24);

@@ -1,5 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { STORAGE_KEY, openApp, setDateTime, snapshot } from './helpers';
+import { expect, type Page, test } from '@playwright/test';
+import { openApp, STORAGE_KEY, setDateTime, snapshot } from './helpers';
 
 const LABELS = ['Odkryta', 'Worek częściowo', 'Mokra przechowalnia', 'Cały worek', 'Pudełko'];
 const DEFAULT_PLAN = 'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.';
@@ -150,7 +150,10 @@ test.describe('covering methods filter', () => {
     await page.keyboard.press('Tab');
     await expect(box(page, 'Worek częściowo')).toBeFocused();
     // the focus ring is drawn on the visible pill
-    const ring = await page.locator('.pill .face').nth(1).evaluate((el) => parseFloat(getComputedStyle(el).outlineWidth));
+    const ring = await page
+      .locator('.pill .face')
+      .nth(1)
+      .evaluate((el) => parseFloat(getComputedStyle(el).outlineWidth));
     expect(ring).toBeGreaterThanOrEqual(2);
   });
 

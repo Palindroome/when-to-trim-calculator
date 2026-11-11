@@ -1,23 +1,25 @@
 import type { CalibratorFactory } from '../domain/calibration';
 import { feedbackToSample } from '../domain/calibration';
 import type { ConditionsSource } from '../domain/conditions';
-import { MS_PER_HOUR, type ModelParams } from '../domain/params';
+import { type ModelParams, MS_PER_HOUR } from '../domain/params';
 import type { RateModel } from '../domain/physics';
 import { derivePiece } from '../domain/piece';
-import { dominantCover, planDrying, type PlanOption } from '../domain/planner';
-import { simulate, type DryingContext } from '../domain/simulate';
+import { dominantCover, type PlanOption, planDrying } from '../domain/planner';
+import { type DryingContext, simulate } from '../domain/simulate';
 import { tipsFor } from '../domain/tips';
 import { COVERS, type Cover, type FeedbackKind, type Piece } from '../domain/types';
 import { assessWeight } from '../domain/weight';
 import { createFormatter, type Messages } from '../i18n';
-import { calibrationSamples, type PieceRepository, type StoredPiece } from '../storage/pieces';
 import type { ActivityStore } from '../storage/activity';
+import { calibrationSamples, type PieceRepository, type StoredPiece } from '../storage/pieces';
 import type { Theme } from '../storage/preferences';
 import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
 import { renderFooter } from './footer';
 import 'cally';
+import { createSummaryCards } from './cards';
 import {
+  type DateTimeId,
   dayLabel,
   normalizeTime,
   readAllowedCovers,
@@ -28,20 +30,18 @@ import {
   readWhenMs,
   toDayKey,
   toTime,
-  type DateTimeId,
 } from './form';
 import {
+  planText,
   renderCalibration,
-  renderSummaries,
   renderPieceList,
   renderResult,
+  renderSummaries,
   renderWeight,
   renderWelcomePieces,
-  planText,
   type View,
 } from './render';
 import { renderShell, type ThemeChoice, type ThrownPreset } from './shell';
-import { createSummaryCards } from './cards';
 import { createWelcome, shouldWelcome } from './welcome';
 import { createWizard } from './wizard';
 
@@ -230,7 +230,7 @@ export function startApp(deps: AppDeps): void {
       start: startMs,
       mass: piece.mass,
       lossPct: piece.lossPct,
-      plan: option.plan.map((s) => ({ w: s.cover, h: isFinite(s.hours) ? s.hours : null })),
+      plan: option.plan.map((s) => ({ w: s.cover, h: Number.isFinite(s.hours) ? s.hours : null })),
       label: planText(view, option, startMs),
       dom,
       predH: option.hours,
@@ -339,8 +339,10 @@ export function startApp(deps: AppDeps): void {
    * heading sits apart from the paging buttons. Screen readers get Cally's live "month year" text instead.
    */
   function showMonth(id: DateTimeId, utcDay: Date): void {
-    if (isNaN(utcDay.getTime())) return;
-    byId(`${id}-cal-heading`).textContent = new Intl.DateTimeFormat(m.lang, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(utcDay);
+    if (Number.isNaN(utcDay.getTime())) return;
+    byId(`${id}-cal-heading`).textContent = new Intl.DateTimeFormat(m.lang, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+      utcDay,
+    );
   }
 
   /** A day picked in the calendar: store it, close the dialog (focus returns to the button), recalculate. */
@@ -503,7 +505,9 @@ export function startApp(deps: AppDeps): void {
     }
     const night = byId<HTMLInputElement>('night');
     const syncNight = (): void => {
-      root.querySelectorAll('.night').forEach((e) => e.classList.toggle('hide', !night.checked));
+      root.querySelectorAll('.night').forEach((e) => {
+        e.classList.toggle('hide', !night.checked);
+      });
     };
     night.addEventListener('change', syncNight);
     syncNight();

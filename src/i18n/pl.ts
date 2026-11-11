@@ -2,8 +2,8 @@
 // A new language: copy en.ts, translate, type it as `Messages`, register it in ./index.ts.
 // Keys ending in `Html` contain trusted markup and are inserted unescaped.
 
-import type { AirflowId, BatId, ClayId, Cover, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
 import type { TipId } from '../domain/tips';
+import type { AirflowId, BatId, ClayId, Cover, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -177,8 +177,7 @@ export const pl = {
     },
   },
 
-  weightHint:
-    'Zważ pracę (bez batu) przy toczeniu i teraz. Utracona masa mówi więcej niż dotyk, zwłaszcza przy grubym dnie.',
+  weightHint: 'Zważ pracę (bez batu) przy toczeniu i teraz. Utracona masa mówi więcej niż dotyk, zwłaszcza przy grubym dnie.',
 
   covers: {
     label: {
@@ -203,8 +202,7 @@ export const pl = {
   result: {
     recommendation: 'Rekomendacja',
     warning: 'Uwaga',
-    ready: (date: string, lossPct: string, grams: number): string =>
-      `Gotowa ok. ${date}: cel to utrata ok. ${lossPct}% masy (${grams} g).`,
+    ready: (date: string, lossPct: string, grams: number): string => `Gotowa ok. ${date}: cel to utrata ok. ${lossPct}% masy (${grams} g).`,
     window: (from: string, to: string): string => `Okno: ${from} → ${to}`,
     windowOpenEnd: '…',
     compareTitle: 'Ile to potrwa w każdym wariancie',
@@ -233,8 +231,7 @@ export const pl = {
   tips: {
     dryAirRim:
       'Powietrze jest suche lub jest przeciąg. Brzeg i ucha wyschną dużo szybciej niż dno, więc owiń je paskiem folii albo obróć pracę dnem do góry, gdy brzeg zesztywnieje.',
-    thickBase:
-      'Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej.',
+    thickBase: 'Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej.',
     mould: 'Ponad 6 dni w wilgoci: zajrzyj co 2–3 dni, czy nie pojawia się pleśń, zwłaszcza na drewnianym podłożu.',
   } satisfies Record<TipId, string>,
 
@@ -243,8 +240,7 @@ export const pl = {
     observedRate: (gramsPerHour: string, remaining: string): string =>
       ` Przy obecnym tempie (${gramsPerHour} g/h) zostało ok. ${remaining}.`,
     modelEstimate: (remaining: string): string => ` W tym opatuleniu potrzeba jeszcze ok. ${remaining}.`,
-    inWindow: (loss: string): string =>
-      `Utrata ${loss}%: jest w oknie trymowania. Jeśli trymujesz później, zawiń ją w worek.`,
+    inWindow: (loss: string): string => `Utrata ${loss}%: jest w oknie trymowania. Jeśli trymujesz później, zawiń ją w worek.`,
     tooHard: (loss: string): string =>
       `Utrata ${loss}%: prawdopodobnie już za twarda na gładkie trymowanie. Spróbuj zawinąć ją z wilgotną gąbką na kilka godzin.`,
   },
@@ -291,8 +287,7 @@ export const pl = {
     instagram: 'Instagram',
     instagramLabel: 'Instagram – profil autora (@palindroom)',
     /** `report` and `message` are the link texts placed into `contactHtml`, `licence` into `licenceHtml` */
-    contactHtml: (report: string, message: string): string =>
-      `Coś nie działa albo wynik wygląda na błędny? ${report} lub ${message}.`,
+    contactHtml: (report: string, message: string): string => `Coś nie działa albo wynik wygląda na błędny? ${report} lub ${message}.`,
     report: 'Zgłoś problem na GitHubie',
     message: 'napisz na Instagramie',
     licenceHtml: (licence: string): string => `Z kalkulatora można korzystać bezpłatnie na ${licence}.`,

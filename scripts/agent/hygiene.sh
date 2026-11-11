@@ -63,6 +63,7 @@ fi
 stray=$(git diff --name-only "origin/main...$B" | grep -E '(^|/)(test-results|playwright-report|dist)/|\.(png|jpg|log|orig)$|(^|/)tmp|\.sh$' | grep -vE '^scripts/|^e2e/__screenshots__/')
 [[ -z "$stray" ]] && echo "ok: no stray files" || bad "possible stray files:"$'\n'"$stray"
 
+# Backstop for the src/domain overrides in biome.json, which `npm run lint` enforces.
 dom=$(grep -rnE "(^|[^.[:alnum:]_])(document|window|localStorage)\.[a-zA-Z]|from '\.\./(ui|i18n|storage)" "$ROOT/src/domain" 2>/dev/null | sed "s#$ROOT/##")
 [[ -z "$dom" ]] && echo "ok: src/domain is pure" || bad "src/domain imports DOM/i18n/storage:"$'\n'"$dom"
 

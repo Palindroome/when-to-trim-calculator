@@ -17,7 +17,7 @@ export function createFormatter(m: Messages, horizonDays: number): Formatter {
   const f = m.format;
   return {
     duration(h) {
-      if (!isFinite(h)) return f.beyondHorizon(horizonDays);
+      if (!Number.isFinite(h)) return f.beyondHorizon(horizonDays);
       if (h < 1) return f.minutes(Math.max(1, Math.round(h * 60)));
       const d = Math.floor(h / 24);
       const r = Math.round(h - d * 24);

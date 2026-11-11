@@ -1,4 +1,4 @@
-import { MS_PER_HOUR, type ModelParams } from './params';
+import { type ModelParams, MS_PER_HOUR } from './params';
 import { COVERS, type Cover, type CoverMultipliers, type FeedbackKind } from './types';
 
 /**
@@ -33,7 +33,10 @@ export type CalibratorFactory = (samples: readonly CalibrationSample[], params: 
 export const geometricMeanCalibrator: CalibratorFactory = (initial, params) => {
   const samples: CalibrationSample[] = [...initial];
   const estimate = (cover: Cover): CoverCalibration => {
-    const values = samples.filter((s) => s.cover === cover).map((s) => s.value).filter((x) => x > 0 && isFinite(x));
+    const values = samples
+      .filter((s) => s.cover === cover)
+      .map((s) => s.value)
+      .filter((x) => x > 0 && Number.isFinite(x));
     if (!values.length) return { multiplier: 1, samples: 0 };
     const g = Math.exp(values.reduce((a, x) => a + Math.log(x), 0) / values.length);
     const w = values.length / (values.length + params.calibration.priorWeight);
@@ -66,12 +69,7 @@ export interface FeedbackOutcome {
 }
 
 /** Returns `null` when the feedback comes too early to be meaningful. */
-export function feedbackToSample(
-  rec: PredictionRecord,
-  kind: FeedbackKind,
-  nowMs: number,
-  params: ModelParams,
-): FeedbackOutcome | null {
+export function feedbackToSample(rec: PredictionRecord, kind: FeedbackKind, nowMs: number, params: ModelParams): FeedbackOutcome | null {
   const actualHours = (nowMs - rec.startMs) / MS_PER_HOUR;
   if (actualHours <= params.calibration.minFeedbackHours) return null;
   const adj = params.calibration.feedbackAdjust[kind];

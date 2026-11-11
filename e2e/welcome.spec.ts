@@ -1,6 +1,6 @@
 // Welcome screen: first visit and after an hour without interaction; saved pieces are never touched.
-import { expect, test, type Page } from '@playwright/test';
-import { ACTIVITY_KEY, NOW, STORAGE_KEY, openApp } from './helpers';
+import { expect, type Page, test } from '@playwright/test';
+import { ACTIVITY_KEY, NOW, openApp, STORAGE_KEY } from './helpers';
 
 const MIN = 60 * 1000;
 const at = (offsetMin: number): Date => new Date(Date.parse(NOW) + offsetMin * MIN);
@@ -21,9 +21,19 @@ const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.ge
 const focused = (page: Page) => page.evaluate(() => document.activeElement?.id || document.activeElement?.textContent?.trim());
 
 const PIECE = {
-  id: 'abc', name: 'miski', start: Date.parse('2026-03-03T12:00:00+01:00'), mass: 800, lossPct: 6,
-  plan: [{ w: 'box', h: null }], label: 'Włóż do zamkniętego pudełka od razu.', dom: 'box',
-  predH: 100, calUsed: 1, ws: 90, we: 120, fb: null,
+  id: 'abc',
+  name: 'miski',
+  start: Date.parse('2026-03-03T12:00:00+01:00'),
+  mass: 800,
+  lossPct: 6,
+  plan: [{ w: 'box', h: null }],
+  label: 'Włóż do zamkniętego pudełka od razu.',
+  dom: 'box',
+  predH: 100,
+  calUsed: 1,
+  ws: 90,
+  we: 120,
+  fb: null,
 };
 const DATA = JSON.stringify({ pieces: [PIECE] });
 /** waiting (ready in 79 h), ready (forecast passed) and rated */
@@ -110,7 +120,9 @@ test.describe('welcome screen', () => {
     await expectNoWelcome(page);
   });
 
-  test('after more than an hour it returns; a piece\'s details open section 5 with 1–3 collapsed; the pieces are intact', async ({ page }) => {
+  test("after more than an hour it returns; a piece's details open section 5 with 1–3 collapsed; the pieces are intact", async ({
+    page,
+  }) => {
     await lastActive(page, 61);
     await openApp(page, { welcome: true, storage: DATA });
     await expectWelcome(page);

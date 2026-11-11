@@ -1,9 +1,9 @@
 import type { ConditionsSource } from '../domain/conditions';
 import {
-  COVERS,
   type AirflowId,
   type BatId,
   type ClayId,
+  COVERS,
   type Conditions,
   type Cover,
   type PieceInput,
@@ -17,7 +17,7 @@ import { byId } from './dom';
 /** Parses a number field, accepting a decimal comma; falls back when not a finite number. */
 export function parseNumber(raw: string, fallback: number): number {
   const v = parseFloat(String(raw).trim().replaceAll(',', '.'));
-  return isFinite(v) ? v : fallback;
+  return Number.isFinite(v) ? v : fallback;
 }
 
 const pad = (n: number): string => String(n).padStart(2, '0');
@@ -46,7 +46,7 @@ export function combineLocalDateTime(dayKey: string, time: string): number {
 /** A day key labelled from the catalog, with a relative word next to yesterday, today and tomorrow: "dziś · śr 4.03". */
 export function dayLabel(m: Messages, fmt: Formatter, dayKey: string, nowMs: number): string {
   const day = new Date(`${dayKey}T12:00`);
-  if (isNaN(day.getTime())) return '';
+  if (Number.isNaN(day.getTime())) return '';
   const relative: Record<number, string> = { [-1]: m.dateTime.yesterday, 0: m.dateTime.today, 1: m.dateTime.tomorrow };
   for (const offset of [-1, 0, 1]) {
     const d = new Date(nowMs);
@@ -67,7 +67,7 @@ export function readPieceInput(): PieceInput {
     massG: num('mass', 500),
     shape: value('shape') as ShapeId,
     wallMm,
-    baseMm: isFinite(base) ? base : undefined,
+    baseMm: Number.isFinite(base) ? base : undefined,
     clay: value('clay') as ClayId,
     bat: value('bat') as BatId,
     wetness: value('wet') as WetnessId,

@@ -1,6 +1,6 @@
 // English UI and the PL | EN switch.
-import { expect, test, type Page } from '@playwright/test';
-import { STORAGE_KEY, choose, expectDateTime, fill, openApp, setDateTime, setNight, snapshot } from './helpers';
+import { expect, type Page, test } from '@playwright/test';
+import { choose, expectDateTime, fill, openApp, STORAGE_KEY, setDateTime, setNight, snapshot } from './helpers';
 
 const LANG_KEY = 'kiedy-trymowac-lang';
 const SAVE_EN = 'Save this piece with its plan';
@@ -31,8 +31,7 @@ const DEFAULTS_EN = {
     '71.4286% | target 26.7273%',
     '100% | target 26.7273%',
   ],
-  legend:
-    'The vertical line is your deadline (2 d 1 h). The number next to a name is how many pieces have calibrated that option.',
+  legend: 'The vertical line is your deadline (2 d 1 h). The number next to a name is how many pieces have calibrated that option.',
   alts: [
     'Leave uncovered for 4 h (until Wed 4 Mar 13:15), then put in a closed box.',
     'Cover loosely with a bag (base or rim exposed) for 19 h (until Thu 5 Mar 03:30), then wrap fully in a bag.',
@@ -147,7 +146,9 @@ test.describe('language switch', () => {
     await toEnglish(page);
     await page.locator('#thrown-quick').getByRole('button', { name: 'last evening' }).click();
     const section = page.locator('main > section').nth(2);
-    const text = (await section.innerText()) + (await section.locator('select, input').evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value).join(' ')));
+    const text =
+      (await section.innerText()) +
+      (await section.locator('select, input').evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value).join(' ')));
     expect(text).not.toMatch(/\b(AM|PM)\b/i);
     await expect(page.locator('#thrown-time')).toHaveValue('19:00');
   });
@@ -230,7 +231,11 @@ test.describe('language switch', () => {
     await expect(langButton(page, 'Polski')).toBeFocused();
   });
 
-  for (const [width, height] of [[320, 640], [375, 812], [1280, 900]] as const) {
+  for (const [width, height] of [
+    [320, 640],
+    [375, 812],
+    [1280, 900],
+  ] as const) {
     test(`${width}px: the switch is at the top, large enough, and nothing overflows`, async ({ page }) => {
       await page.setViewportSize({ width, height });
       await openApp(page);
@@ -278,9 +283,19 @@ test.describe('initial language', () => {
       const data = {
         pieces: [
           {
-            id: 'abc', name: 'miski', start, mass: 800, lossPct: 6,
-            plan: [{ w: 'box', h: null }], label: 'Włóż do zamkniętego pudełka od razu.', dom: 'box',
-            predH: 100, calUsed: 1, ws: 90, we: 120, fb: null,
+            id: 'abc',
+            name: 'miski',
+            start,
+            mass: 800,
+            lossPct: 6,
+            plan: [{ w: 'box', h: null }],
+            label: 'Włóż do zamkniętego pudełka od razu.',
+            dom: 'box',
+            predH: 100,
+            calUsed: 1,
+            ws: 90,
+            we: 120,
+            fb: null,
           },
         ],
       };

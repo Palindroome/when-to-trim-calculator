@@ -19,9 +19,7 @@ export default defineConfig({
     locale: 'pl-PL',
     trace: 'retain-on-failure',
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'], timezoneId: 'Europe/Warsaw', locale: 'pl-PL' } },
-  ],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], timezoneId: 'Europe/Warsaw', locale: 'pl-PL' } }],
   webServer: {
     command: `npm run build && npx vite preview --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: `http://127.0.0.1:${PORT}/`,

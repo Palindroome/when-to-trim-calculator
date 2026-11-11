@@ -41,7 +41,7 @@ Other agents may be testing in other worktrees at the same time, and a server on
    ```bash
    bash $V/scripts/agent/check.sh
    ```
-   Record the pass/fail counts it prints.
+   Record the pass/fail counts it prints. A failing `lint` step (lint or format check) is a blocker, like any other failing step.
 3. **Behaviour.**
    - **Bugs:** reproduce on `origin/main` first, then confirm the fix on the branch. Use `bash $S/worktree.sh --main` and run your probe or `check.sh` in that worktree, or use the live site.
    - **UI changes:** run `bash $V/scripts/agent/viewport.sh`. It checks 320, 375 and 1280 px for horizontal overflow (`scrollWidth <= clientWidth`), a rendered `#result` and console errors. Write your own probe only for states the script doesn't reach (for example after the wizard, or with saved pieces).
@@ -95,7 +95,7 @@ Round <k> of 3 · branch `<branch>` · commit `<sha>`
 | Acceptance criterion | Result | Evidence |
 |---|---|---|
 
-Checks: typecheck <ok/fail> · unit <n passed/failed> · e2e <n passed/failed/skipped> · build <ok/fail>
+Checks: lint <ok/fail> · typecheck <ok/fail> · unit <n passed/failed> · e2e <n passed/failed/skipped> · build <ok/fail>
 
 ### Findings
 1. [blocker|major|minor] `file:line`: what is wrong. Evidence: … Fix: …
