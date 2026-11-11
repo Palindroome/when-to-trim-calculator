@@ -57,7 +57,6 @@ export function createWizard(root: HTMLElement, store: WizardStore, onEnd: (outc
       end('skipped');
       focus(focusTarget(0));
     };
-    byId('wizard-open').onclick = start;
     show(open ? step : 0, false);
   }
 

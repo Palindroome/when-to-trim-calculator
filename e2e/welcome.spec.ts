@@ -7,9 +7,15 @@ const at = (offsetMin: number): Date => new Date(Date.parse(NOW) + offsetMin * M
 
 const screen = (page: Page) => page.locator('.welcome-screen');
 const heading = (page: Page) => page.getByRole('heading', { name: 'Zaplanuj suszenie pracy' });
-const newPiece = (page: Page) => page.getByRole('button', { name: 'Nowa praca' });
+const newPiece = (page: Page) => screen(page).getByRole('button', { name: 'Nowa praca' });
 const myPieces = (page: Page) => page.getByRole('button', { name: /^Moje prace \(\d+\)$/ });
-const backToWelcome = (page: Page) => page.getByRole('button', { name: 'Ekran startowy' });
+const bar = (page: Page) => page.locator('.wizard-bar');
+const backToWelcome = (page: Page) => bar(page).getByRole('button', { name: 'Nowa praca' });
+const PRIVACY_PL =
+  'Twoje prace zapisują się w tej przeglądarce na tym urządzeniu i zostają po jej zamknięciu. Znikną tylko, jeśli wyczyścisz dane przeglądania. Nigdzie ich nie wysyłamy.';
+const PRIVACY_EN =
+  "Your pieces are saved in this browser on this device and stay after you close it. They're removed only if you clear your browsing data. We don't send them anywhere.";
+const explainer = (page: Page) => page.locator('main > section:has(details)');
 const rows = (page: Page) => page.locator('#welcome-list > li');
 const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
 const focused = (page: Page) => page.evaluate(() => document.activeElement?.id || document.activeElement?.textContent?.trim());
@@ -74,7 +80,10 @@ test.describe('welcome screen', () => {
     await expect(screen(page)).not.toContainText(/po trymowaniu/i);
     await expect(screen(page).getByRole('heading', { name: 'Jak to działa' })).toBeVisible();
     await expect(screen(page).locator('ol > li')).toHaveCount(3);
-    await expect(screen(page)).toContainText('Prace i kalibracja są zapisywane tylko w tej przeglądarce.');
+    await expect(screen(page)).toContainText(PRIVACY_PL);
+    await expect(screen(page)).not.toContainText('tylko w tej przeglądarce');
+    await expect(explainer(page)).toContainText(`${PRIVACY_PL} W kolejnej wersji temperaturę i wilgotność mogą wpisywać czujniki BLE`);
+    await expect(explainer(page)).not.toContainText('tylko w tej przeglądarce');
     await expect(myPieces(page)).toHaveCount(0);
     // the form behind it is not reachable by keyboard
     await page.keyboard.press('Tab');
@@ -160,7 +169,28 @@ test.describe('welcome screen', () => {
     await expect(page.locator('#pieces .piece[data-piece="def"]')).toBeFocused();
   });
 
-  test('"Ekran startowy" on the working page shows the welcome screen again, from the form and from the wizard', async ({ page }) => {
+  test('the bar holds only "Nowa praca", on the left, outside and inside the wizard', async ({ page }) => {
+    await openApp(page);
+    await expect(page.locator('#wizard-open')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Przeprowadź mnie krok po kroku' })).toHaveCount(0);
+    await expect(bar(page).getByRole('button')).toHaveCount(1);
+    const expectFirstOnLeft = async (): Promise<void> => {
+      await expect(bar(page).locator('button:visible').first()).toHaveText('Nowa praca');
+      const b = (await backToWelcome(page).boundingBox())!;
+      const box = (await bar(page).boundingBox())!;
+      expect(Math.abs(b.x - box.x)).toBeLessThan(1);
+    };
+    await expectFirstOnLeft();
+    await backToWelcome(page).click();
+    await newPiece(page).click();
+    // inside the wizard: progress text and "Pomiń" unchanged, "Nowa praca" still first
+    await expect(page.locator('#wizard-progress')).toHaveText('Krok 1 z 3: Praca');
+    await expect(bar(page).getByRole('button', { name: 'Pomiń – pokaż cały formularz' })).toBeVisible();
+    await expect(bar(page).getByRole('button')).toHaveText(['Nowa praca', 'Pomiń – pokaż cały formularz']);
+    await expectFirstOnLeft();
+  });
+
+  test('"Nowa praca" on the working page shows the welcome screen again, from the form and from the wizard', async ({ page }) => {
     await openApp(page, { storage: DATA });
     await expectNoWelcome(page);
     await backToWelcome(page).click();
@@ -224,7 +254,10 @@ test.describe('welcome screen', () => {
     );
     await expect(screen(page)).not.toContainText(/leather-hard/i);
     await expect(screen(page)).toContainText('How it works');
-    await expect(screen(page)).toContainText('Pieces and calibration are stored only in this browser.');
+    await expect(screen(page)).toContainText(PRIVACY_EN);
+    await expect(screen(page)).not.toContainText('only in this browser');
+    await expect(explainer(page)).toContainText(`${PRIVACY_EN} In a later version, BLE sensors`);
+    await expect(explainer(page)).not.toContainText('only in this browser');
     await expect(page.getByRole('button', { name: 'New piece' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'My pieces (1)' })).toBeVisible();
     await expect(page.locator('main > section:visible')).toHaveCount(0);
@@ -233,7 +266,8 @@ test.describe('welcome screen', () => {
     await expect(rows(page).locator('.meta')).toHaveText(/^Thrown .+ · forecast .+$/);
     await page.getByRole('button', { name: 'New piece' }).click();
     await expect(page.locator('#wizard-progress')).toHaveText('Step 1 of 3: Piece');
-    await page.getByRole('button', { name: 'Start screen' }).click();
+    await expect(page.locator('.wizard-bar').getByRole('button')).toHaveText(['New piece', 'Skip – show the full form']);
+    await page.locator('.wizard-bar').getByRole('button', { name: 'New piece' }).click();
     await expect(page.getByRole('heading', { name: 'Plan your piece’s drying' })).toBeFocused();
   });
 });

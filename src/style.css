@@ -233,12 +233,13 @@ details li{margin:var(--space-2) 0}
 }
 
 /* ---------- first-run wizard: one section at a time, single column at every width ---------- */
-.wizard-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--space-2) var(--space-3);margin:0 0 var(--space-4)}
+.wizard-bar{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2) var(--space-3);margin:0 0 var(--space-4)}
+#wizard-skip{margin-left:auto}
 .wizard-progress{margin:0;font-size:var(--text-sm);font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums}
 .wizard-nav{display:flex;flex-wrap:wrap;gap:var(--space-3);margin:0 0 var(--space-4)}
 .wizard-nav button{flex:1 1 auto;width:auto;min-height:var(--control-h)}
 .wizard-nav button[hidden]{display:none}
-main:not(.wizard) .wizard-only,main.wizard .full-only{display:none}
+main:not(.wizard) .wizard-only{display:none}
 main.wizard>section:not(.current){display:none}
 main.wizard{display:block;max-width:720px}
 main.wizard #result{position:static;max-height:none;overflow:visible;padding:0;margin:0}

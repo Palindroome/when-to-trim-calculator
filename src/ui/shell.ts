@@ -65,10 +65,9 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
   </div>
   <p class="lead">${m.lead}</p>
   <div class="wizard-bar">
+    <button type="button" class="ghost" id="welcome-back">${m.welcome.back}</button>
     <p class="wizard-progress wizard-only" id="wizard-progress" aria-live="polite"></p>
     <button type="button" class="ghost wizard-only" id="wizard-skip">${m.wizard.skip}</button>
-    <button type="button" class="ghost full-only" id="wizard-open">${m.wizard.reopen}</button>
-    <button type="button" class="ghost" id="welcome-back">${m.welcome.back}</button>
   </div>
 
   <section class="card" data-step>

@@ -50,7 +50,6 @@ export const pl = {
     back: 'Wstecz',
     finish: 'Pokaż wynik',
     skip: 'Pomiń – pokaż cały formularz',
-    reopen: 'Przeprowadź mnie krok po kroku',
   },
 
   /** shown on the first visit and after a long pause */
@@ -66,13 +65,14 @@ export const pl = {
       'Podaj warunki w pracowni: temperaturę, wilgotność i ruch powietrza.',
       'Wybierz termin i zapisz plan. Gdy praca dojdzie do tego etapu, oceń wynik – z każdą oceną kalkulator lepiej zna Twoją pracownię.',
     ],
-    privacy: 'Prace i kalibracja są zapisywane tylko w tej przeglądarce.',
+    privacy:
+      'Twoje prace zapisują się w tej przeglądarce na tym urządzeniu i zostają po jej zamknięciu. Znikną tylko, jeśli wyczyścisz dane przeglądania. Nigdzie ich nie wysyłamy.',
     start: 'Nowa praca',
     pieces: (n: number): string => `Moje prace (${n})`,
     details: 'Szczegóły',
     detailsLabel: (name: string): string => `Szczegóły: ${name}`,
     /** on the working page: shows the welcome screen again */
-    back: 'Ekran startowy',
+    back: 'Nowa praca',
   },
 
   /** sections 1–3 collapsed to one line after the wizard */
@@ -247,7 +247,7 @@ export const pl = {
       '<b>Skórzana twardość</b> to utrata ok. 5–7% masy od toczenia, zależnie od masy ceramicznej, mokrości i celu. Okno trymowania to mniej więcej ±1–1,5 punktu procentowego wokół tej wartości.',
       '<b>Grube dno, porcelana, plastikowy bat i forma zamknięta</b> wydłużają czas. Gips go skraca.',
       'Wszystkie współczynniki to <b>założenia startowe</b>. Każda zapisana praca z oceną „za mokra / w sam raz / za sucha” koryguje mnożnik dla danego opatulenia.',
-      'Dane zapisują się tylko w tej przeglądarce. W kolejnej wersji temperaturę i wilgotność mogą wpisywać czujniki BLE z półki i przechowalni.',
+      'Twoje prace zapisują się w tej przeglądarce na tym urządzeniu i zostają po jej zamknięciu. Znikną tylko, jeśli wyczyścisz dane przeglądania. Nigdzie ich nie wysyłamy. W kolejnej wersji temperaturę i wilgotność mogą wpisywać czujniki BLE z półki i przechowalni.',
     ],
   },
 
