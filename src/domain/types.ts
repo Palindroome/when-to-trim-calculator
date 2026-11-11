@@ -1,8 +1,4 @@
-/** Ways of covering a drying piece, from fastest to slowest drying. */
-export type Cover = 'open' | 'partial' | 'damp' | 'full' | 'box';
-
-/** Canonical order used everywhere (bars, calibration table, weight-check select). */
-export const COVERS: readonly Cover[] = ['open', 'partial', 'damp', 'full', 'box'];
+import type { CoverId } from './covers';
 
 export type ShapeId = 'cyl' | 'bowl' | 'plate' | 'vase' | 'closed';
 export type ClayId = 'grog' | 'stone' | 'porc' | 'earth';
@@ -65,10 +61,10 @@ export interface Conditions {
 
 /** One phase of a covering plan. `hours: Infinity` means "until done". */
 export interface PlanStep {
-  cover: Cover;
+  cover: CoverId;
   hours: number;
 }
 export type Plan = readonly PlanStep[];
 
-/** Per-cover time multipliers applied to the physical model (1 = uncorrected). */
-export type CoverMultipliers = Readonly<Record<Cover, number>>;
+/** Per-cover time multipliers applied to the physical model (1 = uncorrected; a missing entry means 1). */
+export type CoverMultipliers = Readonly<Partial<Record<CoverId, number>>>;

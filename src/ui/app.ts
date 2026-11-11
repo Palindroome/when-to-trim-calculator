@@ -1,13 +1,14 @@
-import type { CalibratorFactory } from '../domain/calibration';
+import type { CalibratorFactory, CoverCalibration } from '../domain/calibration';
 import { feedbackToSample } from '../domain/calibration';
 import type { ConditionsSource } from '../domain/conditions';
+import type { CoverId } from '../domain/covers';
 import { MS_PER_HOUR, type ModelParams } from '../domain/params';
 import type { RateModel } from '../domain/physics';
 import { derivePiece } from '../domain/piece';
 import { dominantCover, planDrying, type PlanOption } from '../domain/planner';
 import { simulate, type DryingContext } from '../domain/simulate';
 import { tipsFor } from '../domain/tips';
-import { COVERS, type Cover, type FeedbackKind, type Piece } from '../domain/types';
+import type { FeedbackKind, Piece } from '../domain/types';
 import { assessWeight } from '../domain/weight';
 import { createFormatter, type Messages } from '../i18n';
 import { calibrationSamples, type PieceRepository, type StoredPiece } from '../storage/pieces';
@@ -31,6 +32,7 @@ import {
   type DateTimeId,
 } from './form';
 import {
+  coverLabel,
   renderCalibration,
   renderSummaries,
   renderPieceList,
@@ -112,11 +114,13 @@ interface FormState {
   /** `data-preset` of the selected thrown preset */
   thrownPreset: string | undefined;
   /** ticked cover checkboxes */
-  allowed: Cover[];
+  allowed: CoverId[];
 }
 
 export function startApp(deps: AppDeps): void {
   const { root, params, repository, conditions, rateModel } = deps;
+  const covers = params.covers;
+  const coverIds = covers.map((c) => c.id);
   const now = deps.now ?? Date.now;
   let m: Messages;
   let view: View;
@@ -157,7 +161,23 @@ export function startApp(deps: AppDeps): void {
   };
 
   function context(piece: Piece, startMs: number): DryingContext {
-    return { piece, conditions: conditions.read(), startMs, multipliers: calibration().multipliers(), model: rateModel, params };
+    return {
+      piece,
+      conditions: conditions.read(),
+      startMs,
+      multipliers: calibration().multipliers(coverIds),
+      model: rateModel,
+      params,
+      covers,
+    };
+  }
+
+  /** Calibration of every cover, for the bars and the calibration table. */
+  function perCover(): Record<CoverId, CoverCalibration> {
+    const cal = calibration();
+    const out = {} as Record<CoverId, CoverCalibration>;
+    for (const c of coverIds) out[c] = cal.estimate(c);
+    return out;
   }
 
   // ---------- recommendation ----------
@@ -167,7 +187,7 @@ export function startApp(deps: AppDeps): void {
     const startMs = readThrownMs(now());
     const H = (readWhenMs() - startMs) / MS_PER_HOUR;
     const ctx = context(piece, startMs);
-    const allowed = readAllowedCovers();
+    const allowed = readAllowedCovers(covers);
     const plan = planDrying(ctx, H, input.stage, { allowed });
     const rec = plan.recommendation;
 
@@ -182,18 +202,14 @@ export function startApp(deps: AppDeps): void {
       saveable = { piece, startMs, option: rec.option, ws: NaN, we: NaN };
     }
 
-    const cal = calibration();
-    const perCover = {} as Record<Cover, ReturnType<typeof cal.estimate>>;
-    for (const c of COVERS) perCover[c] = cal.estimate(c);
-
     const result = byId('result');
     result.innerHTML = renderResult(view, {
       piece,
       startMs,
       plan,
       window,
-      tips: tipsFor(rec, piece, ctx.conditions, params),
-      calibration: perCover,
+      tips: tipsFor(rec, piece, ctx.conditions, params, covers),
+      calibration: perCover(),
       canSave: saveable !== null,
       allowed,
     });
@@ -273,10 +289,7 @@ export function startApp(deps: AppDeps): void {
     el.querySelectorAll<HTMLElement>('[data-del]').forEach((b) => {
       b.onclick = () => removePiece(b.dataset.del ?? '');
     });
-    const cal = calibration();
-    const perCover = {} as Record<Cover, ReturnType<typeof cal.estimate>>;
-    for (const c of COVERS) perCover[c] = cal.estimate(c);
-    byId('calib').innerHTML = renderCalibration(view, perCover);
+    byId('calib').innerHTML = renderCalibration(view, perCover());
   }
 
   // ---------- dates ----------
@@ -383,7 +396,7 @@ export function startApp(deps: AppDeps): void {
       })),
       quick: root.querySelector<HTMLElement>('#quick .chip.on')?.dataset.d,
       thrownPreset: root.querySelector<HTMLElement>('#thrown-quick .chip.on')?.dataset.preset,
-      allowed: readAllowedCovers(),
+      allowed: readAllowedCovers(covers),
     };
   }
 
@@ -400,7 +413,7 @@ export function startApp(deps: AppDeps): void {
       checkTime(id, true);
     }
     coverBoxes().forEach((b) => {
-      b.checked = s.allowed.includes(b.dataset.cover as Cover);
+      b.checked = s.allowed.includes(b.dataset.cover as CoverId);
     });
   }
 
@@ -443,15 +456,15 @@ export function startApp(deps: AppDeps): void {
   /** (Re)builds the page in `messages`; `form` restores the inputs after a language switch. */
   function render(messages: Messages, form: FormState | null): void {
     m = messages;
-    view = { m, params, fmt: createFormatter(m, params.horizonHours / 24) };
+    view = { m, params, fmt: createFormatter(m, params.horizonHours / 24), covers };
     document.documentElement.lang = m.lang;
     document.title = m.title;
-    root.innerHTML = renderShell(m, Object.keys(deps.locales), theme ?? 'system');
+    root.innerHTML = renderShell(m, Object.keys(deps.locales), theme ?? 'system', covers);
     if (deps.footer) deps.footer.innerHTML = renderFooter(m);
     wizard.mount(m);
     cards.mount(m);
     welcome.mount(m);
-    byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');
+    byId('wnow').innerHTML = covers.map((c) => `<option value="${c.id}">${coverLabel(m, c)}</option>`).join('');
     if (form) {
       restoreForm(form);
     } else {

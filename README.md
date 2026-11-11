@@ -42,8 +42,9 @@ src/
   main.ts             composition root: picks language, params, storage, conditions source, models
   style.css           design tokens (one :root block: type, space, radii, colour roles, shadows; dark values as --d-*) + components
   domain/             pure logic, no DOM; unit-tested
-    types.ts          ids (Cover, ShapeId, ...), Piece, Conditions, Plan
-    params.ts         ModelParams + DEFAULT_PARAMS: every model constant in one typed object
+    types.ts          ids (ShapeId, ClayId, ...), Piece, Conditions, Plan
+    covers.ts         CoverId, CoverDefinition (factor, airflow, environment, planner gate), coverById
+    params.ts         ModelParams + DEFAULT_PARAMS: every model constant in one typed object, including the built-in covers
     piece.ts          derivePiece: area, slowness, target loss / trimming window
     physics.ts        psat, RateModel interface, physicalRateModel
     simulate.ts       time-stepping simulation of a covering plan
@@ -92,9 +93,10 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
 
   Saved pieces store their plan sentence (`label`) in the language that was active at save time. The piece list re-renders it from `plan` in the current language and falls back to `label` for unexpected plan shapes.
 - **Colour schemes.** Components use only the colour-role tokens in `src/style.css`. Dark mode overrides those same tokens with the `--d-*` values, either when the system prefers dark (`prefers-color-scheme`) or when `data-theme="dark"` is set on `<html>`; `data-theme="light"` forces the light values. The `System | Light | Dark` switch next to the language switch sets that attribute and stores `light` / `dark` under `kiedy-trymowac-theme` (System removes the key). A new component that uses the tokens works in both schemes without extra CSS; a new colour role needs a light value and a `--d-*` value assigned in both dark blocks.
-- **Fitted parameters.** Every coefficient is in `ModelParams` (`src/domain/params.ts`): evaporation coefficient, cover factors, shape/clay/surface factors, wetness/stage offsets, window bounds, planner and tip thresholds. Pass a different object to `startApp`.
+- **Fitted parameters.** Every coefficient is in `ModelParams` (`src/domain/params.ts`): evaporation coefficient, cover definitions, shape/clay/surface factors, wetness/stage offsets, window bounds, planner and tip thresholds. Pass a different object to `startApp`.
+- **Covers.** Each covering method is one `CoverDefinition` (`domain/covers.ts`) in `ModelParams.covers`: its drying factor, how airflow reaches the piece (`full` / `damped` / `none`), which conditions apply (`room` with night mode, or `dampRoom`) and an optional planner gate. The list order is the display order (bars, weight-check select, calibration table, cover filter) and the planner's preference order: the first cover is preferred as the first phase of two-phase plans, and the first / last are the fallbacks when even they are too slow / too fast. The app passes this catalog to the planner (`DryingContext.covers`), the tips and the UI; nothing else names a cover. Built-in labels and plan phrases are looked up by id in `covers.label` / `covers.phrase` of the i18n catalog through `coverLabel` / `coverPhrase` in `ui/render.ts`.
 - **Trained models.** There are two seams:
-  - `RateModel` (`domain/physics.ts`) predicts grams per hour for a cover, time, piece and conditions. Replace `physicalRateModel` to change the drying physics itself.
+  - `RateModel` (`domain/physics.ts`) predicts grams per hour: `rate(cover: CoverDefinition, timeMs, piece, conditions, multipliers)`. It receives the cover's definition, so a trained model can key on `cover.id` or use its properties. Replace `physicalRateModel` to change the drying physics itself.
   - `Calibrator` / `CalibratorFactory` (`domain/calibration.ts`) turns feedback samples into per-cover time multipliers (`estimate`, `multipliers`, `learn`). Replace `geometricMeanCalibrator` to plug in a learned correction.
 - **Training data.** Each rated piece already stores start time, mass, target loss, the plan, predicted vs. actual hours, the calibration used and the feedback. It does not store the piece inputs (shape, walls, clay, ...) or the conditions. Adding them would change the stored format, so it was deliberately left out. To collect them:
   1. Add optional fields, e.g. `input` and `conditions`, to `StoredPiece`. Older readers ignore unknown fields, and older records simply lack them.

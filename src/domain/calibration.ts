@@ -1,12 +1,13 @@
+import type { CoverId } from './covers';
 import { MS_PER_HOUR, type ModelParams } from './params';
-import { COVERS, type Cover, type CoverMultipliers, type FeedbackKind } from './types';
+import type { CoverMultipliers, FeedbackKind } from './types';
 
 /**
  * One observation of how a prediction turned out: `value` is the time multiplier that would have
  * made the prediction right (> 1 = the piece dried slower than predicted).
  */
 export interface CalibrationSample {
-  cover: Cover;
+  cover: CoverId;
   value: number;
 }
 
@@ -22,8 +23,9 @@ export interface CoverCalibration {
  * a trained model can implement the same interface.
  */
 export interface Calibrator {
-  estimate(cover: Cover): CoverCalibration;
-  multipliers(): CoverMultipliers;
+  estimate(cover: CoverId): CoverCalibration;
+  /** multipliers for the given covers */
+  multipliers(ids: readonly CoverId[]): CoverMultipliers;
   learn(sample: CalibrationSample): void;
 }
 
@@ -32,7 +34,7 @@ export type CalibratorFactory = (samples: readonly CalibrationSample[], params: 
 /** Geometric mean of the samples, shrunk towards 1 while there are few of them. */
 export const geometricMeanCalibrator: CalibratorFactory = (initial, params) => {
   const samples: CalibrationSample[] = [...initial];
-  const estimate = (cover: Cover): CoverCalibration => {
+  const estimate = (cover: CoverId): CoverCalibration => {
     const values = samples.filter((s) => s.cover === cover).map((s) => s.value).filter((x) => x > 0 && isFinite(x));
     if (!values.length) return { multiplier: 1, samples: 0 };
     const g = Math.exp(values.reduce((a, x) => a + Math.log(x), 0) / values.length);
@@ -41,9 +43,9 @@ export const geometricMeanCalibrator: CalibratorFactory = (initial, params) => {
   };
   return {
     estimate,
-    multipliers() {
-      const m = {} as Record<Cover, number>;
-      for (const c of COVERS) m[c] = estimate(c).multiplier;
+    multipliers(ids) {
+      const m: Partial<Record<CoverId, number>> = {};
+      for (const c of ids) m[c] = estimate(c).multiplier;
       return m;
     },
     learn(sample) {

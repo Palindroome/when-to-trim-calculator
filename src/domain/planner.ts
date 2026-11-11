@@ -1,9 +1,10 @@
+import type { CoverId } from './covers';
 import { hoursToLoss, type DryingContext } from './simulate';
-import { COVERS, type Cover, type Plan, type StageId } from './types';
+import type { Plan, StageId } from './types';
 
 export type PlanOption =
-  | { kind: 'single'; cover: Cover; plan: Plan; hours: number }
-  | { kind: 'twoPhase'; first: Cover; then: Cover; switchAfterHours: number; plan: Plan; hours: number };
+  | { kind: 'single'; cover: CoverId; plan: Plan; hours: number }
+  | { kind: 'twoPhase'; first: CoverId; then: CoverId; switchAfterHours: number; plan: Plan; hours: number };
 
 export type Recommendation =
   /** the trim date is not after the throwing date */
@@ -17,8 +18,8 @@ export type Recommendation =
 export interface PlanResult {
   /** hours from throwing to the wanted trim time (NaN/≤0 when invalid) */
   deadlineHours: number;
-  /** hours to the target loss under each single cover, in COVERS order */
-  singles: Record<Cover, number>;
+  /** hours to the target loss under each single cover, in catalog order */
+  singles: Record<CoverId, number>;
   recommendation: Recommendation;
   /** up to three other plans that also meet the deadline */
   alternatives: PlanOption[];
@@ -28,10 +29,10 @@ export interface PlanResult {
 
 export interface PlanOptions {
   /** covers the planner may use; omitted or empty = all covers */
-  allowed?: readonly Cover[];
+  allowed?: readonly CoverId[];
 }
 
-const single = (cover: Cover, hours: number): PlanOption => ({
+const single = (cover: CoverId, hours: number): PlanOption => ({
   kind: 'single',
   cover,
   plan: [{ cover, hours: Infinity }],
@@ -39,9 +40,36 @@ const single = (cover: Cover, hours: number): PlanOption => ({
 });
 
 /** The cover that best describes a plan (used to attribute calibration feedback). */
-export function dominantCover(plan: Plan, dominantFirstPhaseHours: number): Cover {
+export function dominantCover(plan: Plan, dominantFirstPhaseHours: number): CoverId {
   if (plan.length === 1) return plan[0]!.cover;
   return plan[0]!.hours > dominantFirstPhaseHours ? plan[0]!.cover : plan[1]!.cover;
+}
+
+/**
+ * What to recommend when no plan meets the deadline `H`. With nothing excluded: the first / last
+ * catalog cover (normally "open" / "box"), with times over every cover. With exclusions: the
+ * fastest / slowest candidate by hours; ties go to the earlier one in catalog order.
+ */
+function fallback(
+  H: number,
+  hours: (c: CoverId) => number,
+  ids: readonly CoverId[],
+  candidates: readonly CoverId[],
+  filtered: boolean,
+): Recommendation {
+  if (!filtered) {
+    const all = ids.map(hours);
+    const fastest = Math.min(...all);
+    const last = ids[ids.length - 1]!;
+    return H < fastest
+      ? { status: 'tooFast', fastestHours: fastest, option: single(ids[0]!, fastest) }
+      : { status: 'tooSlow', slowestHours: Math.max(...all), option: single(last, hours(last)) };
+  }
+  const fastest = candidates.reduce((p, c) => (hours(c) < hours(p) ? c : p));
+  const slowest = candidates.reduce((p, c) => (hours(c) > hours(p) ? c : p));
+  return H < hours(fastest)
+    ? { status: 'tooFast', fastestHours: hours(fastest), option: single(fastest, hours(fastest)) }
+    : { status: 'tooSlow', slowestHours: hours(slowest), option: single(slowest, hours(slowest)) };
 }
 
 /** Finds how to cover the piece so it reaches its target loss at `deadlineHours` after throwing. */
@@ -49,32 +77,34 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
   const H = deadlineHours;
   const cfg = ctx.params.planner;
   const target = ctx.piece.lossPct;
+  const ids = ctx.covers.map((c) => c.id);
   const { allowed } = options;
-  const allowedSet = allowed?.length ? COVERS.filter((c) => allowed.includes(c)) : COVERS;
-  const filtered = allowedSet.length < COVERS.length;
+  const allowedSet = allowed?.length ? ctx.covers.filter((c) => allowed.includes(c.id)) : ctx.covers;
+  const filtered = allowedSet.length < ctx.covers.length;
 
   // every cover, also the excluded ones, so the bars can compare them all
-  const singles = {} as Record<Cover, number>;
-  for (const c of COVERS) singles[c] = hoursToLoss([{ cover: c, hours: Infinity }], ctx, target);
+  const singles = {} as Record<CoverId, number>;
+  for (const c of ids) singles[c] = hoursToLoss([{ cover: c, hours: Infinity }], ctx, target);
+  const hours = (c: CoverId): number => singles[c]!;
 
   if (!(H > 0)) {
     return { deadlineHours: H, singles, recommendation: { status: 'invalidDeadline' }, alternatives: [], excludedWouldMeet: false };
   }
 
-  // the damp room is small: suggest it only for very wet work or long waits,
-  // unless it is the only cover allowed
-  const allowDamp = stage === 'soft' || H >= cfg.dampMinHours;
-  const gated = allowedSet.filter((c) => c !== 'damp' || allowDamp);
-  const candidates = gated.length ? gated : allowedSet;
+  // gated covers (the damp room is small) are suggested only for very wet work or long waits,
+  // unless nothing else is allowed
+  const openGate = stage === 'soft' || H >= cfg.dampMinHours;
+  const gated = allowedSet.filter((c) => c.gate !== 'longWaitOrSoft' || openGate);
+  const candidates = (gated.length ? gated : allowedSet).map((c) => c.id);
 
-  const singleOptions = candidates.map((c) => single(c, singles[c])).filter((o) => isFinite(o.hours));
+  const singleOptions = candidates.map((c) => single(c, hours(c))).filter((o) => isFinite(o.hours));
 
   // two-phase: a faster cover first (rim firms up), then a slower one
   const twoPhase: Extract<PlanOption, { kind: 'twoPhase' }>[] = [];
   for (const a of candidates) {
     for (const b of candidates) {
       if (a === b) continue;
-      if (!(singles[a] < H && singles[b] > H)) continue;
+      if (!(hours(a) < H && hours(b) > H)) continue;
       let lo = 0;
       let hi = H;
       for (let i = 0; i < cfg.bisectionSteps; i++) {
@@ -93,9 +123,13 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
   const close = singleOptions
     .filter((o) => Math.abs(o.hours - H) / H <= cfg.targetTolerance)
     .sort((p, q) => Math.abs(p.hours - H) - Math.abs(q.hours - H));
-  // prefer: open first, then the gentlest wrap that is slower than target
-  const rank = (o: (typeof twoPhase)[number]): number => (o.first === 'open' ? 0 : 10) + COVERS.indexOf(o.then);
-  twoPhase.sort((p, q) => rank(p) - rank(q));
+  // prefer: the first catalog cover (normally open) first, then the gentlest wrap that is slower than target
+  const rank = (o: (typeof twoPhase)[number]): [number, number] => [o.first === ids[0] ? 0 : 1, ids.indexOf(o.then)];
+  twoPhase.sort((p, q) => {
+    const [p0, p1] = rank(p);
+    const [q0, q1] = rank(q);
+    return p0 - q0 || p1 - q1;
+  });
 
   let recommendation: Recommendation;
   let chosen: PlanOption | undefined;
@@ -105,22 +139,8 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
   } else if (twoPhase.length) {
     chosen = twoPhase[0]!;
     recommendation = { status: 'onTarget', option: chosen };
-  } else if (!filtered) {
-    // nothing excluded: the original fallbacks ("open" / "box", times over every cover)
-    const all = COVERS.map((c) => singles[c]);
-    const fastest = Math.min(...all);
-    recommendation =
-      H < fastest
-        ? { status: 'tooFast', fastestHours: fastest, option: single('open', fastest) }
-        : { status: 'tooSlow', slowestHours: Math.max(...all), option: single('box', singles.box) };
   } else {
-    // fastest / slowest candidate by hours; ties go to the earlier one in COVERS order
-    const fastest = candidates.reduce((p, c) => (singles[c] < singles[p] ? c : p));
-    const slowest = candidates.reduce((p, c) => (singles[c] > singles[p] ? c : p));
-    recommendation =
-      H < singles[fastest]
-        ? { status: 'tooFast', fastestHours: singles[fastest], option: single(fastest, singles[fastest]) }
-        : { status: 'tooSlow', slowestHours: singles[slowest], option: single(slowest, singles[slowest]) };
+    recommendation = fallback(H, hours, ids, candidates, filtered);
   }
   const alternatives = [...close, ...twoPhase].filter((o) => o !== chosen).slice(0, 3);
   const excludedWouldMeet =

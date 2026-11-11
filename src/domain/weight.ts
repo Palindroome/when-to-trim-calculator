@@ -1,6 +1,6 @@
 import { MS_PER_HOUR } from './params';
 import { hoursToLoss, type DryingContext } from './simulate';
-import type { Cover } from './types';
+import type { CoverId } from './covers';
 
 export type WeightAssessment =
   | {
@@ -19,7 +19,7 @@ export interface WeightCheckInput {
   /** mass now, g */
   currentMassG: number;
   /** cover used since throwing (for the model estimate) */
-  cover: Cover;
+  cover: CoverId;
   /** epoch ms "now" */
   nowMs: number;
 }

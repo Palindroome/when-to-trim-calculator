@@ -1,4 +1,5 @@
-import type { AirflowId, BatId, ClayId, Cover, FeedbackKind, ShapeId, StageId, WetnessId } from './types';
+import type { CoverDefinition } from './covers';
+import type { AirflowId, BatId, ClayId, FeedbackKind, ShapeId, StageId, WetnessId } from './types';
 
 /**
  * Every tunable number of the drying model in one place.
@@ -19,8 +20,11 @@ export interface ModelParams {
   rhClamp: { min: number; max: number };
   /** night hours [from, to) when night conditions apply */
   night: { fromHour: number; toHour: number };
-  /** fraction of open-air drying speed kept by each cover */
-  coverFactor: Record<Cover, number>;
+  /**
+   * Built-in covers, from fastest to slowest drying. The list order is the canonical order
+   * (bars, weight-check select, calibration table, two-phase ranking).
+   */
+  covers: readonly CoverDefinition[];
   /** air-movement multiplier near the shelf */
   airflowFactor: Record<AirflowId, number>;
   shapes: Record<ShapeId, { areaFactor: number; slowFactor: number }>;
@@ -79,7 +83,13 @@ export const DEFAULT_PARAMS: ModelParams = {
   minVpd: 0.05,
   rhClamp: { min: 1, max: 99 },
   night: { fromHour: 22, toHour: 7 },
-  coverFactor: { open: 1, partial: 0.3, full: 0.07, box: 0.05, damp: 0.6 },
+  covers: [
+    { id: 'open', factor: 1, airflow: 'full', environment: 'room' },
+    { id: 'partial', factor: 0.3, airflow: 'damped', environment: 'room' },
+    { id: 'damp', factor: 0.6, airflow: 'none', environment: 'dampRoom', gate: 'longWaitOrSoft' },
+    { id: 'full', factor: 0.07, airflow: 'none', environment: 'room' },
+    { id: 'box', factor: 0.05, airflow: 'none', environment: 'room' },
+  ],
   airflowFactor: { still: 1, light: 1.6, draft: 2.6 },
   shapes: {
     cyl: { areaFactor: 1.6, slowFactor: 1.0 },

@@ -1,15 +1,14 @@
 import type { ConditionsSource } from '../domain/conditions';
-import {
-  COVERS,
-  type AirflowId,
-  type BatId,
-  type ClayId,
-  type Conditions,
-  type Cover,
-  type PieceInput,
-  type ShapeId,
-  type StageId,
-  type WetnessId,
+import type { CoverDefinition, CoverId } from '../domain/covers';
+import type {
+  AirflowId,
+  BatId,
+  ClayId,
+  Conditions,
+  PieceInput,
+  ShapeId,
+  StageId,
+  WetnessId,
 } from '../domain/types';
 import type { Formatter, Messages } from '../i18n';
 import { byId } from './dom';
@@ -104,17 +103,17 @@ export const readWhenMs = (): number => readDateTime('when');
 
 export const readName = (): string => value('name').trim();
 
-/** Covers ticked in "Sposoby okrycia, których mogę użyć", in COVERS order. */
-export function readAllowedCovers(): Cover[] {
+/** Covers ticked in "Sposoby okrycia, których mogę użyć", in catalog order. */
+export function readAllowedCovers(covers: readonly CoverDefinition[]): CoverId[] {
   const checked = new Set(
     [...document.querySelectorAll<HTMLInputElement>('input[data-cover]')].filter((e) => e.checked).map((e) => e.dataset.cover),
   );
-  return COVERS.filter((c) => checked.has(c));
+  return covers.map((c) => c.id).filter((c) => checked.has(c));
 }
 
 /** Mass check inputs; thrown mass falls back to 0 (not 500) here, so an empty field hides the check. */
-export const readWeightInputs = (): { thrownMassG: number; currentMassG: number; cover: Cover } => ({
+export const readWeightInputs = (): { thrownMassG: number; currentMassG: number; cover: CoverId } => ({
   thrownMassG: num('mass', 0),
   currentMassG: num('mnow', NaN),
-  cover: value('wnow') as Cover,
+  cover: value('wnow') as CoverId,
 });

@@ -1,4 +1,5 @@
 export * from './types';
+export * from './covers';
 export * from './params';
 export * from './piece';
 export * from './physics';
