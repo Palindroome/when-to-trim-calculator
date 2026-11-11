@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { STORAGE_KEY, fill, openApp, snapshot } from './helpers';
+import { STORAGE_KEY, openApp, setDateTime, snapshot } from './helpers';
 
 const LABELS = ['Odkryta', 'Worek częściowo', 'Mokra przechowalnia', 'Cały worek', 'Pudełko'];
 const DEFAULT_PLAN = 'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.';
@@ -72,7 +72,7 @@ test.describe('covering methods filter', () => {
 
   test('too fast without "Odkryta": falls back to the loose bag and names it', async ({ page }) => {
     await openApp(page);
-    await fill(page, 'Chcę trymować', '2026-03-04T11:00');
+    await setDateTime(page, 'Chcę trymować', '2026-03-04T11:00');
     await box(page, 'Odkryta').uncheck();
     await expect(page.locator('.rec .k')).toHaveText('Uwaga');
     await expect(page.locator('.rec .big')).toHaveText(
@@ -84,7 +84,7 @@ test.describe('covering methods filter', () => {
 
   test('too slow without the box and the full bag: names the slowest allowed cover', async ({ page }) => {
     await openApp(page);
-    await fill(page, 'Chcę trymować', '2026-03-24T10:00');
+    await setDateTime(page, 'Chcę trymować', '2026-03-24T10:00');
     await box(page, 'Pudełko').uncheck();
     await box(page, 'Cały worek').uncheck();
     await expect(page.locator('.rec .big')).toHaveText(

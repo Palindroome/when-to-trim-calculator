@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { STORAGE_KEY, fill, openApp, snapshot } from './helpers';
+import { STORAGE_KEY, expectDateTime, fill, openApp, setDateTime, snapshot } from './helpers';
 
 const EMPTY =
   'Nie ma jeszcze zapisanych prac. Zapisz pracę z planem, a gdy będziesz ją trymować, oceń, jak trafiła prognoza. Po kilku ocenach czasy dopasują się do Twojej pracowni.';
@@ -86,7 +86,7 @@ test.describe('saved pieces', () => {
     await page.reload();
     await expect(pieces(page).locator('.badge')).toHaveText('powinna być gotowa');
     // thrown date resets to "now" on reload (it is not persisted)
-    await expect(page.getByLabel('Wytoczona', { exact: true })).toHaveValue('2026-03-06T11:00');
+    await expectDateTime(page, 'Wytoczona', '2026-03-06T11:00');
   });
 
   test('feedback within the first 15 minutes is ignored', async ({ page }) => {
@@ -203,7 +203,7 @@ test.describe('saved pieces', () => {
 
   test('a piece can be saved from the "too fast" warning (plan without a window)', async ({ page }) => {
     await openApp(page);
-    await fill(page, 'Chcę trymować', '2026-03-04T11:00');
+    await setDateTime(page, 'Chcę trymować', '2026-03-04T11:00');
     await expect(page.locator('.rec .k')).toHaveText('Uwaga');
     await saveBtn(page).click();
     await expect(pieces(page).locator('.meta')).toHaveText(
@@ -218,7 +218,7 @@ test.describe('saved pieces', () => {
 
   test('a piece can be saved from the "too slow" warning (box plan)', async ({ page }) => {
     await openApp(page);
-    await fill(page, 'Chcę trymować', '2026-03-24T10:00');
+    await setDateTime(page, 'Chcę trymować', '2026-03-24T10:00');
     await saveBtn(page).click();
     await expect(pieces(page).locator('.meta')).toContainText('Włóż do zamkniętego pudełka od razu.');
     expect((await stored(page)).pieces[0].dom).toBe('box');

@@ -41,9 +41,11 @@ export type Field =
   | 'Wilgotność nocą'
   | 'Mokra przechowalnia: temp.'
   | 'Mokra przechowalnia: wilg.'
-  | 'Wytoczona'
-  | 'Chcę trymować'
   | 'Masa teraz';
+
+/** The two day + time pickers in "3 Termin", by their Polish legend. */
+export type DateField = 'Wytoczona' | 'Chcę trymować';
+const DATE_IDS: Record<DateField, string> = { Wytoczona: 'thrown', 'Chcę trymować': 'when' };
 
 export type SelectField =
   | 'Kształt'
@@ -64,6 +66,46 @@ export async function fill(page: Page, label: Field, value: string): Promise<voi
 
 export async function choose(page: Page, label: SelectField, value: string): Promise<void> {
   await field(page, label).selectOption(value);
+}
+
+/** The calendar dialog of a picker, and a day button in it by its day of the month. */
+export const calendarDialog = (page: Page, label: DateField): Locator => page.locator(`#${DATE_IDS[label]}-cal`);
+export const calendarDay = (page: Page, label: DateField, dayOfMonth: number): Locator =>
+  calendarDialog(page, label).locator('calendar-month button[part~="day"]', { hasText: new RegExp(`^${dayOfMonth}$`) });
+
+/**
+ * Sets a picker as a user would, from `YYYY-MM-DDTHH:mm`: opens the calendar from the day button, pages to
+ * the month, clicks the day, then types the time. An empty value clears the time (an unreadable date-time).
+ */
+export async function setDateTime(page: Page, label: DateField, value: string): Promise<void> {
+  const id = DATE_IDS[label];
+  const [day = '', time = ''] = value.split('T');
+  if (day) {
+    const [current = ''] = (await dateTimeValue(page, label)).split('T');
+    const month = (key: string): number => Number(key.slice(0, 4)) * 12 + Number(key.slice(5, 7));
+    const pages = month(day) - month(current);
+    await page.locator(`#${id}-day-btn`).click();
+    const dialog = calendarDialog(page, label);
+    await expect(dialog).toBeVisible();
+    for (let i = 0; i < Math.abs(pages); i++) {
+      await dialog.locator(`[part~="${pages > 0 ? 'next' : 'previous'}"]`).click();
+    }
+    await calendarDay(page, label, Number(day.slice(8, 10))).click();
+    await expect(dialog).toBeHidden();
+  }
+  await page.locator(`#${id}-time`).fill(time);
+}
+
+/** The picker's value as `YYYY-MM-DDTHH:mm` (the stored day key and the typed time). */
+export async function dateTimeValue(page: Page, label: DateField): Promise<string> {
+  return page.evaluate((id) => {
+    const value = (part: string): string => (document.getElementById(`${id}-${part}`) as HTMLInputElement).value;
+    return `${value('day')}T${value('time')}`;
+  }, DATE_IDS[label]);
+}
+
+export async function expectDateTime(page: Page, label: DateField, value: string): Promise<void> {
+  await expect.poll(() => dateTimeValue(page, label)).toBe(value);
 }
 
 export async function setNight(page: Page, on: boolean): Promise<void> {

@@ -132,6 +132,29 @@ export const pl = {
 
   quickDate: (days: number): string => (days === 1 ? 'jutro' : days === 7 ? 'za tydzień' : `za ${days} dni`),
 
+  /** Day + 24 h time picker in section 3 (thrown and trim date). */
+  dateTime: {
+    day: 'Dzień',
+    time: 'Godzina',
+    timePlaceholder: 'gg:mm',
+    invalidTime: 'Wpisz godzinę jako gg:mm, np. 9:30.',
+    /** calendar paging buttons (icons on screen, these are their names) */
+    previousMonth: 'Poprzedni miesiąc',
+    nextMonth: 'Następny miesiąc',
+    today: 'dziś',
+    yesterday: 'wczoraj',
+    tomorrow: 'jutro',
+    /** chosen day with a relative word, e.g. "dziś · śr 4.03" */
+    relativeDay: (relative: string, date: string): string => `${relative} · ${date}`,
+    /** quick choices for the throwing time */
+    presets: {
+      now: 'teraz',
+      hourAgo: 'godzinę temu',
+      morning: 'dziś rano',
+      lastEvening: 'wczoraj wieczorem',
+    },
+  },
+
   weightHint:
     'Zważ pracę (bez batu) przy toczeniu i teraz. Utracona masa mówi więcej niż dotyk, zwłaszcza przy grubym dnie.',
 
@@ -265,6 +288,8 @@ export const pl = {
     days: (n: number): string => `${n} d`,
     daysHours: (d: number, h: number): string => `${d} d ${h} h`,
     beyondHorizon: (days: number): string => `> ${days} dni`,
+    /** e.g. "śr 4.03" */
+    date: (weekday: string, day: number, month: string, _monthShort: string): string => `${weekday} ${day}.${month}`,
     /** e.g. "śr 4.03 10:00" */
     dateTime: (weekday: string, day: number, month: string, hh: string, mm: string, _monthShort: string): string =>
       `${weekday} ${day}.${month} ${hh}:${mm}`,
