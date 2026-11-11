@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createFormatter } from '../i18n';
 import { en } from '../i18n/en';
 import { pl } from '../i18n/pl';
-import { combineLocalDateTime, dayLabel, normalizeTime, parseNumber, toDayKey, toTime } from './form';
+import { combineLocalDateTime, dayLabel, normalizeTime, parseNumber, readAllowedCovers, toDayKey, toTime } from './form';
 
 describe('parseNumber', () => {
   it.each([
@@ -101,5 +101,22 @@ describe('dayLabel', () => {
     // Europe/Warsaw moves to summer time on 29 March 2026
     expect(dayLabel(pl, fmt, '2026-03-28', new Date(2026, 2, 29, 0, 30).getTime())).toBe('wczoraj · sob 28.03');
     expect(dayLabel(pl, fmt, '', now)).toBe('');
+  });
+});
+
+describe('readAllowedCovers', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('returns the ticked covers in cover-list order', () => {
+    // the unit tests run without a DOM: stub the one query the reader makes
+    const boxes = [
+      { cover: 'box', checked: true },
+      { cover: 'open', checked: false },
+      { cover: 'full', checked: true },
+      { cover: 'partial', checked: true },
+      { cover: 'damp', checked: false },
+    ].map(({ cover, checked }) => ({ checked, dataset: { cover } }));
+    vi.stubGlobal('document', { querySelectorAll: (sel: string) => (sel === 'input[data-cover]' ? boxes : []) });
+    expect(readAllowedCovers()).toEqual(['partial', 'full', 'box']);
   });
 });

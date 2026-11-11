@@ -109,11 +109,14 @@ test.describe('language switch', () => {
     expect(await page.locator('#wout').innerText()).toBe(weightPl);
   });
 
-  test('the thrown preset and a calendar-picked day survive a switch', async ({ page }) => {
+  test('the thrown preset, a calendar-picked day and the cover selection survive a switch together', async ({ page }) => {
     await openApp(page);
     await page.locator('#thrown-quick').getByRole('button', { name: 'wczoraj wieczorem' }).click();
     await setDateTime(page, 'Chcę trymować', '2026-04-20T7.05');
+    await page.getByRole('checkbox', { name: 'Pudełko', exact: true }).uncheck();
     await toEnglish(page);
+    await expect(page.getByRole('checkbox', { name: 'Closed box', exact: true })).not.toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'Uncovered', exact: true })).toBeChecked();
     await expectDateTime(page, 'Wytoczona', '2026-03-03T19:00');
     await expect(page.locator('#thrown-quick .chip[aria-pressed="true"]')).toHaveText(['last evening']);
     await expectDateTime(page, 'Chcę trymować', '2026-04-20T07:05');

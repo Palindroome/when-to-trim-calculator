@@ -167,6 +167,9 @@ export const pl = {
       damp: 'Mokra przechowalnia',
     } satisfies Record<Cover, string>,
     phrase: coverPhrase,
+    filterTitle: 'Sposoby okrycia, których mogę użyć',
+    filterHint: 'Odznacz to, czego tym razem nie możesz lub nie chcesz użyć. Dotyczy tylko tej pracy i jej zapisanego planu.',
+    filterLastOne: 'Zostaw zaznaczony co najmniej jeden sposób.',
   },
 
   plan: {
@@ -184,6 +187,7 @@ export const pl = {
     windowOpenEnd: '…',
     compareTitle: 'Ile to potrwa w każdym wariancie',
     dampNote: 'tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni',
+    excludedBar: 'wyłączone',
     legend: (deadline: string): string =>
       `Pionowa kreska to Twój termin (${deadline}). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.`,
     noDeadline: '–',
@@ -197,6 +201,11 @@ export const pl = {
       `Nawet odkryta będzie gotowa najwcześniej za ${duration}. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.`,
     tooSlow: (duration: string): string =>
       `Nawet w najszczelniejszym opatuleniu zajmie to ${duration} lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.`,
+    tooFastWith: (duration: string, cover: string): string =>
+      `Nawet przy najszybszym dostępnym sposobie (${cover}) będzie gotowa najwcześniej za ${duration}. Postaw ją w cieplejszym miejscu z ruchem powietrza, przesuń termin albo włącz inne sposoby okrycia.`,
+    tooSlowWith: (duration: string, cover: string): string =>
+      `Nawet przy najwolniejszym dostępnym sposobie (${cover}) zajmie to ${duration} lub mniej. Sprawdzaj wcześniej albo włącz inne sposoby okrycia.`,
+    excludedWouldMeet: 'Z wyłączonymi sposobami okrycia zdążyłaby na ten termin.',
   },
 
   tips: {

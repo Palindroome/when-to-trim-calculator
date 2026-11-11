@@ -384,6 +384,7 @@ test.describe('calendar', () => {
     await expectDateTime(page, 'Chcę trymować', '2026-04-14T10:00');
     // the paging buttons work from the keyboard too
     await page.keyboard.press('Enter');
+    await expect(calendarDay(page, 'Chcę trymować', 14)).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('Shift+Tab');
     await expect(calendarDialog(page, 'Chcę trymować').getByRole('button', { name: 'Poprzedni miesiąc' })).toBeFocused();
@@ -597,6 +598,8 @@ test.describe('date-time keyboard use', () => {
     // trim: one day later in the calendar, then a typed time, then a preset with Enter
     await page.locator('#when-day-btn').focus();
     await page.keyboard.press('Enter');
+    // the calendar moves focus to the chosen day once it has rendered
+    await expect(calendarDay(page, 'Chcę trymować', 6)).toBeFocused();
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('Enter');
     await expect(page.locator('#when-day-btn')).toBeFocused();
