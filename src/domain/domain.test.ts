@@ -3,10 +3,11 @@ import { feedbackToSample, geometricMeanCalibrator } from './calibration';
 import { DEFAULT_PARAMS, MS_PER_HOUR } from './params';
 import { physicalRateModel, psat } from './physics';
 import { derivePiece } from './piece';
-import { dominantCover, planDrying } from './planner';
+import { dominantCover, planDrying, type PlanResult } from './planner';
 import { hoursToLoss, simulate } from './simulate';
 import { DEFAULT_CONDITIONS, DEFAULT_INPUT, START, constantRateModel, makeContext } from './testing';
 import { tipsFor } from './tips';
+import { COVERS, type Cover } from './types';
 import { assessWeight } from './weight';
 
 const P = DEFAULT_PARAMS;
@@ -199,6 +200,93 @@ describe('planDrying', () => {
     expect(uses(planDrying(ctx, 96, 'trim'))).toBe(true);
     const soft = makeContext({ input: { stage: 'soft' } });
     expect(uses(planDrying(soft, 49, 'soft'))).toBe(true);
+  });
+});
+
+describe('planDrying with allowed covers', () => {
+  const ctx = makeContext();
+  const all: Cover[] = [...COVERS];
+  const except = (...out: Cover[]): Cover[] => all.filter((c) => !out.includes(c));
+  /** every cover used by the recommendation and the alternatives */
+  const used = (r: PlanResult): Cover[] => {
+    const opts = [...('option' in r.recommendation ? [r.recommendation.option] : []), ...r.alternatives];
+    return opts.flatMap((o) => o.plan.map((s) => s.cover));
+  };
+
+  it('no options, all covers or an empty list give the same result as before', () => {
+    for (const [h, stage] of [[49, 'trim'], [25, 'trim'], [2, 'trim'], [24 * 20, 'trim'], [95.75, 'trim'], [96, 'trim'], [49, 'soft']] as const) {
+      const base = planDrying(ctx, h, stage);
+      expect(base.excludedWouldMeet).toBe(false);
+      expect(planDrying(ctx, h, stage, { allowed: all })).toEqual(base);
+      expect(planDrying(ctx, h, stage, { allowed: [] })).toEqual(base);
+    }
+  });
+
+  it('excluding open at 49 h: open is never used, partial then full is recommended', () => {
+    const r = planDrying(ctx, 49, 'trim', { allowed: except('open') });
+    expect(used(r)).not.toContain('open');
+    expect(r.recommendation.status).toBe('onTarget');
+    if (r.recommendation.status !== 'onTarget') return;
+    expect(r.recommendation.option).toMatchObject({ kind: 'twoPhase', first: 'partial', then: 'full' });
+  });
+
+  it('excluding open at 2 h: too fast, falls back to the loose bag', () => {
+    const r = planDrying(ctx, 2, 'trim', { allowed: except('open') });
+    expect(r.recommendation.status).toBe('tooFast');
+    if (r.recommendation.status !== 'tooFast') return;
+    expect(r.recommendation.option).toMatchObject({ kind: 'single', cover: 'partial', hours: r.singles.partial });
+    expect(r.recommendation.fastestHours).toBe(r.singles.partial);
+    expect(r.excludedWouldMeet).toBe(false);
+  });
+
+  it('excluding box and full at 20 days: too slow, falls back to the slowest allowed cover', () => {
+    const allowed = except('box', 'full');
+    const r = planDrying(ctx, 24 * 20, 'trim', { allowed });
+    expect(r.recommendation.status).toBe('tooSlow');
+    if (r.recommendation.status !== 'tooSlow') return;
+    const slowest = Math.max(...allowed.map((c) => r.singles[c]));
+    expect(r.recommendation.slowestHours).toBe(slowest);
+    expect(r.recommendation.option.kind).toBe('single');
+    if (r.recommendation.option.kind !== 'single') return;
+    expect(allowed).toContain(r.recommendation.option.cover);
+    expect(r.singles[r.recommendation.option.cover]).toBe(slowest);
+  });
+
+  it('one allowed cover: no alternatives, status depends on the deadline', () => {
+    const only = { allowed: ['partial'] as Cover[] };
+    const on = planDrying(ctx, 25, 'trim', only);
+    expect(on.recommendation).toMatchObject({ status: 'onTarget', option: { kind: 'single', cover: 'partial' } });
+    expect(on.alternatives).toEqual([]);
+    const fast = planDrying(ctx, 2, 'trim', only);
+    expect(fast.recommendation).toMatchObject({ status: 'tooFast', option: { cover: 'partial' } });
+    expect(fast.alternatives).toEqual([]);
+    const slow = planDrying(ctx, 24 * 20, 'trim', only);
+    expect(slow.recommendation).toMatchObject({ status: 'tooSlow', option: { cover: 'partial' } });
+    expect(slow.alternatives).toEqual([]);
+  });
+
+  it('only the damp room allowed: it is used even for a short wait', () => {
+    const r = planDrying(ctx, 49, 'trim', { allowed: ['damp'] });
+    expect(r.recommendation.status).not.toBe('invalidDeadline');
+    expect(used(r)).toEqual(['damp']);
+  });
+
+  it('flags when an excluded cover would meet the deadline', () => {
+    const r = planDrying(ctx, 49, 'trim', { allowed: ['box'] });
+    expect(r.recommendation.status).toBe('tooFast');
+    expect(r.excludedWouldMeet).toBe(true);
+    expect(planDrying(ctx, 49, 'trim').excludedWouldMeet).toBe(false);
+  });
+
+  it('still times every cover for the bars', () => {
+    const r = planDrying(ctx, 49, 'trim', { allowed: ['partial'] });
+    expect(Object.keys(r.singles)).toEqual([...COVERS]);
+    expect(r.singles).toEqual(planDrying(ctx, 49, 'trim').singles);
+  });
+
+  it('ignores unknown cover ids', () => {
+    const r = planDrying(ctx, 49, 'trim', { allowed: ['paperBag', 'open', 'full'] as unknown as Cover[] });
+    expect(used(r).every((c) => c === 'open' || c === 'full')).toBe(true);
   });
 });
 

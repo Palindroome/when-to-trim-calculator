@@ -9,9 +9,9 @@ export type Recommendation =
   /** the trim date is not after the throwing date */
   | { status: 'invalidDeadline' }
   | { status: 'onTarget'; option: PlanOption }
-  /** even uncovered the piece will not be ready in time; falls back to "leave open" */
+  /** even the fastest allowed cover (normally "open") is too slow; falls back to it */
   | { status: 'tooFast'; option: PlanOption; fastestHours: number }
-  /** even the tightest cover gets there too early; falls back to "box" */
+  /** even the slowest allowed cover (normally "box") gets there too early; falls back to it */
   | { status: 'tooSlow'; option: PlanOption; slowestHours: number };
 
 export interface PlanResult {
@@ -22,6 +22,13 @@ export interface PlanResult {
   recommendation: Recommendation;
   /** up to three other plans that also meet the deadline */
   alternatives: PlanOption[];
+  /** the allowed covers miss the deadline, but planning with every cover would meet it */
+  excludedWouldMeet: boolean;
+}
+
+export interface PlanOptions {
+  /** covers the planner may use; omitted or empty = all covers */
+  allowed?: readonly Cover[];
 }
 
 const single = (cover: Cover, hours: number): PlanOption => ({
@@ -38,21 +45,27 @@ export function dominantCover(plan: Plan, dominantFirstPhaseHours: number): Cove
 }
 
 /** Finds how to cover the piece so it reaches its target loss at `deadlineHours` after throwing. */
-export function planDrying(ctx: DryingContext, deadlineHours: number, stage: StageId): PlanResult {
+export function planDrying(ctx: DryingContext, deadlineHours: number, stage: StageId, options: PlanOptions = {}): PlanResult {
   const H = deadlineHours;
   const cfg = ctx.params.planner;
   const target = ctx.piece.lossPct;
+  const { allowed } = options;
+  const allowedSet = allowed?.length ? COVERS.filter((c) => allowed.includes(c)) : COVERS;
+  const filtered = allowedSet.length < COVERS.length;
 
+  // every cover, also the excluded ones, so the bars can compare them all
   const singles = {} as Record<Cover, number>;
   for (const c of COVERS) singles[c] = hoursToLoss([{ cover: c, hours: Infinity }], ctx, target);
 
   if (!(H > 0)) {
-    return { deadlineHours: H, singles, recommendation: { status: 'invalidDeadline' }, alternatives: [] };
+    return { deadlineHours: H, singles, recommendation: { status: 'invalidDeadline' }, alternatives: [], excludedWouldMeet: false };
   }
 
-  // the damp room is small: suggest it only for very wet work or long waits
+  // the damp room is small: suggest it only for very wet work or long waits,
+  // unless it is the only cover allowed
   const allowDamp = stage === 'soft' || H >= cfg.dampMinHours;
-  const candidates = COVERS.filter((c) => c !== 'damp' || allowDamp);
+  const gated = allowedSet.filter((c) => c !== 'damp' || allowDamp);
+  const candidates = gated.length ? gated : allowedSet;
 
   const singleOptions = candidates.map((c) => single(c, singles[c])).filter((o) => isFinite(o.hours));
 
@@ -92,14 +105,25 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
   } else if (twoPhase.length) {
     chosen = twoPhase[0]!;
     recommendation = { status: 'onTarget', option: chosen };
-  } else {
+  } else if (!filtered) {
+    // nothing excluded: the original fallbacks ("open" / "box", times over every cover)
     const all = COVERS.map((c) => singles[c]);
     const fastest = Math.min(...all);
     recommendation =
       H < fastest
         ? { status: 'tooFast', fastestHours: fastest, option: single('open', fastest) }
         : { status: 'tooSlow', slowestHours: Math.max(...all), option: single('box', singles.box) };
+  } else {
+    // fastest / slowest candidate by hours; ties go to the earlier one in COVERS order
+    const fastest = candidates.reduce((p, c) => (singles[c] < singles[p] ? c : p));
+    const slowest = candidates.reduce((p, c) => (singles[c] > singles[p] ? c : p));
+    recommendation =
+      H < singles[fastest]
+        ? { status: 'tooFast', fastestHours: singles[fastest], option: single(fastest, singles[fastest]) }
+        : { status: 'tooSlow', slowestHours: singles[slowest], option: single(slowest, singles[slowest]) };
   }
   const alternatives = [...close, ...twoPhase].filter((o) => o !== chosen).slice(0, 3);
-  return { deadlineHours: H, singles, recommendation, alternatives };
+  const excludedWouldMeet =
+    filtered && recommendation.status !== 'onTarget' && planDrying(ctx, H, stage).recommendation.status === 'onTarget';
+  return { deadlineHours: H, singles, recommendation, alternatives, excludedWouldMeet };
 }
