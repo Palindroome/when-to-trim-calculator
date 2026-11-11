@@ -113,7 +113,11 @@ test.describe('inputs and defaults', () => {
       // "inna data…" comes last; its native date input stays hidden until chosen
       await expect(page.locator(`#${id}-day option`).last()).toHaveText('inna data…');
       await expect(page.locator(`#${id}-date`)).toBeHidden();
+      await page.locator(`#${id}-day`).selectOption('other');
+      await expect(page.locator(`#${id}-date`)).toBeVisible();
+      await expect(page.locator(`#${id}-date`)).toHaveAccessibleName(`${legend} Dzień inna data…`);
     }
+    await page.reload();
     // thrown: the last 14 days up to today; trim: yesterday up to 30 days ahead
     await expect(page.locator('#thrown-day option')).toHaveCount(14 + 1);
     await expect(page.locator('#thrown-day option').first()).toHaveText('czw 19.02');

@@ -290,13 +290,15 @@ export function startApp(deps: AppDeps): void {
 
   /** Fills the day selects: thrown from 13 days ago to today, trim from yesterday to the model horizon. */
   function fillDays(): void {
-    const html = (from: number, to: number): string =>
-      dayOptions(m, view.fmt, now(), from, to)
+    const fill = (id: DateTimeId, from: number, to: number): void => {
+      byId(`${id}-day`).innerHTML = dayOptions(m, view.fmt, now(), from, to)
         .map((o) => `<option value="${o.value}">${o.label}</option>`)
-        .concat(`<option value="${OTHER_DAY}">${m.dateTime.otherDay}</option>`)
+        // the id names the revealed date input "<field> Dzień inna data…"
+        .concat(`<option id="${id}-other" value="${OTHER_DAY}">${m.dateTime.otherDay}</option>`)
         .join('');
-    byId('thrown-day').innerHTML = html(-THROWN_PAST_DAYS, 0);
-    byId('when-day').innerHTML = html(-1, params.horizonHours / 24);
+    };
+    fill('thrown', -THROWN_PAST_DAYS, 0);
+    fill('when', -1, params.horizonHours / 24);
   }
 
   // ---------- language ----------

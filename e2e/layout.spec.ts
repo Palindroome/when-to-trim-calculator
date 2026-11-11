@@ -77,6 +77,30 @@ test.describe('layout', () => {
     });
   }
 
+  for (const width of [320, 340, 360, 375, 414, 480, 1280]) {
+    test(`${width}px: every day option fits the day select, in Polish and English`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      // two-digit days and month ends give the longest labels, e.g. "yesterday · Tue 24 Feb"
+      await openApp(page, { now: '2026-02-25T09:00:00+01:00' });
+      await page.evaluate(() => document.fonts.ready);
+      for (const lang of ['Polski', 'English'] as const) {
+        await page.getByRole('button', { name: lang, exact: true }).click();
+        const overflow = await page.locator('#thrown-day, #when-day').evaluateAll((selects) =>
+          selects.flatMap((el) => {
+            const s = getComputedStyle(el);
+            const room = el.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight);
+            const ctx = document.createElement('canvas').getContext('2d')!;
+            ctx.font = `${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
+            return [...(el as HTMLSelectElement).options]
+              .filter((o) => ctx.measureText(o.text).width > room)
+              .map((o) => `${el.id}: "${o.text}" > ${room}px`);
+          }),
+        );
+        expect(overflow).toEqual([]);
+      }
+    });
+  }
+
   test('result block sits between "Termin" and "Sprawdź wagą"', async ({ page }) => {
     await openApp(page);
     const order = await page.locator('main > section').evaluateAll((els) =>

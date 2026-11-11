@@ -19,7 +19,7 @@ function dateTimeField(m: Messages, id: 'thrown' | 'when', legend: string, chips
         <div class="dt-row">
           <div class="dt-day"><label id="${id}-day-label" for="${id}-day">${d.day}</label>
             <select id="${id}-day" ${name('day')}></select>
-            <input id="${id}-date" type="date" class="hide" ${name('day')}></div>
+            <input id="${id}-date" type="date" class="hide" aria-labelledby="${id}-legend ${id}-day-label ${id}-other"></div>
           <div class="dt-time"><label id="${id}-time-label" for="${id}-time">${d.time}</label>
             <input id="${id}-time" type="text" inputmode="numeric" autocomplete="off" placeholder="${d.timePlaceholder}" ${name('time')}></div>
         </div>
