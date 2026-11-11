@@ -1,12 +1,12 @@
 // English UI strings, translated from ./pl.ts (the source of truth for `Messages`).
 // Keys ending in `Html` contain trusted markup and are inserted unescaped.
 
-import type { Cover } from '../domain/types';
+import type { BuiltInCoverId } from '../domain/covers';
 import type { Messages } from './pl';
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
-const coverPhrase: Record<Cover, string> = {
+const coverPhrase: Record<BuiltInCoverId, string> = {
   open: 'leave uncovered',
   partial: 'cover loosely with a bag (base or rim exposed)',
   full: 'wrap fully in a bag',
@@ -185,9 +185,9 @@ export const en: Messages = {
   },
 
   plan: {
-    single: (cover: Cover): string => `${cap(coverPhrase[cover])} straight away.`,
-    twoPhase: (first: Cover, duration: string, until: string, then: Cover): string =>
-      `${cap(coverPhrase[first])} for ${duration} (until ${until}), then ${coverPhrase[then]}.`,
+    single: (cover: string): string => `${cap(cover)} straight away.`,
+    twoPhase: (first: string, duration: string, until: string, then: string): string =>
+      `${cap(first)} for ${duration} (until ${until}), then ${then}.`,
   },
 
   result: {

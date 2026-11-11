@@ -55,8 +55,9 @@ describe('decimal', () => {
 
 describe('catalog', () => {
   it('plan sentences', () => {
-    expect(pl.plan.single('open')).toBe('Zostaw odkrytą od razu.');
-    expect(pl.plan.twoPhase('partial', '3 h', 'śr 4.03 12:00', 'box')).toBe(
+    const p = pl.covers.phrase;
+    expect(pl.plan.single(p.open)).toBe('Zostaw odkrytą od razu.');
+    expect(pl.plan.twoPhase(p.partial, '3 h', 'śr 4.03 12:00', p.box)).toBe(
       'Przykryj luźno workiem (dno lub brzeg odsłonięte) na 3 h (do śr 4.03 12:00), potem włóż do zamkniętego pudełka.',
     );
   });
@@ -105,8 +106,9 @@ describe('English', () => {
   });
 
   it('catalog sentences', () => {
-    expect(en.plan.single('open')).toBe('Leave uncovered straight away.');
-    expect(en.plan.twoPhase('open', '4 h', 'Wed 4 Mar 12:30', 'full')).toBe(
+    const p = en.covers.phrase;
+    expect(en.plan.single(p.open)).toBe('Leave uncovered straight away.');
+    expect(en.plan.twoPhase(p.open, '4 h', 'Wed 4 Mar 12:30', p.full)).toBe(
       'Leave uncovered for 4 h (until Wed 4 Mar 12:30), then wrap fully in a bag.',
     );
     expect([1, 2, 3, 5, 7].map(en.quickDate)).toEqual(['tomorrow', 'in 2 days', 'in 3 days', 'in 5 days', 'in a week']);

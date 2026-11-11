@@ -1,3 +1,4 @@
+import { type CoverDefinition, coverById } from './covers';
 import { type ModelParams, MS_PER_HOUR } from './params';
 import type { RateModel } from './physics';
 import type { Conditions, CoverMultipliers, Piece, Plan } from './types';
@@ -11,6 +12,8 @@ export interface DryingContext {
   multipliers: CoverMultipliers;
   model: RateModel;
   params: ModelParams;
+  /** the covers plans may use, in canonical order */
+  covers: readonly CoverDefinition[];
 }
 
 /**
@@ -20,6 +23,7 @@ export interface DryingContext {
  */
 export function simulate(plan: Plan, ctx: DryingContext, targetsPct: readonly number[]): number[] {
   const { piece, conditions, startMs, multipliers, model, params } = ctx;
+  const defs = plan.map((s) => coverById(ctx.covers, s.cover));
   const dt = params.stepHours;
   const targets = targetsPct.map((pct) => (piece.mass * pct) / 100);
   const out = targets.map(() => Infinity);
@@ -33,7 +37,7 @@ export function simulate(plan: Plan, ctx: DryingContext, targetsPct: readonly nu
       seg++;
       segEnd += plan[seg]!.hours;
     }
-    const r = model.rate(plan[seg]!.cover, startMs + t * MS_PER_HOUR, piece, conditions, multipliers);
+    const r = model.rate(defs[seg]!, startMs + t * MS_PER_HOUR, piece, conditions, multipliers);
     const next = lost + r * dt;
     while (idx < targets.length && next >= targets[idx]!) {
       out[idx] = t + (dt * (targets[idx]! - lost)) / Math.max(1e-9, next - lost);

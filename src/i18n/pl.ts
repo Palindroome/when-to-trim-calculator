@@ -2,12 +2,13 @@
 // A new language: copy en.ts, translate, type it as `Messages`, register it in ./index.ts.
 // Keys ending in `Html` contain trusted markup and are inserted unescaped.
 
+import type { BuiltInCoverId } from '../domain/covers';
 import type { TipId } from '../domain/tips';
-import type { AirflowId, BatId, ClayId, Cover, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
+import type { AirflowId, BatId, ClayId, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
-const coverPhrase: Record<Cover, string> = {
+const coverPhrase: Record<BuiltInCoverId, string> = {
   open: 'zostaw odkrytą',
   partial: 'przykryj luźno workiem (dno lub brzeg odsłonięte)',
   full: 'zawiń całą w worek',
@@ -186,17 +187,18 @@ export const pl = {
       full: 'Cały worek',
       box: 'Pudełko',
       damp: 'Mokra przechowalnia',
-    } satisfies Record<Cover, string>,
+    } satisfies Record<BuiltInCoverId, string>,
     phrase: coverPhrase,
     filterTitle: 'Sposoby okrycia, których mogę użyć',
     filterHint: 'Odznacz to, czego tym razem nie możesz lub nie chcesz użyć. Dotyczy tylko tej pracy i jej zapisanego planu.',
     filterLastOne: 'Zostaw zaznaczony co najmniej jeden sposób.',
   },
 
+  /** take cover phrases (`covers.phrase`), so a cover can supply its own text */
   plan: {
-    single: (cover: Cover): string => `${cap(coverPhrase[cover])} od razu.`,
-    twoPhase: (first: Cover, duration: string, until: string, then: Cover): string =>
-      `${cap(coverPhrase[first])} na ${duration} (do ${until}), potem ${coverPhrase[then]}.`,
+    single: (cover: string): string => `${cap(cover)} od razu.`,
+    twoPhase: (first: string, duration: string, until: string, then: string): string =>
+      `${cap(first)} na ${duration} (do ${until}), potem ${then}.`,
   },
 
   result: {

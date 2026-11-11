@@ -1,5 +1,6 @@
 // Shared fixtures for unit tests (not imported by the app).
 import { geometricMeanCalibrator } from './calibration';
+import type { CoverDefinition } from './covers';
 import { DEFAULT_PARAMS, type ModelParams } from './params';
 import { physicalRateModel, type RateModel } from './physics';
 import { derivePiece } from './piece';
@@ -32,20 +33,29 @@ export const DEFAULT_CONDITIONS: Conditions = {
 export const START = new Date(2026, 2, 4, 9, 0).getTime();
 
 export function makeContext(
-  over: { input?: Partial<PieceInput>; conditions?: Partial<Conditions>; params?: ModelParams; model?: RateModel; startMs?: number } = {},
+  over: {
+    input?: Partial<PieceInput>;
+    conditions?: Partial<Conditions>;
+    params?: ModelParams;
+    model?: RateModel;
+    startMs?: number;
+    covers?: readonly CoverDefinition[];
+  } = {},
 ): DryingContext {
   const params = over.params ?? DEFAULT_PARAMS;
+  const covers = over.covers ?? params.covers;
   return {
     piece: derivePiece({ ...DEFAULT_INPUT, ...over.input }, params),
     conditions: { ...DEFAULT_CONDITIONS, ...over.conditions },
     startMs: over.startMs ?? START,
-    multipliers: geometricMeanCalibrator([], params).multipliers(),
+    multipliers: geometricMeanCalibrator([], params).multipliers(covers.map((c) => c.id)),
     model: over.model ?? physicalRateModel(params),
     params,
+    covers,
   };
 }
 
 /** A rate model with a fixed g/h per cover, handy for checking the simulator arithmetic. */
 export const constantRateModel = (gPerHour: Partial<Record<string, number>>): RateModel => ({
-  rate: (cover) => gPerHour[cover] ?? 0,
+  rate: (cover) => gPerHour[cover.id] ?? 0,
 });

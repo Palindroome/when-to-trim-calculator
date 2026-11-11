@@ -6,7 +6,7 @@ import { pl } from '../i18n/pl';
 import type { StoredPiece } from '../storage/pieces';
 import { renderPieceList, renderSummaries, type SummaryInput, type View } from './render';
 
-const view = (m: Messages): View => ({ m, params: DEFAULT_PARAMS, fmt: createFormatter(m, 30) });
+const view = (m: Messages): View => ({ m, params: DEFAULT_PARAMS, fmt: createFormatter(m, 30), covers: DEFAULT_PARAMS.covers });
 const start = new Date(2026, 2, 4, 9, 0).getTime();
 
 const piece = (over: Partial<StoredPiece>): StoredPiece => ({
