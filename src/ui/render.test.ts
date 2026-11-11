@@ -41,7 +41,10 @@ describe('renderPieceList plan sentence', () => {
 
   it('re-renders a two-phase plan with its switch time', () => {
     const p = piece({
-      plan: [{ w: 'open', h: 3.5 }, { w: 'full', h: null }],
+      plan: [
+        { w: 'open', h: 3.5 },
+        { w: 'full', h: null },
+      ],
       label: 'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.',
     });
     expect(planLine(view(en), p)).toBe('Leave uncovered for 4 h (until Wed 4 Mar 12:30), then wrap fully in a bag.');
@@ -50,13 +53,32 @@ describe('renderPieceList plan sentence', () => {
   });
 
   it.each<[string, unknown]>([
-    ['three steps', [{ w: 'open', h: 1 }, { w: 'partial', h: 2 }, { w: 'full', h: null }]],
+    [
+      'three steps',
+      [
+        { w: 'open', h: 1 },
+        { w: 'partial', h: 2 },
+        { w: 'full', h: null },
+      ],
+    ],
     ['empty', []],
     ['not an array', null],
     ['unknown cover', [{ w: 'shelf', h: null }]],
-    ['first step without hours', [{ w: 'open', h: null }, { w: 'full', h: null }]],
+    [
+      'first step without hours',
+      [
+        { w: 'open', h: null },
+        { w: 'full', h: null },
+      ],
+    ],
     ['open-ended first step', [{ w: 'open', h: 2 }]],
-    ['last step with hours', [{ w: 'open', h: 2 }, { w: 'full', h: 5 }]],
+    [
+      'last step with hours',
+      [
+        { w: 'open', h: 2 },
+        { w: 'full', h: 5 },
+      ],
+    ],
   ])('falls back to the stored label for an unexpected plan (%s)', (_, plan) => {
     const p = piece({ plan: plan as StoredPiece['plan'], label: 'Etykieta <b>' });
     expect(planLine(view(en), p)).toBe('Etykieta &lt;b&gt;');

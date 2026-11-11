@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LANGUAGE_KEY, THEME_KEY, loadLanguage, loadTheme, saveLanguage, saveTheme } from './preferences';
+import { LANGUAGE_KEY, loadLanguage, loadTheme, saveLanguage, saveTheme, THEME_KEY } from './preferences';
 
 class MemoryStorage {
   data = new Map<string, string>();

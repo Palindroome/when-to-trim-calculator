@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createFormatter } from './format';
 import { en } from './en';
+import { createFormatter } from './format';
 import { DEFAULT_LOCALE, getMessages, LOCALES, resolveLocale } from './index';
 import { pl } from './pl';
 

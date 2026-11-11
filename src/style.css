@@ -183,6 +183,7 @@ select{appearance:none;padding-right:var(--space-7);cursor:pointer;
   width:var(--space-4);height:var(--space-4);border-radius:var(--radius-sm);background:var(--text-muted)}
 .check input:checked{background:var(--accent);border-color:var(--accent)}
 .check input:checked::before{background:var(--accent-contrast);transform:translateX(var(--space-4))}
+/* biome-ignore lint/complexity/noImportantStyles: the utility must win over every component's display rule */
 .hide{display:none!important}
 
 /* covers the planner may use */

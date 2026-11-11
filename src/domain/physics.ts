@@ -35,10 +35,7 @@ export function physicalRateModel(p: ModelParams): RateModel {
       }
       const clampedRh = Math.min(p.rhClamp.max, Math.max(p.rhClamp.min, rh));
       const vpd = Math.max(p.minVpd, psat(temp) * (1 - clampedRh / 100));
-      return (
-        (p.evaporationCoefficient * piece.area * vpd * air * cover.factor) /
-        (piece.slow * (multipliers[cover.id] ?? 1))
-      );
+      return (p.evaporationCoefficient * piece.area * vpd * air * cover.factor) / (piece.slow * (multipliers[cover.id] ?? 1));
     },
   };
 }

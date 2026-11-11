@@ -1,4 +1,4 @@
-import { coverById, type CoverDefinition } from './covers';
+import { type CoverDefinition, coverById } from './covers';
 import type { ModelParams } from './params';
 import { psat } from './physics';
 import type { Recommendation } from './planner';
@@ -7,13 +7,7 @@ import type { Conditions, Piece } from './types';
 export type TipId = 'dryAirRim' | 'thickBase' | 'mould';
 
 /** Practical warnings shown under the comparison bars, in display order. */
-export function tipsFor(
-  rec: Recommendation,
-  piece: Piece,
-  env: Conditions,
-  p: ModelParams,
-  covers: readonly CoverDefinition[],
-): TipId[] {
+export function tipsFor(rec: Recommendation, piece: Piece, env: Conditions, p: ModelParams, covers: readonly CoverDefinition[]): TipId[] {
   // note: uses the raw daytime humidity, without the clamp applied in the rate model
   const vpd = psat(env.temp) * (1 - env.rh / 100);
   const option = rec.status === 'invalidDeadline' ? undefined : rec.option;

@@ -3,8 +3,10 @@
 # line per step. A failing step also prints the tail of its log; full logs stay
 # in the directory printed at the end.
 #
-#   check.sh                 typecheck, unit, e2e, build
-#   check.sh unit e2e        only the named steps (typecheck|unit|e2e|build)
+#   check.sh                 lint, typecheck, unit, e2e, build
+#   check.sh unit e2e        only the named steps (lint|typecheck|unit|e2e|build)
+#
+# lint runs `npm run lint` and `npm run format:check`.
 #
 # Each Playwright run gets its own free port (E2E_PORT), so it never reuses a
 # server from another worktree. Exit code is non-zero if any step failed.
@@ -13,11 +15,11 @@
 steps=()
 for a in "$@"; do
   case $a in
-    typecheck|unit|e2e|build) steps+=("$a") ;;
+    lint|typecheck|unit|e2e|build) steps+=("$a") ;;
     *) die "unknown step: $a" ;;
   esac
 done
-[[ ${#steps[@]} -gt 0 ]] || steps=(typecheck unit e2e build)
+[[ ${#steps[@]} -gt 0 ]] || steps=(lint typecheck unit e2e build)
 
 cd "$ROOT" || exit 1
 load_node
@@ -31,6 +33,7 @@ summary() { # <log> -> pass/fail/skip counts from vitest or playwright output
 for s in "${steps[@]}"; do
   log="$LOGS/$s.log"
   case $s in
+    lint) { npm run -s lint && npm run -s format:check; } >"$log" 2>&1 ;;
     typecheck) npm run -s typecheck >"$log" 2>&1 ;;
     unit) npm run -s test:unit >"$log" 2>&1 ;;
     e2e) E2E_PORT=$(free_port) npm run -s test:e2e >"$log" 2>&1 ;;

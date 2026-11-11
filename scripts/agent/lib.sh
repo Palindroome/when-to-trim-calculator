@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Shared helpers for the agent scripts. Sourced, not run.
 # The scripts exist so agents never have to pass quoted shell through
 # PowerShell -> wsl, which mangles ", |, ( and $(...).

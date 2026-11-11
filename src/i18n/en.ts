@@ -233,8 +233,7 @@ export const en: Messages = {
     observedRate: (gramsPerHour: string, remaining: string): string =>
       ` At the current rate (${gramsPerHour} g/h) about ${remaining} to go.`,
     modelEstimate: (remaining: string): string => ` With this covering it needs about ${remaining} more.`,
-    inWindow: (loss: string): string =>
-      `Loss ${loss}%: it is in the trimming window. If you trim later, wrap it in a bag.`,
+    inWindow: (loss: string): string => `Loss ${loss}%: it is in the trimming window. If you trim later, wrap it in a bag.`,
     tooHard: (loss: string): string =>
       `Loss ${loss}%: probably already too firm for smooth trimming. Try wrapping it with a damp sponge for a few hours.`,
   },

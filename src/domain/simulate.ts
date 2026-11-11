@@ -1,5 +1,5 @@
-import { coverById, type CoverDefinition } from './covers';
-import { MS_PER_HOUR, type ModelParams } from './params';
+import { type CoverDefinition, coverById } from './covers';
+import { type ModelParams, MS_PER_HOUR } from './params';
 import type { RateModel } from './physics';
 import type { Conditions, CoverMultipliers, Piece, Plan } from './types';
 
@@ -50,5 +50,4 @@ export function simulate(plan: Plan, ctx: DryingContext, targetsPct: readonly nu
 }
 
 /** Hours to reach a single target loss. */
-export const hoursToLoss = (plan: Plan, ctx: DryingContext, targetPct: number): number =>
-  simulate(plan, ctx, [targetPct])[0]!;
+export const hoursToLoss = (plan: Plan, ctx: DryingContext, targetPct: number): number => simulate(plan, ctx, [targetPct])[0]!;

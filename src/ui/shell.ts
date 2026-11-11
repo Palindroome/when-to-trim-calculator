@@ -47,9 +47,7 @@ function dateTimeField(m: Messages, id: 'thrown' | 'when', legend: string, chips
 }
 
 const options = <K extends string>(order: readonly K[], labels: Record<K, string>, selected?: K): string =>
-  order
-    .map((k) => `<option value="${k}"${k === selected ? ' selected' : ''}>${labels[k]}</option>`)
-    .join('\n          ');
+  order.map((k) => `<option value="${k}"${k === selected ? ' selected' : ''}>${labels[k]}</option>`).join('\n          ');
 
 /** `PL | EN` segmented control; one button per registered locale code. */
 function languageSwitch(m: Messages, locales: readonly string[]): string {

@@ -1,14 +1,12 @@
-import { MS_PER_HOUR } from './params';
-import { hoursToLoss, type DryingContext } from './simulate';
 import type { CoverId } from './covers';
+import { MS_PER_HOUR } from './params';
+import { type DryingContext, hoursToLoss } from './simulate';
 
 export type WeightAssessment =
   | {
       state: 'wet';
       lossPct: number;
-      estimate:
-        | { kind: 'observedRate'; gramsPerHour: number; remainingHours: number }
-        | { kind: 'model'; remainingHours: number };
+      estimate: { kind: 'observedRate'; gramsPerHour: number; remainingHours: number } | { kind: 'model'; remainingHours: number };
     }
   | { state: 'ok'; lossPct: number }
   | { state: 'dry'; lossPct: number };

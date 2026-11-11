@@ -63,7 +63,7 @@ Validation reports and hand-off reports never go to the issue. They pass only be
 - **Changes:**
   - Commits are small and focused, written in the imperative mood, and may reference the issue (`Fixes #N` in the final commit body).
   - The configured git identity is used, with no AI attribution (see `CLAUDE.md`).
-- **Before handing off:** `npm run typecheck`, `npm run test:unit`, `npm run test:e2e` and `npm run build` must all pass. New behaviour has tests, and golden data is re-recorded only for scenarios that are meant to change.
+- **Before handing off:** `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run test:unit`, `npm run test:e2e` and `npm run build` must all pass. New behaviour has tests, and golden data is re-recorded only for scenarios that are meant to change.
 - **Validation loop (up to 3 rounds):** the implementer owns the loop and its status labels. It posts no issue comments in the loop.
   1. It sets `status:needs-validation` and spawns a **fresh** validator with the branch, the issue, the round number and, from round 2 on, the previous report.
   2. If the report says changes are requested, it sets `status:in-progress`, fixes every finding, re-runs all checks, commits, and starts the next round.
@@ -82,7 +82,7 @@ Validation reports and hand-off reports never go to the issue. They pass only be
 - The agent works in its own worktree (`~/wtc-worktrees/validate-<branch>`) and does not edit files or commit.
 - It checks:
   1. **Requirements:** every acceptance criterion in the issue is met (or the task description, when there is no issue).
-  2. **Checks:** a clean `npm ci`, then `typecheck`, `test:unit`, `test:e2e` and `build`, all re-run by the validator itself. It does not trust the implementer's report.
+  2. **Checks:** a clean `npm ci`, then `lint` (with `format:check`), `typecheck`, `test:unit`, `test:e2e` and `build`, all re-run by the validator itself. It does not trust the implementer's report.
   3. **Behaviour:**
      - bugs are reproduced on `main` and confirmed fixed on the branch;
      - UI changes are checked at 320/375/1280 px;

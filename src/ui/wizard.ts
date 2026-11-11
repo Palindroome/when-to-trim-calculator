@@ -30,7 +30,9 @@ export function createWizard(root: HTMLElement, store: WizardStore, onEnd: (outc
     const all = steps();
     const last = all.length - 1;
     root.classList.toggle('wizard', open);
-    all.forEach((s, k) => s.classList.toggle('current', open && k === i));
+    all.forEach((s, k) => {
+      s.classList.toggle('current', open && k === i);
+    });
     byId('wizard-progress').textContent = open ? m.wizard.progress(i + 1, all.length, titles()[i]!) : '';
     byId('wizard-back').hidden = i === 0;
     byId('wizard-next').textContent = i === last ? m.wizard.finish : m.wizard.next;
