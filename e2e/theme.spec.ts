@@ -33,6 +33,7 @@ const TOKEN_PAIRS: [string, string, number][] = [
   ['--wet', '--wet-soft', 4.5],
   ['--input-border', '--surface', 3],
   ['--input-border', '--bg', 3],
+  ['--input-border', '--surface-2', 3],
   ['--ring', '--surface', 3],
   ['--ring', '--bg', 3],
   // comparison bars: fill, on-target fill and deadline marker against the track
