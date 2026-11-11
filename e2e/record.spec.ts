@@ -18,5 +18,5 @@ test('record golden snapshots', async ({ page }) => {
     await applySteps(page, s.steps);
     out[s.name] = await snapshot(page);
   }
-  writeFileSync(fileURLToPath(new URL('./golden.json', import.meta.url)), JSON.stringify(out, null, 2) + '\n');
+  writeFileSync(fileURLToPath(new URL('./golden.json', import.meta.url)), `${JSON.stringify(out, null, 2)}\n`);
 });

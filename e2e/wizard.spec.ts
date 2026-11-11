@@ -89,7 +89,7 @@ test.describe('wizard', () => {
     await walkThrough(page);
     expect(await visibleSections(page)).toEqual(ALL);
     expect(await focused(page)).toBe('#result');
-    expect(await snapshot(page)).toEqual(GOLDEN['defaults']);
+    expect(await snapshot(page)).toEqual(GOLDEN.defaults);
     await expect(summary(page, 1)).toHaveText('Kubek / cylinder · 500 g · ścianka 6 mm, dno 9 mm · Kamionka gładka');
     await expect(summary(page, 2)).toHaveText('20 °C, 50% · Lekki ruch (ludzie, wentylacja)');
     await expect(summary(page, 3)).toHaveText('Wytoczona śr 4.03 09:00 · trymowanie pt 6.03 10:00');

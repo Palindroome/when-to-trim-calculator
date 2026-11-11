@@ -446,7 +446,10 @@ test.describe('calendar', () => {
       const tokens = await page.evaluate(() => {
         const probe = document.createElement('div');
         document.body.append(probe);
-        const resolve = (v: string): string => ((probe.style.color = `var(${v})`), getComputedStyle(probe).color);
+        const resolve = (v: string): string => {
+          probe.style.color = `var(${v})`;
+          return getComputedStyle(probe).color;
+        };
         const out = { hover: resolve('--accent-hover'), contrast: resolve('--accent-contrast') };
         probe.remove();
         return out;
