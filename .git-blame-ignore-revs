@@ -1,0 +1,9 @@
+# Mechanical reformatting commits, skipped by `git blame` (GitHub reads this file;
+# locally: git config blame.ignoreRevsFile .git-blame-ignore-revs).
+
+# style(tests): reformat TypeScript sources with Biome
+6b3d6ef52d408873393901f5066e92240be874c2
+# style(tests): sort imports and exports with Biome
+4ce18daf2507e08fb9c908f6b198e86597efb6c1
+# style(e2e): apply Biome's second formatting pass to design.spec.ts
+74c35ad57aa6fe13346a2b01f8a8478392d8716d
