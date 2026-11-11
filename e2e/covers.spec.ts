@@ -113,7 +113,11 @@ test.describe('covering methods filter', () => {
       ['id', 'name', 'start', 'mass', 'lossPct', 'plan', 'label', 'dom', 'predH', 'calUsed', 'ws', 'we', 'fb'].sort(),
     );
     // nothing about the filter is stored anywhere
-    expect(await page.evaluate(() => Object.keys(localStorage).sort())).toEqual(['kiedy-trymowac-v1', 'kiedy-trymowac-wizard']);
+    expect(await page.evaluate(() => Object.keys(localStorage).sort())).toEqual([
+      'kiedy-trymowac-last-active',
+      'kiedy-trymowac-v1',
+      'kiedy-trymowac-wizard',
+    ]);
 
     const before = await stored(page);
     await page.reload();

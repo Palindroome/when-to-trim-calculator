@@ -235,7 +235,8 @@ test.describe('welcome screen', () => {
     // a new piece starts from fresh defaults, thrown "now"
     await newPiece(page).click();
     await expect(page.locator('#mass')).toHaveValue('500');
-    await expect(page.locator('#thrown')).toHaveValue('2026-03-04T10:31');
+    await expect(page.locator('#thrown-day')).toHaveValue('2026-03-04');
+    await expect(page.locator('#thrown-time')).toHaveValue('10:31');
   });
 
   test('a restored page (bfcache pageshow) after more than an hour shows it', async ({ page }) => {
