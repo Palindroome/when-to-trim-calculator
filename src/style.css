@@ -144,9 +144,20 @@ select{appearance:none;padding-right:var(--space-7);cursor:pointer;
 /* covers the planner may use */
 .covers{min-width:0;margin:var(--space-5) 0 0;padding:0;border:0}
 .covers legend{padding:0;margin-bottom:var(--space-1);font-size:var(--text-sm);font-weight:500;color:var(--text)}
-.covers .opts{display:flex;flex-wrap:wrap;gap:0 var(--space-5)}
+.covers .opts{display:flex;flex-wrap:wrap;gap:var(--space-1)}
 .covers p{margin:var(--space-2) 0 0;font-size:var(--text-sm)}
-.check input:disabled{opacity:.5;cursor:not-allowed}
+/* toggle pill: a real checkbox stretched invisibly over the visible face, so clicks, keys and focus stay native */
+.pill{position:relative;display:block;margin:0;font-size:var(--text-sm);font-weight:400}
+.pill input{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:0;opacity:0;cursor:pointer;z-index:1}
+.pill .face{display:flex;align-items:center;gap:var(--space-1);min-height:var(--control-h);padding:0 var(--space-2);white-space:nowrap;
+  color:var(--text-muted);background:var(--surface);border:1px solid var(--input-border);border-radius:var(--radius-md)}
+.pill .ico{flex:none}
+.pill .ico.on,.pill input:checked+.face .ico.off{display:none}
+.pill input:checked+.face .ico.on{display:block}
+.pill input:checked+.face{color:var(--accent);background:var(--accent-soft);border-color:var(--accent)}
+.pill input:not(:checked):hover+.face{background:var(--surface-2)}
+.pill input:focus-visible+.face{outline:var(--ring-width) solid var(--ring);outline-offset:var(--ring-width)}
+.pill input:disabled{cursor:not-allowed}
 
 /* ---------- buttons ---------- */
 button:focus-visible,summary:focus-visible{outline:var(--ring-width) solid var(--ring);outline-offset:var(--ring-width)}

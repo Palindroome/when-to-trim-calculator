@@ -6,7 +6,7 @@ const DEFAULT_PLAN = 'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń c
 const NO_OPEN_PLAN = 'Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.';
 
 const group = (page: Page) => page.getByRole('group', { name: 'Sposoby okrycia, których mogę użyć' });
-const box = (page: Page, label: string) => group(page).getByRole('switch', { name: label, exact: true });
+const box = (page: Page, label: string) => group(page).getByRole('checkbox', { name: label, exact: true });
 const lastOne = (page: Page) => page.getByText('Zostaw zaznaczony co najmniej jeden sposób.');
 const saveBtn = (page: Page) => page.getByRole('button', { name: 'Zapisz tę pracę z planem' });
 const stored = (page: Page) => page.evaluate((k) => localStorage.getItem(k), STORAGE_KEY);
@@ -18,9 +18,9 @@ async function only(page: Page, keep: string): Promise<void> {
 test.describe('covering methods filter', () => {
   test('all covers are offered and ticked by default; the result is unchanged', async ({ page }) => {
     await openApp(page);
-    await expect(group(page).getByRole('switch')).toHaveCount(5);
+    await expect(group(page).getByRole('checkbox')).toHaveCount(5);
     for (const [i, l] of LABELS.entries()) {
-      await expect(group(page).getByRole('switch').nth(i)).toHaveAccessibleName(l);
+      await expect(group(page).getByRole('checkbox').nth(i)).toHaveAccessibleName(l);
       await expect(box(page, l)).toBeChecked();
       await expect(box(page, l)).toBeEnabled();
     }
@@ -129,8 +129,8 @@ test.describe('covering methods filter', () => {
     await box(page, 'Odkryta').uncheck();
     await page.locator('[data-lang="en"]').click();
     const en = page.getByRole('group', { name: 'Covering methods I can use' });
-    await expect(en.getByRole('switch', { name: 'Uncovered', exact: true })).not.toBeChecked();
-    await expect(en.getByRole('switch', { name: 'Loosely bagged', exact: true })).toBeChecked();
+    await expect(en.getByRole('checkbox', { name: 'Uncovered', exact: true })).not.toBeChecked();
+    await expect(en.getByRole('checkbox', { name: 'Loosely bagged', exact: true })).toBeChecked();
     await expect(page.locator('#result .bar.off')).toContainText('Uncovered · excluded');
     await page.locator('[data-lang="pl"]').click();
     await expect(box(page, 'Odkryta')).not.toBeChecked();
@@ -145,5 +145,52 @@ test.describe('covering methods filter', () => {
     await expect(page.locator('.rec .big')).toHaveText(NO_OPEN_PLAN);
     await page.keyboard.press('Tab');
     await expect(box(page, 'Worek częściowo')).toBeFocused();
+    // the focus ring is drawn on the visible pill
+    const ring = await page.locator('.pill .face').nth(1).evaluate((el) => parseFloat(getComputedStyle(el).outlineWidth));
+    expect(ring).toBeGreaterThanOrEqual(2);
+  });
+
+  test('pills show a check when ticked and a cross when not', async ({ page }) => {
+    await openApp(page);
+    await box(page, 'Odkryta').uncheck();
+    const pill = (i: number) => page.locator('.pill .face').nth(i);
+    await expect(pill(0).locator('.ico.off')).toBeVisible();
+    await expect(pill(0).locator('.ico.on')).toBeHidden();
+    await expect(pill(1).locator('.ico.on')).toBeVisible();
+    await expect(pill(1).locator('.ico.off')).toBeHidden();
+    const bg = (i: number) => pill(i).evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(await bg(1)).not.toBe(await bg(0));
+  });
+});
+
+test.describe('covering methods layout', () => {
+  /** top edge and right edge of each pill, plus the fieldset's right edge */
+  const geometry = (page: Page) =>
+    page.locator('#covers').evaluate((fs) => ({
+      tops: [...fs.querySelectorAll('.pill')].map((p) => Math.round(p.getBoundingClientRect().top)),
+      rights: [...fs.querySelectorAll('.pill')].map((p) => p.getBoundingClientRect().right),
+      heights: [...fs.querySelectorAll('.pill')].map((p) => p.getBoundingClientRect().height),
+      edge: fs.getBoundingClientRect().right,
+    }));
+
+  test('1280 px: all five pills share one row, each 44 px tall', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openApp(page);
+    const g = await geometry(page);
+    expect(g.tops).toHaveLength(5);
+    expect(new Set(g.tops).size).toBe(1);
+    for (const h of g.heights) expect(h).toBeGreaterThanOrEqual(44);
+  });
+
+  test('320 px: pills wrap without overflowing', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await openApp(page);
+    const g = await geometry(page);
+    for (const r of g.rights) expect(r).toBeLessThanOrEqual(g.edge + 0.5);
+    const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
   });
 });

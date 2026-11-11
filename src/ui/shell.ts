@@ -29,6 +29,15 @@ const THEME_ICONS: Record<ThemeChoice, string> = {
   dark: '<path d="M15.5 10.5A6.5 6.5 0 1 1 7.5 2.5a5 5 0 0 0 8 8z"/>',
 };
 
+/** Check (ticked) and cross (unticked) icons of a cover pill; CSS shows the one matching the checkbox. */
+const PILL_ICONS = ['on', 'off']
+  .map(
+    (k) =>
+      `<svg class="ico ${k}" viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">` +
+      `<path d="${k === 'on' ? 'M2.5 7.5l3 3 6-7' : 'M3.5 3.5l7 7M10.5 3.5l-7 7'}"/></svg>`,
+  )
+  .join('');
+
 /** `System | Light | Dark` segmented control with icons; names come from the catalog. */
 function themeSwitch(m: Messages, current: ThemeChoice): string {
   const buttons = THEME_CHOICES.map(
@@ -134,7 +143,7 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
     <fieldset class="covers" id="covers">
       <legend>${m.covers.filterTitle}</legend>
       <div class="opts">
-        ${COVERS.map((c) => `<label class="check"><input type="checkbox" role="switch" data-cover="${c}" checked> ${m.covers.label[c]}</label>`).join('\n        ')}
+        ${COVERS.map((c) => `<label class="pill"><input type="checkbox" data-cover="${c}" checked><span class="face">${PILL_ICONS}${m.covers.label[c]}</span></label>`).join('\n        ')}
       </div>
       <p class="muted" id="covers-hint">${m.covers.filterHint}</p>
       <p class="muted hide" id="covers-last" aria-live="polite">${m.covers.filterLastOne}</p>
