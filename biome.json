@@ -18,9 +18,16 @@
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
-    "rules": { "preset": "recommended" }
+    "rules": {
+      "preset": "recommended",
+      "style": { "noNonNullAssertion": "off", "noDescendingSpecificity": "off" }
+    }
   },
   "overrides": [
+    {
+      "includes": ["e2e/**"],
+      "linter": { "rules": { "performance": { "useDomNodeTextContent": "off" } } }
+    },
     {
       "includes": ["src/domain/**"],
       "linter": {
