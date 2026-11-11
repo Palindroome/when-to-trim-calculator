@@ -410,6 +410,62 @@ test.describe('calendar', () => {
     await expect(calendarDay(page, 'Wytoczona', 4)).toBeEnabled();
     await expect(page.locator('#thrown-cal calendar-month button[part~="thrown"]')).toHaveCount(0);
   });
+
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`${scheme}: unavailable days and paging buttons look inert; the backdrop dims the page`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await openApp(page);
+      await page.locator('#thrown-day-btn').click();
+      const dialog = calendarDialog(page, 'Wytoczona');
+      await expect(dialog).toBeVisible();
+      const look = (l: Locator) => l.evaluate((el) => ({ cursor: getComputedStyle(el).cursor, bg: getComputedStyle(el).backgroundColor }));
+
+      // today is the max: later days are disabled and the "next month" button is aria-disabled
+      const next = dialog.getByRole('button', { name: 'Następny miesiąc' });
+      await expect(next).toHaveAttribute('aria-disabled', 'true');
+      for (const inert of [calendarDay(page, 'Wytoczona', 20), next]) {
+        const before = await look(inert);
+        expect(before.cursor).toBe('not-allowed');
+        await inert.hover({ force: true });
+        expect((await look(inert)).bg).toBe(before.bg);
+      }
+      // guard: an available day and an enabled paging button do react to hover
+      for (const live of [calendarDay(page, 'Wytoczona', 3), dialog.getByRole('button', { name: 'Poprzedni miesiąc' })]) {
+        const before = await look(live);
+        expect(before.cursor).toBe('pointer');
+        await live.hover();
+        await expect.poll(async () => (await look(live)).bg).not.toBe(before.bg);
+      }
+      // the selected day (today) stays readable on hover: an accent background under the accent-contrast text
+      const selected = calendarDay(page, 'Wytoczona', 4);
+      await expect(selected).toHaveAttribute('aria-pressed', 'true');
+      await selected.hover();
+      const tokens = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        document.body.append(probe);
+        const resolve = (v: string): string => ((probe.style.color = `var(${v})`), getComputedStyle(probe).color);
+        const out = { hover: resolve('--accent-hover'), contrast: resolve('--accent-contrast') };
+        probe.remove();
+        return out;
+      });
+      await expect.poll(async () => (await look(selected)).bg).toBe(tokens.hover);
+      expect(await selected.evaluate((el) => getComputedStyle(el).color)).toBe(tokens.contrast);
+
+      // the backdrop is a scrim token that makes the page behind it darker in both schemes
+      const { backdrop, page: bg } = await page.evaluate(() => ({
+        backdrop: getComputedStyle(document.getElementById('thrown-cal')!, '::backdrop').backgroundColor,
+        page: getComputedStyle(document.body).backgroundColor,
+      }));
+      const luminance = (css: string, under: number[] = [0, 0, 0]): number => {
+        const [r = 0, g = 0, b = 0, a = 1] = (css.match(/[\d.]+/g) ?? []).map(Number);
+        const mix = [r, g, b].map((c, i) => (c * a + under[i]! * (1 - a)) / 255);
+        const lin = mix.map((s) => (s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4));
+        return 0.2126 * lin[0]! + 0.7152 * lin[1]! + 0.0722 * lin[2]!;
+      };
+      const pageRgb = (bg.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+      expect(luminance(backdrop, pageRgb)).toBeLessThan(luminance(bg) * 0.75);
+    });
+  }
 });
 
 test.describe('thrown presets', () => {
