@@ -47,7 +47,7 @@ src/
     piece.ts          derivePiece: area, slowness, target loss / trimming window
     physics.ts        psat, RateModel interface, physicalRateModel
     simulate.ts       time-stepping simulation of a covering plan
-    planner.ts        planDrying: single / two-phase plans, warnings, alternatives
+    planner.ts        planDrying: single / two-phase plans, warnings, alternatives; optional allow-list of covers
     calibration.ts    Calibrator interface, geometricMeanCalibrator, feedbackToSample
     weight.ts         weight check (loss vs. window, time remaining)
     tips.ts           which practical tips apply

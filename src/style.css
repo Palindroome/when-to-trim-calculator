@@ -141,6 +141,24 @@ select{appearance:none;padding-right:var(--space-7);cursor:pointer;
 .check input:checked::before{background:var(--accent-contrast);transform:translateX(var(--space-4))}
 .hide{display:none!important}
 
+/* covers the planner may use */
+.covers{min-width:0;margin:var(--space-5) 0 0;padding:0;border:0}
+.covers legend{padding:0;margin-bottom:var(--space-1);font-size:var(--text-sm);font-weight:500;color:var(--text)}
+.covers .opts{display:flex;flex-wrap:wrap;gap:var(--space-1)}
+.covers p{margin:var(--space-2) 0 0;font-size:var(--text-sm)}
+/* toggle pill: a real checkbox stretched invisibly over the visible face, so clicks, keys and focus stay native */
+.pill{position:relative;display:block;margin:0;font-size:var(--text-sm);font-weight:400}
+.pill input{position:absolute;inset:0;width:100%;height:100%;min-height:0;margin:0;padding:0;opacity:0;cursor:pointer;z-index:1}
+.pill .face{display:flex;align-items:center;gap:var(--space-1);min-height:var(--control-h);padding:0 var(--space-2);white-space:nowrap;
+  color:var(--text-muted);background:var(--surface);border:1px solid var(--input-border);border-radius:var(--radius-md)}
+.pill .ico{flex:none}
+.pill .ico.on,.pill input:checked+.face .ico.off{display:none}
+.pill input:checked+.face .ico.on{display:block}
+.pill input:checked+.face{color:var(--accent);background:var(--accent-soft);border-color:var(--accent)}
+.pill input:not(:checked):hover+.face{background:var(--surface-2)}
+.pill input:focus-visible+.face{outline:var(--ring-width) solid var(--ring);outline-offset:var(--ring-width)}
+.pill input:disabled{cursor:not-allowed}
+
 /* ---------- buttons ---------- */
 button:focus-visible,summary:focus-visible{outline:var(--ring-width) solid var(--ring);outline-offset:var(--ring-width)}
 button.main{width:100%;min-height:var(--control-h);padding:var(--space-2) var(--space-4);font-family:inherit;font-size:var(--text-md);font-weight:600;
@@ -160,6 +178,7 @@ button.ghost:hover{background:var(--surface-2)}
 .rec.err{background:var(--warn-soft);border-color:var(--warn-soft);border-top-color:var(--warn)}
 .rec.err .k{color:var(--warn)}
 .rec.err .big{font-size:var(--text-lg);color:var(--warn);margin:0}
+.rec.err .extra{flex-basis:100%;font-size:var(--text-md);color:var(--warn)}
 
 .bars{margin-top:var(--space-2)}
 .bar{display:grid;grid-template-columns:128px minmax(0,1fr) 76px;gap:var(--space-3);align-items:center;padding:var(--space-3) 0;border-bottom:1px solid var(--border);font-size:var(--text-sm);line-height:var(--leading-tight)}
@@ -168,6 +187,8 @@ button.ghost:hover{background:var(--surface-2)}
 .track{position:relative;height:var(--space-2);background:var(--track);border-radius:var(--radius-sm);box-shadow:inset 0 0 0 1px var(--border)}
 .fill{position:absolute;left:0;top:0;bottom:0;border-radius:var(--radius-sm);background:var(--fill)}
 .fill.good{background:var(--ok)}
+.bar.off{color:var(--text-muted)}
+.bar.off .fill{opacity:.4}
 .target{position:absolute;top:calc(-1 * var(--space-1));bottom:calc(-1 * var(--space-1));width:var(--line-strong);margin-left:calc(-1 * var(--line-strong) / 2);background:var(--text)}
 .target::before{content:"";position:absolute;top:0;left:50%;width:var(--space-2);height:var(--line-strong);transform:translateX(-50%);background:var(--text)}
 .bar .t{text-align:right;font-variant-numeric:tabular-nums;color:var(--text-muted)}

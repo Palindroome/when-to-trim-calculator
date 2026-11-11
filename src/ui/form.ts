@@ -1,14 +1,15 @@
 import type { ConditionsSource } from '../domain/conditions';
-import type {
-  AirflowId,
-  BatId,
-  ClayId,
-  Conditions,
-  Cover,
-  PieceInput,
-  ShapeId,
-  StageId,
-  WetnessId,
+import {
+  COVERS,
+  type AirflowId,
+  type BatId,
+  type ClayId,
+  type Conditions,
+  type Cover,
+  type PieceInput,
+  type ShapeId,
+  type StageId,
+  type WetnessId,
 } from '../domain/types';
 import { byId } from './dom';
 
@@ -65,6 +66,14 @@ export const readThrownMs = (nowMs: number): number => new Date(value('thrown'))
 export const readWhenMs = (): number => new Date(value('when')).getTime();
 
 export const readName = (): string => value('name').trim();
+
+/** Covers ticked in "Sposoby okrycia, których mogę użyć", in COVERS order. */
+export function readAllowedCovers(): Cover[] {
+  const checked = new Set(
+    [...document.querySelectorAll<HTMLInputElement>('input[data-cover]')].filter((e) => e.checked).map((e) => e.dataset.cover),
+  );
+  return COVERS.filter((c) => checked.has(c));
+}
 
 /** Mass check inputs; thrown mass falls back to 0 (not 500) here, so an empty field hides the check. */
 export const readWeightInputs = (): { thrownMassG: number; currentMassG: number; cover: Cover } => ({
