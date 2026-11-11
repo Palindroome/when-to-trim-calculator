@@ -7,26 +7,40 @@ export const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
 export const THROWN_PRESETS = ['now', 'hourAgo', 'morning', 'lastEvening'] as const;
 export type ThrownPreset = (typeof THROWN_PRESETS)[number];
 
+const CHEVRON = (d: string): string =>
+  `<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+
 /**
- * One date-time field: a day select (options filled by the app), a native date input revealed by
- * "other date", a 24 h time text field and quick-choice buttons. Every control is named "<field> <part>".
+ * One date-time field: a day button that opens a calendar (Cally) in a dialog, a 24 h time text field
+ * and quick-choice buttons. The chosen day key lives in the hidden `<id>-day`; the app fills the
+ * button text and sets up the calendar. Every control is named "<field> <part>".
  */
 function dateTimeField(m: Messages, id: 'thrown' | 'when', legend: string, chipsId: string, chips: string): string {
   const d = m.dateTime;
-  const name = (part: string): string => `aria-labelledby="${id}-legend ${id}-${part}-label"`;
   return `<fieldset class="datetime">
         <legend id="${id}-legend">${legend}</legend>
         <div class="dt-row">
-          <div class="dt-day"><label id="${id}-day-label" for="${id}-day">${d.day}</label>
-            <select id="${id}-day" ${name('day')}></select>
-            <input id="${id}-date" type="date" class="hide" aria-labelledby="${id}-legend ${id}-day-label ${id}-other"></div>
+          <div class="dt-day"><label id="${id}-day-label" for="${id}-day-btn">${d.day}</label>
+            <input id="${id}-day" type="hidden">
+            <button type="button" class="day-btn" id="${id}-day-btn" aria-haspopup="dialog" aria-controls="${id}-cal" aria-labelledby="${id}-legend ${id}-day-label ${id}-day-text">
+              <span id="${id}-day-text"></span>
+              <svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.5" y="3.5" width="13" height="12" rx="1.5"/><path d="M2.5 7.5h13M6 2v3M12 2v3"/></svg>
+            </button></div>
           <div class="dt-time"><label id="${id}-time-label" for="${id}-time">${d.time}</label>
-            <input id="${id}-time" type="text" inputmode="numeric" autocomplete="off" placeholder="${d.timePlaceholder}" ${name('time')}></div>
+            <input id="${id}-time" type="text" inputmode="numeric" autocomplete="off" placeholder="${d.timePlaceholder}" aria-labelledby="${id}-legend ${id}-time-label"></div>
         </div>
         <p class="field-msg hide" id="${id}-time-msg">${d.invalidTime}</p>
         <div class="chips" id="${chipsId}">
           ${chips}
         </div>
+        <dialog class="calendar" id="${id}-cal" aria-labelledby="${id}-legend">
+          <calendar-date id="${id}-calendar" locale="${m.lang}" first-day-of-week="1">
+            <span slot="heading" id="${id}-cal-heading" aria-hidden="true"></span>
+            <span slot="previous">${CHEVRON('M11 4 6 9l5 5')}<span class="vh">${d.previousMonth}</span></span>
+            <span slot="next">${CHEVRON('m7 4 5 5-5 5')}<span class="vh">${d.nextMonth}</span></span>
+            <calendar-month></calendar-month>
+          </calendar-date>
+        </dialog>
       </fieldset>`;
 }
 

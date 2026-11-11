@@ -21,7 +21,7 @@ export function parseNumber(raw: string, fallback: number): number {
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
-/** Local calendar day as `YYYY-MM-DD`: the value of a day option and of the native date input. */
+/** Local calendar day as `YYYY-MM-DD`: the stored day of a picker and the calendar's value. */
 export const toDayKey = (d: Date): string => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 /** Local time as 24 h `HH:MM`. */
@@ -42,22 +42,18 @@ export function combineLocalDateTime(dayKey: string, time: string): number {
   return t ? new Date(`${dayKey}T${t}`).getTime() : NaN;
 }
 
-/** Day option value that reveals the native date input for a day outside the list. */
-export const OTHER_DAY = 'other';
-
-/** Days `from`..`to` (inclusive) relative to the day of `nowMs`, labelled from the catalog, e.g. "dziś · śr 4.03". */
-export function dayOptions(m: Messages, fmt: Formatter, nowMs: number, from: number, to: number): { value: string; label: string }[] {
+/** A day key labelled from the catalog, with a relative word next to yesterday, today and tomorrow: "dziś · śr 4.03". */
+export function dayLabel(m: Messages, fmt: Formatter, dayKey: string, nowMs: number): string {
+  const day = new Date(`${dayKey}T12:00`);
+  if (isNaN(day.getTime())) return '';
   const relative: Record<number, string> = { [-1]: m.dateTime.yesterday, 0: m.dateTime.today, 1: m.dateTime.tomorrow };
-  const options: { value: string; label: string }[] = [];
-  for (let i = from; i <= to; i++) {
+  for (const offset of [-1, 0, 1]) {
     const d = new Date(nowMs);
-    d.setHours(12, 0, 0, 0); // midday: adding days never crosses into a neighbouring day on DST changes
-    d.setDate(d.getDate() + i);
-    const date = fmt.date(d.getTime());
-    const word = relative[i];
-    options.push({ value: toDayKey(d), label: word ? m.dateTime.relativeDay(word, date) : date });
+    d.setHours(12, 0, 0, 0); // midday: adding a day never lands in a neighbouring day on DST changes
+    d.setDate(d.getDate() + offset);
+    if (toDayKey(d) === dayKey) return m.dateTime.relativeDay(relative[offset]!, fmt.date(day.getTime()));
   }
-  return options;
+  return fmt.date(day.getTime());
 }
 
 const value = (id: string): string => byId<HTMLInputElement | HTMLSelectElement>(id).value;
@@ -94,14 +90,10 @@ export const formConditionsSource: ConditionsSource = {
   },
 };
 
-/** The two day + time pickers in section 3; their controls are `<id>-day`, `<id>-date` and `<id>-time`. */
+/** The two day + time pickers in section 3: the day key is kept in `<id>-day`, the typed time in `<id>-time`. */
 export type DateTimeId = 'thrown' | 'when';
 
-/** Day key of a picker: the chosen day option, or the native date input after "other date". */
-const readDayKey = (id: DateTimeId): string =>
-  value(`${id}-day`) === OTHER_DAY ? value(`${id}-date`) : value(`${id}-day`);
-
-const readDateTime = (id: DateTimeId): number => combineLocalDateTime(readDayKey(id), value(`${id}-time`));
+const readDateTime = (id: DateTimeId): number => combineLocalDateTime(value(`${id}-day`), value(`${id}-time`));
 
 /** Throwing time; an empty/invalid field means "now". */
 export const readThrownMs = (nowMs: number): number => readDateTime('thrown') || nowMs;

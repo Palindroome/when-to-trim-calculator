@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { fill, openApp } from './helpers';
+import { expect, test, type Locator, type Page } from '@playwright/test';
+import { fill, openApp, setDateTime } from './helpers';
 
 test.describe('layout', () => {
   test.describe('page columns', () => {
@@ -10,8 +10,8 @@ test.describe('layout', () => {
       const result = (await page.locator('#result .rec').boundingBox())!;
       expect(result.x).toBeGreaterThanOrEqual(form.x + form.width);
       expect(Math.abs(result.y - form.y)).toBeLessThan(2);
-      const thrown = (await page.locator('#thrown-day').boundingBox())!;
-      const when = (await page.locator('#when-day').boundingBox())!;
+      const thrown = (await page.locator('#thrown-day-btn').boundingBox())!;
+      const when = (await page.locator('#when-day-btn').boundingBox())!;
       expect(when.y).toBe(thrown.y);
       expect(when.x).toBeGreaterThan(thrown.x + thrown.width);
 
@@ -52,51 +52,72 @@ test.describe('layout', () => {
     }
   });
 
-  for (const [width, height] of [[320, 640], [375, 812], [414, 896], [480, 900]] as const) {
-    test(`${width}px: no horizontal scroll, date-time controls fully visible and 44px high`, async ({ page }) => {
+  const pageFits = async (page: Page): Promise<number> => {
+    const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    return clientWidth;
+  };
+  const expectInside = async (boxes: DOMRect[], clientWidth: number, clientHeight = Infinity): Promise<void> => {
+    for (const box of boxes) {
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
+      expect(box.y + box.height).toBeLessThanOrEqual(clientHeight);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
+  };
+  const rects = (l: Locator): Promise<DOMRect[]> => l.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
+
+  for (const [width, height] of [[320, 640], [375, 812], [414, 896], [480, 900], [1280, 900]] as const) {
+    test(`${width}px: no horizontal scroll, date-time controls and the open calendar fully visible, 44px targets`, async ({ page }) => {
       await page.setViewportSize({ width, height });
       await openApp(page);
-      // reveal the "other date" inputs too, so they are measured
-      for (const id of ['thrown', 'when']) await page.locator(`#${id}-day`).selectOption('other');
-      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
-        scrollWidth: document.documentElement.scrollWidth,
-        clientWidth: document.documentElement.clientWidth,
-      }));
-      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
-      const controls = page.locator('.datetime').locator('select, input, button');
-      expect(await controls.count()).toBe(2 * 3 + 4 + 5);
-      for (const box of await controls.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect))) {
-        expect(box.x).toBeGreaterThanOrEqual(0);
-        expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
-        expect(box.height).toBeGreaterThanOrEqual(44);
-      }
+      const clientWidth = await pageFits(page);
+      const controls = page.locator('.dt-row button, .dt-row input:not([type="hidden"]), .chips button');
+      expect(await controls.count()).toBe(2 * 2 + 4 + 5);
+      await expectInside(await rects(controls), clientWidth);
       // the time field shows the whole HH:MM
       for (const id of ['#thrown-time', '#when-time']) {
         expect(await page.locator(id).evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+      }
+      for (const id of ['thrown', 'when']) {
+        await page.locator(`#${id}-day-btn`).click();
+        const dialog = page.locator(`#${id}-cal`);
+        await expect(dialog).toBeVisible();
+        await pageFits(page);
+        const [box] = await rects(dialog);
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(clientWidth);
+        expect(box!.y + box!.height).toBeLessThanOrEqual(height);
+        // every day and both paging buttons are inside the window and at least 44px
+        const targets = dialog.locator('calendar-month button[part~="day"], calendar-date [part~="previous"], calendar-date [part~="next"]');
+        expect(await targets.count()).toBeGreaterThanOrEqual(28 + 2);
+        await expectInside(await rects(targets), clientWidth, height);
+        await page.keyboard.press('Escape');
+        await expect(dialog).toBeHidden();
       }
     });
   }
 
   for (const width of [320, 340, 360, 375, 414, 480, 1280]) {
-    test(`${width}px: every day option fits the day select, in Polish and English`, async ({ page }) => {
+    test(`${width}px: the day button shows the whole day, in Polish and English`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
-      // two-digit days and month ends give the longest labels, e.g. "yesterday · Tue 24 Feb"
-      await openApp(page, { now: '2026-02-25T09:00:00+01:00' });
+      // the longest labels: a relative word, a two-digit day and a wide month, e.g. "yesterday · Mon 24 May"
+      await openApp(page, { now: '2027-05-25T09:00:00+02:00' });
       await page.evaluate(() => document.fonts.ready);
-      for (const lang of ['Polski', 'English'] as const) {
+      await setDateTime(page, 'Wytoczona', '2027-05-24T09:00');
+      await setDateTime(page, 'Chcę trymować', '2027-05-24T10:00');
+      for (const [lang, label] of [
+        ['Polski', 'wczoraj · pn 24.05'],
+        ['English', 'yesterday · Mon 24 May'],
+      ] as const) {
         await page.getByRole('button', { name: lang, exact: true }).click();
-        const overflow = await page.locator('#thrown-day, #when-day').evaluateAll((selects) =>
-          selects.flatMap((el) => {
-            const s = getComputedStyle(el);
-            const room = el.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight);
-            const ctx = document.createElement('canvas').getContext('2d')!;
-            ctx.font = `${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
-            return [...(el as HTMLSelectElement).options]
-              .filter((o) => ctx.measureText(o.text).width > room)
-              .map((o) => `${el.id}: "${o.text}" > ${room}px`);
-          }),
-        );
-        expect(overflow).toEqual([]);
+        for (const id of ['#thrown-day-text', '#when-day-text']) {
+          await expect(page.locator(id)).toHaveText(label);
+          expect(await page.locator(id).evaluate((el) => el.scrollWidth <= el.clientWidth), `${id} ${label}`).toBe(true);
+        }
       }
     });
   }

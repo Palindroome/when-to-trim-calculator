@@ -15,10 +15,10 @@ import type { Theme } from '../storage/preferences';
 import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
 import { renderFooter } from './footer';
+import 'cally';
 import {
-  dayOptions,
+  dayLabel,
   normalizeTime,
-  OTHER_DAY,
   readName,
   readPieceInput,
   readThrownMs,
@@ -62,9 +62,18 @@ const QUICK_DATE_HOUR = 10;
 /** Thrown presets "dziś rano" (today) and "wczoraj wieczorem" (yesterday). */
 const MORNING_HOUR = 8;
 const EVENING_HOUR = 19;
-/** Day options for the throwing time: the last 14 days up to today. */
-const THROWN_PAST_DAYS = 13;
 const DATE_IDS: readonly DateTimeId[] = ['thrown', 'when'];
+
+/** The parts of Cally's `<calendar-date>` the app drives. */
+interface CalendarDate extends HTMLElement {
+  value: string;
+  focusedDate: string | undefined;
+  today: string;
+  max: string;
+  /** extra CSS part names for a day (a Date at UTC midnight) */
+  getDayParts: (date: Date) => string;
+  updated: Promise<void>;
+}
 
 /** Plan that can be saved with the current inputs. */
 interface Saveable {
@@ -251,21 +260,56 @@ export function startApp(deps: AppDeps): void {
     press(presets(), (b) => b.dataset.preset === preset);
   }
 
-  /** Puts a time into a picker; a day outside the option list goes to the "other date" input. */
+  /** Puts a time into a picker: the day key, the button text and the time field. */
   function setDateTime(id: DateTimeId, ms: number): void {
     const d = new Date(ms);
-    const day = byId<HTMLSelectElement>(`${id}-day`);
-    day.value = toDayKey(d);
-    if (!day.value) day.value = OTHER_DAY;
-    byId<HTMLInputElement>(`${id}-date`).value = toDayKey(d);
+    byId<HTMLInputElement>(`${id}-day`).value = toDayKey(d);
     byId<HTMLInputElement>(`${id}-time`).value = toTime(d);
-    syncDay(id);
+    showDay(id);
     checkTime(id, true);
   }
 
-  /** Shows the native date input only while "other date" is chosen. */
-  function syncDay(id: DateTimeId): void {
-    byId(`${id}-date`).classList.toggle('hide', byId<HTMLSelectElement>(`${id}-day`).value !== OTHER_DAY);
+  /** Writes the chosen day onto its button, e.g. "dziś · śr 4.03". */
+  function showDay(id: DateTimeId): void {
+    byId(`${id}-day-text`).textContent = dayLabel(m, view.fmt, byId<HTMLInputElement>(`${id}-day`).value, now());
+  }
+
+  const calendar = (id: DateTimeId): CalendarDate => byId<CalendarDate>(`${id}-calendar`);
+
+  /** Opens the calendar on the chosen day; today, and in the trim calendar the throwing day, are marked. */
+  function openCalendar(id: DateTimeId): void {
+    const cal = calendar(id);
+    const day = byId<HTMLInputElement>(`${id}-day`).value;
+    const today = toDayKey(new Date(now()));
+    cal.today = today;
+    if (id === 'thrown') cal.max = today; // a piece cannot be thrown in the future
+    const thrown = byId<HTMLInputElement>('thrown-day').value;
+    // a new function each time, so the calendar re-renders with the current throwing day
+    cal.getDayParts = (date) => (id === 'when' && date.toISOString().slice(0, 10) === thrown ? 'thrown' : '');
+    cal.value = day;
+    cal.focusedDate = day;
+    showMonth(id, new Date(`${day}T00:00Z`));
+    byId<HTMLDialogElement>(`${id}-cal`).showModal();
+    void cal.updated.then(() => cal.focus());
+  }
+
+  /**
+   * Visible month heading, e.g. "marzec 2026": Cally's own header shows only the year, and its month
+   * heading sits apart from the paging buttons. Screen readers get Cally's live "month year" text instead.
+   */
+  function showMonth(id: DateTimeId, utcDay: Date): void {
+    if (isNaN(utcDay.getTime())) return;
+    byId(`${id}-cal-heading`).textContent = new Intl.DateTimeFormat(m.lang, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(utcDay);
+  }
+
+  /** A day picked in the calendar: store it, close the dialog (focus returns to the button), recalculate. */
+  function pickDay(id: DateTimeId): void {
+    const input = byId<HTMLInputElement>(`${id}-day`);
+    input.value = calendar(id).value;
+    showDay(id);
+    byId<HTMLDialogElement>(`${id}-cal`).close();
+    // the same path as typing into a field: clears the quick choice and recalculates
+    input.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   /**
@@ -286,19 +330,6 @@ export function startApp(deps: AppDeps): void {
       input.removeAttribute('aria-invalid');
       input.removeAttribute('aria-describedby');
     }
-  }
-
-  /** Fills the day selects: thrown from 13 days ago to today, trim from yesterday to the model horizon. */
-  function fillDays(): void {
-    const fill = (id: DateTimeId, from: number, to: number): void => {
-      byId(`${id}-day`).innerHTML = dayOptions(m, view.fmt, now(), from, to)
-        .map((o) => `<option value="${o.value}">${o.label}</option>`)
-        // the id names the revealed date input "<field> Dzień inna data…"
-        .concat(`<option id="${id}-other" value="${OTHER_DAY}">${m.dateTime.otherDay}</option>`)
-        .join('');
-    };
-    fill('thrown', -THROWN_PAST_DAYS, 0);
-    fill('when', -1, params.horizonHours / 24);
   }
 
   // ---------- language ----------
@@ -323,7 +354,7 @@ export function startApp(deps: AppDeps): void {
     press(chips(), (c) => c.dataset.d === s.quick);
     press(presets(), (b) => b.dataset.preset === s.thrownPreset);
     for (const id of DATE_IDS) {
-      syncDay(id);
+      showDay(id);
       checkTime(id, true);
     }
   }
@@ -363,7 +394,6 @@ export function startApp(deps: AppDeps): void {
     wizard.mount(m);
     cards.mount(m);
     byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');
-    fillDays();
     if (form) {
       restoreForm(form);
     } else {
@@ -397,12 +427,17 @@ export function startApp(deps: AppDeps): void {
       };
     });
     for (const id of DATE_IDS) {
-      const day = byId<HTMLSelectElement>(`${id}-day`);
-      day.addEventListener('input', () => {
-        // keep the date input on the chosen day, so "other date" starts from it
-        if (day.value !== OTHER_DAY) byId<HTMLInputElement>(`${id}-date`).value = day.value;
-        syncDay(id);
+      const button = byId<HTMLButtonElement>(`${id}-day-btn`);
+      const dialog = byId<HTMLDialogElement>(`${id}-cal`);
+      button.onclick = () => openCalendar(id);
+      calendar(id).addEventListener('change', () => pickDay(id));
+      // also fired when paging moves the focused day into another month
+      calendar(id).addEventListener('focusday', (e) => showMonth(id, (e as CustomEvent<Date>).detail));
+      // Escape closes the dialog natively; a click on the backdrop lands on the dialog element itself
+      dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) dialog.close();
       });
+      dialog.addEventListener('close', () => button.focus());
       const time = byId<HTMLInputElement>(`${id}-time`);
       time.addEventListener('input', () => checkTime(id, false));
       time.addEventListener('change', () => checkTime(id, true));

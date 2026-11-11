@@ -138,11 +138,13 @@ export const pl = {
     time: 'Godzina',
     timePlaceholder: 'gg:mm',
     invalidTime: 'Wpisz godzinę jako gg:mm, np. 9:30.',
-    otherDay: 'inna data…',
+    /** calendar paging buttons (icons on screen, these are their names) */
+    previousMonth: 'Poprzedni miesiąc',
+    nextMonth: 'Następny miesiąc',
     today: 'dziś',
     yesterday: 'wczoraj',
     tomorrow: 'jutro',
-    /** day option with a relative word, e.g. "dziś · śr 4.03" */
+    /** chosen day with a relative word, e.g. "dziś · śr 4.03" */
     relativeDay: (relative: string, date: string): string => `${relative} · ${date}`,
     /** quick choices for the throwing time */
     presets: {

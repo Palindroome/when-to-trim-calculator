@@ -78,7 +78,7 @@ test.describe('wizard', () => {
       await expect(toggle(page, n)).toHaveText('Zmień');
     }
     await expect(page.locator('#mass')).toBeHidden();
-    await expect(page.locator('#when-day')).toBeHidden();
+    await expect(page.locator('#when-day-btn')).toBeHidden();
     // sections 4 and 5 stay a normal form
     await expect(page.locator('#mnow')).toBeVisible();
     expect(await stored(page, WIZARD_KEY)).toBe('done');
@@ -153,10 +153,10 @@ test.describe('summary cards', () => {
     await toggle(page, 3).focus();
     await expect(toggle(page, 3)).toHaveAttribute('aria-label', 'Zmień: Termin');
     await page.keyboard.press('Enter');
-    await expect(page.locator('#when-day')).toBeVisible();
+    await expect(page.locator('#when-day-btn')).toBeVisible();
     expect(await focused(page)).toBe('Zwiń: Termin');
     await page.keyboard.press('Space');
-    await expect(page.locator('#when-day')).toBeHidden();
+    await expect(page.locator('#when-day-btn')).toBeHidden();
     expect(await focused(page)).toBe('Zmień: Termin');
   });
 

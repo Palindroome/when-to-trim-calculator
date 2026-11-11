@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createFormatter } from '../i18n';
 import { en } from '../i18n/en';
 import { pl } from '../i18n/pl';
-import { combineLocalDateTime, dayOptions, normalizeTime, parseNumber, toDayKey, toTime } from './form';
+import { combineLocalDateTime, dayLabel, normalizeTime, parseNumber, toDayKey, toTime } from './form';
 
 describe('parseNumber', () => {
   it.each([
@@ -71,37 +71,35 @@ describe('combineLocalDateTime', () => {
   });
 });
 
-describe('dayOptions', () => {
+describe('dayLabel', () => {
   const now = new Date(2026, 2, 4, 9, 0).getTime(); // Wed 4 March 2026
 
+  const days = ['2026-03-02', '2026-03-03', '2026-03-04', '2026-03-05', '2026-03-06'];
+
   it('labels days in Polish with relative words for yesterday, today and tomorrow', () => {
-    const options = dayOptions(pl, createFormatter(pl, 30), now, -2, 2);
-    expect(options).toEqual([
-      { value: '2026-03-02', label: 'pn 2.03' },
-      { value: '2026-03-03', label: 'wczoraj · wt 3.03' },
-      { value: '2026-03-04', label: 'dziś · śr 4.03' },
-      { value: '2026-03-05', label: 'jutro · czw 5.03' },
-      { value: '2026-03-06', label: 'pt 6.03' },
+    expect(days.map((d) => dayLabel(pl, createFormatter(pl, 30), d, now))).toEqual([
+      'pn 2.03',
+      'wczoraj · wt 3.03',
+      'dziś · śr 4.03',
+      'jutro · czw 5.03',
+      'pt 6.03',
     ]);
   });
 
   it('labels days in English', () => {
-    expect(dayOptions(en, createFormatter(en, 30), now, -1, 1).map((o) => o.label)).toEqual([
+    expect(days.slice(1, 4).map((d) => dayLabel(en, createFormatter(en, 30), d, now))).toEqual([
       'yesterday · Tue 3 Mar',
       'today · Wed 4 Mar',
       'tomorrow · Thu 5 Mar',
     ]);
   });
 
-  it('covers the range bounds inclusively, across month ends and DST', () => {
-    const thrown = dayOptions(pl, createFormatter(pl, 30), now, -13, 0);
-    expect(thrown).toHaveLength(14);
-    expect(thrown[0]!.value).toBe('2026-02-19');
-    expect(thrown.at(-1)!.value).toBe('2026-03-04');
-    const trim = dayOptions(pl, createFormatter(pl, 30), now, -1, 30);
-    expect(trim).toHaveLength(32);
-    expect(trim[0]!.value).toBe('2026-03-03');
-    expect(trim.at(-1)!.value).toBe('2026-04-03');
-    expect(new Set(trim.map((o) => o.value)).size).toBe(32);
+  it('works across month ends and DST changes, and is empty for no day', () => {
+    const fmt = createFormatter(pl, 30);
+    const lastOfMarch = new Date(2026, 2, 31, 23, 30).getTime();
+    expect(dayLabel(pl, fmt, '2026-04-01', lastOfMarch)).toBe('jutro · śr 1.04');
+    // Europe/Warsaw moves to summer time on 29 March 2026
+    expect(dayLabel(pl, fmt, '2026-03-28', new Date(2026, 2, 29, 0, 30).getTime())).toBe('wczoraj · sob 28.03');
+    expect(dayLabel(pl, fmt, '', now)).toBe('');
   });
 });

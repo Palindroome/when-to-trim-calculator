@@ -1,6 +1,6 @@
 // English UI and the PL | EN switch.
 import { expect, test, type Page } from '@playwright/test';
-import { STORAGE_KEY, choose, expectDateTime, fill, openApp, setNight, snapshot } from './helpers';
+import { STORAGE_KEY, choose, expectDateTime, fill, openApp, setDateTime, setNight, snapshot } from './helpers';
 
 const LANG_KEY = 'kiedy-trymowac-lang';
 const SAVE_EN = 'Save this piece with its plan';
@@ -109,29 +109,39 @@ test.describe('language switch', () => {
     expect(await page.locator('#wout').innerText()).toBe(weightPl);
   });
 
-  test('the thrown preset and a day outside the list survive a switch', async ({ page }) => {
+  test('the thrown preset and a calendar-picked day survive a switch', async ({ page }) => {
     await openApp(page);
     await page.locator('#thrown-quick').getByRole('button', { name: 'wczoraj wieczorem' }).click();
-    await page.locator('#when-day').selectOption('other');
-    await page.locator('#when-date').fill('2026-04-20');
-    await page.locator('#when-time').fill('7.05');
+    await setDateTime(page, 'Chcę trymować', '2026-04-20T7.05');
     await toEnglish(page);
     await expectDateTime(page, 'Wytoczona', '2026-03-03T19:00');
     await expect(page.locator('#thrown-quick .chip[aria-pressed="true"]')).toHaveText(['last evening']);
-    await expect(page.locator('#when-date')).toBeVisible();
     await expectDateTime(page, 'Chcę trymować', '2026-04-20T07:05');
+    await expect(page.locator('#when-day-text')).toHaveText('Mon 20 Apr');
     await expect(page.locator('#quick .chip.on')).toHaveCount(0);
   });
 
-  test('English pickers: labels, day names and a 24 h clock', async ({ page }) => {
+  test('English pickers: labels, day names, an English calendar and a 24 h clock', async ({ page }) => {
     await openApp(page);
     await toEnglish(page);
-    await expect(page.getByRole('combobox', { name: 'Thrown Day' })).toHaveValue('2026-03-04');
-    await expect(page.getByRole('combobox', { name: 'Thrown Day' }).locator('option:checked')).toHaveText('today · Wed 4 Mar');
+    await expect(page.getByRole('button', { name: 'Thrown Day today · Wed 4 Mar', exact: true })).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'Trim at Time' })).toHaveValue('10:00');
     await expect(page.getByRole('textbox', { name: 'Trim at Time' })).toHaveAttribute('placeholder', 'hh:mm');
-    await expect(page.locator('#when-day option:checked')).toHaveText('Fri 6 Mar');
+    await expect(page.locator('#when-day-text')).toHaveText('Fri 6 Mar');
     await expect(page.locator('#thrown-quick .chip')).toHaveText(['now', 'an hour ago', 'this morning', 'last evening']);
+    // the calendar follows the page language, and switches back with it
+    await page.locator('#when-day-btn').click();
+    const dialog = page.locator('#when-cal');
+    await expect(dialog.locator('[slot="heading"]')).toContainText('March 2026');
+    await expect(dialog.locator('calendar-month th .vh').first()).toHaveText('Monday');
+    await expect(dialog.getByRole('button', { name: 'Next month' })).toBeVisible();
+    await expect(dialog.locator('calendar-month button[part~="day"]', { hasText: /^6$/ })).toHaveAccessibleName('March 6');
+    await page.keyboard.press('Escape');
+    await langButton(page, 'Polski').click();
+    await page.locator('#when-day-btn').click();
+    await expect(dialog.locator('[slot="heading"]')).toContainText(/marzec 2026/i);
+    await page.keyboard.press('Escape');
+    await toEnglish(page);
     await page.locator('#thrown-quick').getByRole('button', { name: 'last evening' }).click();
     const section = page.locator('main > section').nth(2);
     const text = (await section.innerText()) + (await section.locator('select, input').evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value).join(' ')));

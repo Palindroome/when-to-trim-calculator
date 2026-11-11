@@ -1,5 +1,17 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { choose, expectDateTime, field, fill, openApp, setDateTime, setNight, snapshot, type Field } from './helpers';
+import {
+  calendarDay,
+  calendarDialog,
+  choose,
+  expectDateTime,
+  field,
+  fill,
+  openApp,
+  setDateTime,
+  setNight,
+  snapshot,
+  type Field,
+} from './helpers';
 
 test.describe('page shell', () => {
   test('title, language and headings', async ({ page }) => {
@@ -95,37 +107,24 @@ test.describe('inputs and defaults', () => {
     }
   });
 
-  test('date-time pickers: a day select and a 24 h text field, no native date-time inputs', async ({ page }) => {
+  test('date-time pickers: a day button with a calendar and a 24 h text field, no native date inputs', async ({ page }) => {
     await openApp(page);
-    await expect(page.locator('#body-3 input[type="datetime-local"], #body-3 input[type="time"]')).toHaveCount(0);
-    for (const [legend, id] of [
-      ['Wytoczona', 'thrown'],
-      ['Chcę trymować', 'when'],
+    await expect(page.locator('#body-3 input[type="datetime-local"], #body-3 input[type="time"], #body-3 input[type="date"], #body-3 select')).toHaveCount(0);
+    for (const [legend, id, day] of [
+      ['Wytoczona', 'thrown', 'dziś · śr 4.03'],
+      ['Chcę trymować', 'when', 'pt 6.03'],
     ] as const) {
       await expect(page.getByRole('group', { name: legend })).toBeVisible();
-      await expect(page.getByRole('combobox', { name: `${legend} Dzień` })).toHaveAttribute('id', `${id}-day`);
+      const button = page.getByRole('button', { name: `${legend} Dzień ${day}`, exact: true });
+      await expect(button).toHaveAttribute('id', `${id}-day-btn`);
+      await expect(button).toHaveAttribute('aria-haspopup', 'dialog');
       const time = page.getByRole('textbox', { name: `${legend} Godzina` });
       await expect(time).toHaveAttribute('id', `${id}-time`);
       await expect(time).toHaveAttribute('type', 'text');
       await expect(time).toHaveAttribute('inputmode', 'numeric');
       await expect(time).toHaveAttribute('autocomplete', 'off');
       await expect(time).toHaveAttribute('placeholder', 'gg:mm');
-      // "inna data…" comes last; its native date input stays hidden until chosen
-      await expect(page.locator(`#${id}-day option`).last()).toHaveText('inna data…');
-      await expect(page.locator(`#${id}-date`)).toBeHidden();
-      await page.locator(`#${id}-day`).selectOption('other');
-      await expect(page.locator(`#${id}-date`)).toBeVisible();
-      await expect(page.locator(`#${id}-date`)).toHaveAccessibleName(`${legend} Dzień inna data…`);
     }
-    await page.reload();
-    // thrown: the last 14 days up to today; trim: yesterday up to 30 days ahead
-    await expect(page.locator('#thrown-day option')).toHaveCount(14 + 1);
-    await expect(page.locator('#thrown-day option').first()).toHaveText('czw 19.02');
-    await expect(page.locator('#thrown-day option').nth(13)).toHaveText('dziś · śr 4.03');
-    await expect(page.locator('#when-day option')).toHaveCount(32 + 1);
-    await expect(page.locator('#when-day option').first()).toHaveText('wczoraj · wt 3.03');
-    await expect(page.locator('#when-day option').nth(31)).toHaveText('pt 3.04');
-    await expect(page.locator('#when-day option:checked')).toHaveText('pt 6.03');
     expect(await page.locator('main > section').nth(2).innerText()).not.toMatch(/\b(AM|PM)\b/i);
   });
 
@@ -274,10 +273,8 @@ test.describe('date chips', () => {
     // changing the thrown date alone does not move the trim date
     await expectDateTime(page, 'Chcę trymować', '2026-03-06T10:00');
     await chips(page).getByText('za 3 dni', { exact: true }).click();
-    // 2 March is before the trim day list, so it goes to "inna data…"
     await expectDateTime(page, 'Chcę trymować', '2026-03-02T10:00');
-    await expect(page.locator('#when-day')).toHaveValue('other');
-    await expect(page.locator('#when-date')).toBeVisible();
+    await expect(page.locator('#when-day-text')).toHaveText('pn 2.03');
   });
 
   test('chip with an empty thrown date counts from now', async ({ page }) => {
@@ -291,8 +288,9 @@ test.describe('date chips', () => {
 
   for (const [part, edit] of [
     ['time', (p: Page) => p.locator('#when-time').fill('18:00')],
-    ['day', (p: Page) => p.locator('#when-day').selectOption('2026-03-07')],
-    ['other date', (p: Page) => p.locator('#when-day').selectOption('other')],
+    ['day', (p: Page) => setDateTime(p, 'Chcę trymować', '2026-03-07T10:00')],
+    // even picking the same day again counts as a hand edit
+    ['day (same day)', (p: Page) => setDateTime(p, 'Chcę trymować', '2026-03-06T10:00')],
   ] as const) {
     test(`editing the trim ${part} by hand clears the highlighted chip`, async ({ page }) => {
       await openApp(page);
@@ -323,12 +321,94 @@ test.describe('date chips', () => {
     expect(s.legend).toContain('Twój termin (–)');
     expect(s.save).toBe(false);
   });
+});
 
-  test('"inna data…" with an empty date shows the ordering error', async ({ page }) => {
+test.describe('calendar', () => {
+  test('the day button opens a Polish calendar on the chosen day; picking a day closes it and returns focus', async ({ page }) => {
     await openApp(page);
-    await page.locator('#when-day').selectOption('other');
-    await page.locator('#when-date').fill('');
+    const button = page.locator('#when-day-btn');
+    await button.click();
+    const dialog = calendarDialog(page, 'Chcę trymować');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toHaveAccessibleName('Chcę trymować');
+    // Polish month and weekday names, week from Monday; the chosen day is selected and focused
+    await expect(dialog.locator('[slot="heading"]')).toContainText(/marzec 2026/i);
+    await expect(dialog.locator('calendar-month th .vh').first()).toHaveText('poniedziałek');
+    await expect(dialog.locator('calendar-month th .vh').last()).toHaveText('niedziela');
+    await expect(calendarDay(page, 'Chcę trymować', 6)).toHaveAttribute('aria-pressed', 'true');
+    await expect(calendarDay(page, 'Chcę trymować', 6)).toBeFocused();
+    await expect(calendarDay(page, 'Chcę trymować', 6)).toHaveAccessibleName('6 marca');
+    await expect(dialog.getByRole('button', { name: 'Następny miesiąc' })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Poprzedni miesiąc' })).toBeVisible();
+
+    await calendarDay(page, 'Chcę trymować', 9).click();
+    await expect(dialog).toBeHidden();
+    await expect(button).toBeFocused();
+    await expect(page.locator('#when-day-text')).toHaveText('pn 9.03');
+    await expectDateTime(page, 'Chcę trymować', '2026-03-09T10:00');
+    await expect(page.locator('.legend')).toContainText('Twój termin (5 d 1 h)');
+    await expect(page.locator('#quick .chip.on')).toHaveCount(0);
+  });
+
+  test('Escape and a click outside close it without changing the day', async ({ page }) => {
+    await openApp(page);
+    const button = page.locator('#thrown-day-btn');
+    const dialog = calendarDialog(page, 'Wytoczona');
+    await button.click();
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(button).toBeFocused();
+    await button.click();
+    await expect(dialog).toBeVisible();
+    await page.mouse.click(5, 5);
+    await expect(dialog).toBeHidden();
+    await expect(button).toBeFocused();
+    await expectDateTime(page, 'Wytoczona', '2026-03-04T09:00');
+  });
+
+  test('keyboard: arrows and Page Down move through days and months, Enter picks', async ({ page }) => {
+    await openApp(page);
+    const button = page.locator('#when-day-btn');
+    await button.focus();
+    await page.keyboard.press('Enter');
+    await expect(calendarDay(page, 'Chcę trymować', 6)).toBeFocused();
+    await page.keyboard.press('ArrowRight'); // 7 March
+    await page.keyboard.press('ArrowDown'); // 14 March
+    await page.keyboard.press('PageDown'); // 14 April
+    await expect(calendarDialog(page, 'Chcę trymować').locator('[slot="heading"]')).toContainText(/kwiecień 2026/i);
+    await page.keyboard.press('Enter');
+    await expect(calendarDialog(page, 'Chcę trymować')).toBeHidden();
+    await expect(button).toBeFocused();
+    await expectDateTime(page, 'Chcę trymować', '2026-04-14T10:00');
+    // the paging buttons work from the keyboard too
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Shift+Tab');
+    await expect(calendarDialog(page, 'Chcę trymować').getByRole('button', { name: 'Poprzedni miesiąc' })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(calendarDialog(page, 'Chcę trymować').locator('[slot="heading"]')).toContainText(/marzec 2026/i);
+  });
+
+  test('today is marked; the trim calendar marks the throwing day; no throwing day after today', async ({ page }) => {
+    await openApp(page);
+    await setDateTime(page, 'Wytoczona', '2026-03-02T18:30');
+    await page.locator('#when-day-btn').click();
+    await expect(calendarDay(page, 'Chcę trymować', 4)).toHaveAttribute('aria-current', 'date');
+    await expect(calendarDay(page, 'Chcę trymować', 4)).toHaveAttribute('part', /\btoday\b/);
+    await expect(calendarDay(page, 'Chcę trymować', 2)).toHaveAttribute('part', /\bthrown\b/);
+    await expect(page.locator('#when-cal calendar-month button[part~="thrown"]')).toHaveCount(1);
+    // the mark is visible: an inset ring in the accent colour
+    expect(await calendarDay(page, 'Chcę trymować', 2).evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none');
+    // trim days before the throwing day stay pickable, so the ordering error is still reachable
+    await calendarDay(page, 'Chcę trymować', 1).click();
     expect((await snapshot(page)).big).toBe('Termin trymowania musi być po toczeniu.');
+
+    await page.locator('#thrown-day-btn').click();
+    await expect(calendarDay(page, 'Wytoczona', 5)).toBeDisabled();
+    await expect(calendarDay(page, 'Wytoczona', 4)).toBeEnabled();
+    await expect(page.locator('#thrown-cal calendar-month button[part~="thrown"]')).toHaveCount(0);
   });
 });
 
@@ -363,7 +443,7 @@ test.describe('thrown presets', () => {
 
   for (const [part, edit] of [
     ['time', (p: Page) => p.locator('#thrown-time').fill('7:30')],
-    ['day', (p: Page) => p.locator('#thrown-day').selectOption('2026-03-02')],
+    ['day', (p: Page) => setDateTime(p, 'Wytoczona', '2026-03-02T08:00')],
   ] as const) {
     test(`editing the thrown ${part} by hand clears the highlight, not the trim chip`, async ({ page }) => {
       await openApp(page);
@@ -434,7 +514,7 @@ test.describe('time field', () => {
 test.describe('date-time keyboard use', () => {
   test('Tab goes day → time → presets in each picker, and a value can be set without a mouse', async ({ page }) => {
     await openApp(page);
-    await page.locator('#thrown-day').focus();
+    await page.locator('#thrown-day-btn').focus();
     const order: string[] = [];
     for (let i = 0; i < 12; i++) {
       order.push(await page.evaluate(() => {
@@ -444,13 +524,13 @@ test.describe('date-time keyboard use', () => {
       await page.keyboard.press('Tab');
     }
     expect(order).toEqual([
-      'thrown-day',
+      'thrown-day-btn',
       'thrown-time',
       'teraz',
       'godzinę temu',
       'dziś rano',
       'wczoraj wieczorem',
-      'when-day',
+      'when-day-btn',
       'when-time',
       'jutro',
       'za 2 dni',
@@ -458,9 +538,12 @@ test.describe('date-time keyboard use', () => {
       'za 5 dni',
     ]);
 
-    // trim: one day later with the arrow key, then a typed time, then a preset with Enter
-    await page.locator('#when-day').focus();
-    await page.keyboard.press('ArrowDown');
+    // trim: one day later in the calendar, then a typed time, then a preset with Enter
+    await page.locator('#when-day-btn').focus();
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#when-day-btn')).toBeFocused();
     await expectDateTime(page, 'Chcę trymować', '2026-03-07T10:00');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Control+A');
