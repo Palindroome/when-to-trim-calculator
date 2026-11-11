@@ -230,7 +230,7 @@ export function startApp(deps: AppDeps): void {
       start: startMs,
       mass: piece.mass,
       lossPct: piece.lossPct,
-      plan: option.plan.map((s) => ({ w: s.cover, h: isFinite(s.hours) ? s.hours : null })),
+      plan: option.plan.map((s) => ({ w: s.cover, h: Number.isFinite(s.hours) ? s.hours : null })),
       label: planText(view, option, startMs),
       dom,
       predH: option.hours,
@@ -339,7 +339,7 @@ export function startApp(deps: AppDeps): void {
    * heading sits apart from the paging buttons. Screen readers get Cally's live "month year" text instead.
    */
   function showMonth(id: DateTimeId, utcDay: Date): void {
-    if (isNaN(utcDay.getTime())) return;
+    if (Number.isNaN(utcDay.getTime())) return;
     byId(`${id}-cal-heading`).textContent = new Intl.DateTimeFormat(m.lang, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
       utcDay,
     );
@@ -505,7 +505,9 @@ export function startApp(deps: AppDeps): void {
     }
     const night = byId<HTMLInputElement>('night');
     const syncNight = (): void => {
-      root.querySelectorAll('.night').forEach((e) => e.classList.toggle('hide', !night.checked));
+      root.querySelectorAll('.night').forEach((e) => {
+        e.classList.toggle('hide', !night.checked);
+      });
     };
     night.addEventListener('change', syncNight);
     syncNight();

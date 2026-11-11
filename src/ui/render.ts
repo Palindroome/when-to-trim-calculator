@@ -41,9 +41,9 @@ function storedPlanText(v: View, p: StoredPiece): string {
     isCover(b.w) &&
     typeof a.h === 'number' &&
     a.h > 0 &&
-    isFinite(a.h) &&
+    Number.isFinite(a.h) &&
     b.h === null &&
-    isFinite(p.start)
+    Number.isFinite(p.start)
   ) {
     return v.m.plan.twoPhase(a.w, v.fmt.duration(a.h), v.fmt.dateTime(p.start + a.h * MS_PER_HOUR), b.w);
   }
@@ -75,7 +75,7 @@ export function renderResult(v: View, r: ResultModel): string {
         <div class="k">${m.result.recommendation}</div>
         <div class="big">${esc(planText(v, rec.option, start))}</div>
         <div class="sub">${m.result.ready(fmt.dateTime(start + rec.option.hours * MS_PER_HOUR), fmt.decimal(piece.lossPct, 1), Math.round((piece.mass * piece.lossPct) / 100))}</div>
-        <div class="win">${m.result.window(fmt.dateTime(start + ws * MS_PER_HOUR), isFinite(we) ? fmt.dateTime(start + we * MS_PER_HOUR) : m.result.windowOpenEnd)}</div>
+        <div class="win">${m.result.window(fmt.dateTime(start + ws * MS_PER_HOUR), Number.isFinite(we) ? fmt.dateTime(start + we * MS_PER_HOUR) : m.result.windowOpenEnd)}</div>
       </div>`;
   } else if (rec.status !== 'onTarget') {
     let err: string;
@@ -97,7 +97,7 @@ export function renderResult(v: View, r: ResultModel): string {
   }
 
   // comparison bars
-  const finite = COVERS.map((c) => plan.singles[c]).filter(isFinite);
+  const finite = COVERS.map((c) => plan.singles[c]).filter(Number.isFinite);
   const maxShown = Math.max(
     H > 0 ? H * CHART.deadlineHeadroom : CHART.noDeadlineHours,
     Math.min(Math.max(...finite, CHART.minFiniteHours), CHART.maxFiniteHours),
@@ -105,13 +105,13 @@ export function renderResult(v: View, r: ResultModel): string {
   html += `<div class="card"><h2>${m.result.compareTitle}</h2><div class="bars">`;
   for (const c of COVERS) {
     const t = plan.singles[c];
-    const pct = Math.min(100, ((isFinite(t) ? t : maxShown) / maxShown) * 100);
+    const pct = Math.min(100, ((Number.isFinite(t) ? t : maxShown) / maxShown) * 100);
     const off = !r.allowed.includes(c);
-    const good = !off && H > 0 && isFinite(t) && Math.abs(t - H) / H <= v.params.planner.targetTolerance;
+    const good = !off && H > 0 && Number.isFinite(t) && Math.abs(t - H) / H <= v.params.planner.targetTolerance;
     const n = r.calibration[c].samples;
     html += `<div class="bar${off ? ' off' : ''}"><div>${m.covers.label[c]}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c === 'damp' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
         <div class="track"><div class="fill ${good ? 'good' : ''}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
-        <div class="t">${fmt.duration(t)}${pct >= 100 && isFinite(t) ? '+' : ''}</div></div>`;
+        <div class="t">${fmt.duration(t)}${pct >= 100 && Number.isFinite(t) ? '+' : ''}</div></div>`;
   }
   html += `</div><div class="legend">${m.result.legend(H > 0 ? fmt.duration(H) : m.result.noDeadline)}</div>`;
   if (plan.alternatives.length) {
@@ -227,6 +227,6 @@ export function renderSummaries(v: View, s: SummaryInput): [string, string, stri
       m.options.airflow[c.airflow],
       c.night ? { temp: n(c.nightTemp), rh: n(c.nightRh) } : undefined,
     ),
-    m.summary.schedule(fmt.dateTime(s.thrownMs), isFinite(s.whenMs) ? fmt.dateTime(s.whenMs) : m.result.noDeadline),
+    m.summary.schedule(fmt.dateTime(s.thrownMs), Number.isFinite(s.whenMs) ? fmt.dateTime(s.whenMs) : m.result.noDeadline),
   ];
 }
