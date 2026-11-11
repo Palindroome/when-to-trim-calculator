@@ -119,27 +119,49 @@ export function renderResult(v: View, r: ResultModel): string {
   return html;
 }
 
-export function renderPieceList(v: View, pieces: readonly StoredPiece[], nowMs: number): string {
+/** A saved piece's name and state badge (waiting / ready / rated), and its thrown and forecast times. */
+function pieceHighlights(v: View, p: StoredPiece, nowMs: number): { top: string; times: string } {
   const { m, fmt } = v;
+  const ready = p.start + p.predH * MS_PER_HOUR;
+  const left = (ready - nowMs) / MS_PER_HOUR;
+  const status = p.fb
+    ? `<span class="badge ok">${m.pieces.rated(m.pieces.feedbackResult[p.fb.kind], fmt.duration(p.fb.actualH))}</span>`
+    : `<span class="badge">${left > 0 ? m.pieces.dueIn(fmt.duration(left)) : m.pieces.due}</span>`;
+  return { top: `<div class="top"><b>${esc(p.name)}</b>${status}</div>`, times: m.pieces.meta(fmt.dateTime(p.start), fmt.dateTime(ready)) };
+}
+
+export function renderPieceList(v: View, pieces: readonly StoredPiece[], nowMs: number): string {
+  const { m } = v;
   if (!pieces.length) return `<p class="muted empty">${m.pieces.empty}</p>`;
   return pieces
     .map((p) => {
-      const ready = p.start + p.predH * MS_PER_HOUR;
-      const left = (ready - nowMs) / MS_PER_HOUR;
-      const status = p.fb
-        ? `<span class="badge ok">${m.pieces.rated(m.pieces.feedbackResult[p.fb.kind], fmt.duration(p.fb.actualH))}</span>`
-        : `<span class="badge">${left > 0 ? m.pieces.dueIn(fmt.duration(left)) : m.pieces.due}</span>`;
+      const h = pieceHighlights(v, p, nowMs);
       const buttons = FEEDBACK_KINDS.map(
         (k) => `
             <button class="ghost" data-fb="${k}" data-id="${p.id}">${m.pieces.feedbackButton[k]}</button>`,
       ).join('');
-      return `<div class="piece">
-          <div class="top"><b>${esc(p.name)}</b>${status}</div>
-          <div class="meta">${esc(storedPlanText(v, p))}<br>${m.pieces.meta(fmt.dateTime(p.start), fmt.dateTime(ready))}</div>
+      return `<div class="piece" data-piece="${esc(p.id)}">
+          ${h.top}
+          <div class="meta">${esc(storedPlanText(v, p))}<br>${h.times}</div>
           <div class="fb">
             ${p.fb ? '' : `<span class="muted">${m.pieces.feedbackPrompt}</span>${buttons}`}
             <button class="ghost del" data-del="${p.id}">${m.pieces.remove}</button>
           </div></div>`;
+    })
+    .join('');
+}
+
+/** Rows of the welcome screen's "My pieces" list: the highlights of each piece and a link to its details. */
+export function renderWelcomePieces(v: View, pieces: readonly StoredPiece[], nowMs: number): string {
+  const { m } = v;
+  return pieces
+    .map((p) => {
+      const h = pieceHighlights(v, p, nowMs);
+      return `<li class="piece">
+          ${h.top}
+          <div class="meta">${h.times}</div>
+          <button type="button" class="ghost" data-details="${esc(p.id)}" aria-label="${esc(m.welcome.detailsLabel(p.name))}">${m.welcome.details}</button>
+        </li>`;
     })
     .join('');
 }

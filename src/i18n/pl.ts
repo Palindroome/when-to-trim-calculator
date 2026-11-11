@@ -55,20 +55,24 @@ export const pl = {
 
   /** shown on the first visit and after a long pause */
   welcome: {
-    title: 'Zaplanuj trymowanie',
+    title: 'Zaplanuj suszenie pracy',
     intro: [
-      'Kalkulator szacuje, kiedy świeżo wytoczona praca osiągnie stan skórzasty i będzie gotowa do trymowania.',
+      'Kalkulator szacuje, kiedy świeżo wytoczona praca będzie gotowa do kolejnego etapu: doklejania uch, trymowania albo rzeźbienia.',
       'Podpowiada też, jak ją przykryć, żeby zdążyła na wybrany termin.',
     ],
     stepsTitle: 'Jak to działa',
     steps: [
       'Opisz pracę: masę, kształt, grubość ścianki i dna, masę ceramiczną.',
       'Podaj warunki w pracowni: temperaturę, wilgotność i ruch powietrza.',
-      'Wybierz termin i zapisz plan. Po trymowaniu oceń wynik – z każdą oceną kalkulator lepiej zna Twoją pracownię.',
+      'Wybierz termin i zapisz plan. Gdy praca dojdzie do tego etapu, oceń wynik – z każdą oceną kalkulator lepiej zna Twoją pracownię.',
     ],
     privacy: 'Prace i kalibracja są zapisywane tylko w tej przeglądarce.',
     start: 'Nowa praca',
     pieces: (n: number): string => `Moje prace (${n})`,
+    details: 'Szczegóły',
+    detailsLabel: (name: string): string => `Szczegóły: ${name}`,
+    /** on the working page: shows the welcome screen again */
+    back: 'Ekran startowy',
   },
 
   /** sections 1–3 collapsed to one line after the wizard */

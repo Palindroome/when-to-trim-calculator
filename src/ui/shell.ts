@@ -59,14 +59,16 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
     <p class="muted">${m.welcome.privacy}</p>
     <div class="welcome-actions">
       <button type="button" class="main" id="welcome-new">${m.welcome.start}</button>
-      <button type="button" class="ghost" id="welcome-pieces"></button>
+      <button type="button" class="ghost" id="welcome-pieces" aria-expanded="false" aria-controls="welcome-list"></button>
     </div>
+    <ul class="welcome-list" id="welcome-list" hidden></ul>
   </div>
   <p class="lead">${m.lead}</p>
   <div class="wizard-bar">
     <p class="wizard-progress wizard-only" id="wizard-progress" aria-live="polite"></p>
     <button type="button" class="ghost wizard-only" id="wizard-skip">${m.wizard.skip}</button>
     <button type="button" class="ghost full-only" id="wizard-open">${m.wizard.reopen}</button>
+    <button type="button" class="ghost" id="welcome-back">${m.welcome.back}</button>
   </div>
 
   <section class="card" data-step>

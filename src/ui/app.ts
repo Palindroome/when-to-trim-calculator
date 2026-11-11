@@ -17,7 +17,16 @@ import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
 import { renderFooter } from './footer';
 import { readName, readPieceInput, readThrownMs, readWeightInputs, readWhenMs, toLocalInput } from './form';
-import { renderCalibration, renderSummaries, renderPieceList, renderResult, renderWeight, planText, type View } from './render';
+import {
+  renderCalibration,
+  renderSummaries,
+  renderPieceList,
+  renderResult,
+  renderWeight,
+  renderWelcomePieces,
+  planText,
+  type View,
+} from './render';
 import { renderShell, type ThemeChoice } from './shell';
 import { createSummaryCards } from './cards';
 import { createWelcome, shouldWelcome } from './welcome';
@@ -89,16 +98,19 @@ export function startApp(deps: AppDeps): void {
   const wizard = createWizard(root, deps.wizard, (outcome) => cards.set(outcome === 'done'));
   const welcome = createWelcome(root, {
     pieceCount: () => pieces.length,
+    pieceRows: () => renderWelcomePieces(view, pieces, now()),
     onNew: () => {
       render(m, null);
       wizard.start();
     },
-    onPieces: () => {
+    onDetails: (id) => {
       wizard.close();
-      const list = byId('pieces');
-      list.scrollIntoView({ block: 'start' });
-      list.tabIndex = -1;
-      list.focus({ preventScroll: true });
+      // sections 1-3 as collapsed summary cards, so the piece is what the page opens on
+      cards.set(true);
+      const el = byId('pieces').querySelector<HTMLElement>(`[data-piece="${CSS.escape(id)}"]`)!;
+      el.scrollIntoView({ block: 'start' });
+      el.tabIndex = -1;
+      el.focus({ preventScroll: true });
     },
   });
 
