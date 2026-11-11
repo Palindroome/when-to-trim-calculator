@@ -14,13 +14,22 @@ npm run dev               # dev server with hot reload
 npm run build             # typecheck + production build into dist/
 npm run preview           # serve dist/
 npm run typecheck         # tsc, strict
+npm run lint              # Biome lint rules and import order (lint:fix applies the fixes)
+npm run format:check      # Biome formatter check (format rewrites the files)
 npm test                  # unit tests (Vitest), pure logic only
 npm run test:e2e          # Playwright e2e against the production build
+npm run validate          # lint, format check, typecheck, unit tests, build
 ```
+
+Biome is configured in `biome.json`. Besides the recommended rules, it rejects UI, i18n and storage imports and `document`/`window`/`localStorage` in `src/domain`. The CSS is linted but not reformatted. Reformat commits are listed in `.git-blame-ignore-revs`.
 
 The first Playwright run needs a browser: `npx playwright install chromium`. On Linux it also needs the system libraries: `sudo npx playwright install-deps chromium`.
 
-The build uses `base: './'`, so `dist/` works from any sub-path, for example GitHub Pages at `/when-to-trim-calculator/`. The Pages workflow runs `npm ci && npm run build` and deploys `dist/`.
+The build uses `base: './'`, so `dist/` works from any sub-path, for example GitHub Pages at `/when-to-trim-calculator/`. The Pages workflow runs `npm ci && npm run build` and deploys `dist/`, but only after the CI workflow has passed on `main`.
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`: lint (with the format check), typecheck, unit, e2e (Chromium, with `playwright-report/` uploaded on failure), build, and shellcheck for `scripts/agent/`. The `ci-result` job fails unless all of them passed, so it is the one check to require in branch protection. `dependency-review.yml` rejects PRs that add high/critical vulnerabilities or non-MIT-compatible licences. Dependabot (`.github/dependabot.yml`) opens weekly update PRs for npm and for the SHA-pinned actions.
 
 ### Visual regression check (optional)
 
