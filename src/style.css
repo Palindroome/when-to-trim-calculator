@@ -1,6 +1,6 @@
 @font-face{font-family:"Inter";src:url("/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
 
-/* Design tokens: direction "Bisque" with a plum accent. Components use only these; dark mode (#7) overrides the colour roles. */
+/* Design tokens: direction "Bisque" with a plum accent (lavender in dark mode). Components use only these; dark mode (#7) overrides the colour roles. */
 :root{
   color-scheme:light;
   /* type */
@@ -28,7 +28,7 @@
   --d-bg:#171412; --d-surface:#211d1a; --d-surface-2:#2b2622;
   --d-border:#3d3632; --d-border-strong:#57504a; --d-input-border:#8c847d;
   --d-text:#f5f5f4; --d-text-muted:#b8b0a8;
-  --d-accent:#d49ac0; --d-accent-hover:#e2b3d2; --d-accent-contrast:#1c1917; --d-accent-soft:#3a2332;
+  --d-accent:#b4a0d4; --d-accent-hover:#c7b7e2; --d-accent-contrast:#1c1917; --d-accent-soft:#2c2638;
   --d-ok:#a3d9ad; --d-ok-soft:#18291c; --d-warn:#f2c779; --d-warn-soft:#33270f; --d-wet:#a3c8ea; --d-wet-soft:#15243a;
   --d-fill:#9a918a;
 }
