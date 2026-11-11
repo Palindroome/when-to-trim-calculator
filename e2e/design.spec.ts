@@ -21,16 +21,14 @@ for (const width of [320, 375, 768, 1280]) {
 test('controls: 16px text, 44px primary controls, buttons at least 24×24', async ({ page }) => {
   await openApp(page);
   await STATES['tips-and-pieces']!(page);
-  const controls = await page
-    .locator('input:visible, select:visible')
-    .evaluateAll((els) =>
-      els.map((el) => ({
-        id: el.id,
-        font: parseFloat(getComputedStyle(el).fontSize),
-        h: el.getBoundingClientRect().height,
-        sw: el.getAttribute('role') === 'switch',
-      })),
-    );
+  const controls = await page.locator('input:visible, select:visible').evaluateAll((els) =>
+    els.map((el) => ({
+      id: el.id,
+      font: parseFloat(getComputedStyle(el).fontSize),
+      h: el.getBoundingClientRect().height,
+      sw: el.getAttribute('role') === 'switch',
+    })),
+  );
   expect(controls.length).toBeGreaterThan(10);
   for (const c of controls) {
     expect(c.font, c.id).toBeGreaterThanOrEqual(16);
