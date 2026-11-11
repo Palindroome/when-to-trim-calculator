@@ -64,6 +64,8 @@ export interface ResultModel {
   tips: TipId[];
   calibration: Record<Cover, CoverCalibration>;
   canSave: boolean;
+  /** covers the user left ticked; the others get a muted "excluded" bar */
+  allowed: readonly Cover[];
 }
 
 export function renderResult(v: View, r: ResultModel): string {
@@ -81,13 +83,22 @@ export function renderResult(v: View, r: ResultModel): string {
         <div class="win">${m.result.window(fmt.dateTime(start + ws * MS_PER_HOUR), isFinite(we) ? fmt.dateTime(start + we * MS_PER_HOUR) : m.result.windowOpenEnd)}</div>
       </div>`;
   } else if (rec.status !== 'onTarget') {
-    const err =
-      rec.status === 'invalidDeadline'
-        ? m.errors.invalidDeadline
-        : rec.status === 'tooFast'
-          ? m.errors.tooFast(fmt.duration(rec.fastestHours))
-          : m.errors.tooSlow(fmt.duration(rec.slowestHours));
-    html += `<div class="rec err"><div class="k">${m.result.warning}</div><div class="big">${esc(err)}</div></div>`;
+    let err: string;
+    if (rec.status === 'invalidDeadline') {
+      err = m.errors.invalidDeadline;
+    } else {
+      // the fallback is always a single cover
+      const cover = rec.option.plan[0]!.cover;
+      if (rec.status === 'tooFast') {
+        const d = fmt.duration(rec.fastestHours);
+        err = cover === 'open' ? m.errors.tooFast(d) : m.errors.tooFastWith(d, m.covers.label[cover]);
+      } else {
+        const d = fmt.duration(rec.slowestHours);
+        err = cover === 'box' ? m.errors.tooSlow(d) : m.errors.tooSlowWith(d, m.covers.label[cover]);
+      }
+    }
+    const extra = plan.excludedWouldMeet ? `<div class="extra">${esc(m.errors.excludedWouldMeet)}</div>` : '';
+    html += `<div class="rec err"><div class="k">${m.result.warning}</div><div class="big">${esc(err)}</div>${extra}</div>`;
   }
 
   // comparison bars
@@ -100,9 +111,10 @@ export function renderResult(v: View, r: ResultModel): string {
   for (const c of COVERS) {
     const t = plan.singles[c];
     const pct = Math.min(100, ((isFinite(t) ? t : maxShown) / maxShown) * 100);
-    const good = H > 0 && isFinite(t) && Math.abs(t - H) / H <= v.params.planner.targetTolerance;
+    const off = !r.allowed.includes(c);
+    const good = !off && H > 0 && isFinite(t) && Math.abs(t - H) / H <= v.params.planner.targetTolerance;
     const n = r.calibration[c].samples;
-    html += `<div class="bar"><div>${m.covers.label[c]}${n ? ` <span class="muted">·${n}</span>` : ''}${c === 'damp' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
+    html += `<div class="bar${off ? ' off' : ''}"><div>${m.covers.label[c]}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c === 'damp' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
         <div class="track"><div class="fill ${good ? 'good' : ''}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
         <div class="t">${fmt.duration(t)}${pct >= 100 && isFinite(t) ? '+' : ''}</div></div>`;
   }

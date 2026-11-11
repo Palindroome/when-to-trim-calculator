@@ -38,6 +38,13 @@ describe('dateTime', () => {
   });
 });
 
+describe('date', () => {
+  it('formats weekday and day.month without the time', () => {
+    expect(fmt.date(new Date(2026, 2, 4, 9, 5).getTime())).toBe('śr 4.03');
+    expect(createFormatter(en, 30).date(new Date(2026, 10, 8, 23, 59).getTime())).toBe('Sun 8 Nov');
+  });
+});
+
 describe('decimal', () => {
   it('uses a decimal comma', () => {
     expect(fmt.decimal(6, 1)).toBe('6,0');

@@ -148,6 +148,25 @@ export const en: Messages = {
 
   quickDate: (days: number): string => (days === 1 ? 'tomorrow' : days === 7 ? 'in a week' : `in ${days} days`),
 
+  dateTime: {
+    day: 'Day',
+    time: 'Time',
+    timePlaceholder: 'hh:mm',
+    invalidTime: 'Enter the time as hh:mm, e.g. 9:30.',
+    previousMonth: 'Previous month',
+    nextMonth: 'Next month',
+    today: 'today',
+    yesterday: 'yesterday',
+    tomorrow: 'tomorrow',
+    relativeDay: (relative: string, date: string): string => `${relative} · ${date}`,
+    presets: {
+      now: 'now',
+      hourAgo: 'an hour ago',
+      morning: 'this morning',
+      lastEvening: 'last evening',
+    },
+  },
+
   weightHint:
     'Weigh the piece (without the bat) when thrown and now. The mass lost tells you more than touch, especially with a thick base.',
 
@@ -160,6 +179,9 @@ export const en: Messages = {
       damp: 'Damp room',
     },
     phrase: coverPhrase,
+    filterTitle: 'Covering methods I can use',
+    filterHint: "Untick what you can't or don't want to use this time. It applies only to this piece and its saved plan.",
+    filterLastOne: 'Keep at least one method ticked.',
   },
 
   plan: {
@@ -177,6 +199,7 @@ export const en: Messages = {
     windowOpenEnd: '…',
     compareTitle: 'How long each option takes',
     dampNote: 'only if it must stay very wet or for waits of 4+ days',
+    excludedBar: 'excluded',
     legend: (deadline: string): string =>
       `The vertical line is your deadline (${deadline}). The number next to a name is how many pieces have calibrated that option.`,
     noDeadline: '–',
@@ -190,6 +213,11 @@ export const en: Messages = {
       `Even uncovered it will be ready in ${duration} at the earliest. Put it somewhere warmer with moving air, or move the deadline.`,
     tooSlow: (duration: string): string =>
       `Even with the tightest covering it will take ${duration} or less. Wrap it tightly and check earlier.`,
+    tooFastWith: (duration: string, cover: string): string =>
+      `Even with the fastest method available (${cover}) it will be ready in ${duration} at the earliest. Put it somewhere warmer with moving air, move the deadline, or tick other covering methods.`,
+    tooSlowWith: (duration: string, cover: string): string =>
+      `Even with the slowest method available (${cover}) it will take ${duration} or less. Check earlier, or tick other covering methods.`,
+    excludedWouldMeet: 'With the excluded covering methods it would make this deadline.',
   },
 
   tips: {
@@ -269,6 +297,8 @@ export const en: Messages = {
     days: (n: number): string => `${n} d`,
     daysHours: (d: number, h: number): string => `${d} d ${h} h`,
     beyondHorizon: (days: number): string => `> ${days} days`,
+    /** e.g. "Wed 4 Mar" */
+    date: (weekday: string, day: number, _month: string, monthShort: string): string => `${weekday} ${day} ${monthShort}`,
     /** e.g. "Wed 4 Mar 10:00" */
     dateTime: (weekday: string, day: number, _month: string, hh: string, mm: string, monthShort: string): string =>
       `${weekday} ${day} ${monthShort} ${hh}:${mm}`,

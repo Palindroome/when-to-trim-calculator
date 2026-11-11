@@ -2,7 +2,7 @@
 
 A calculator for potters. It estimates when a freshly thrown piece reaches leather-hard and is ready to trim. It also suggests how to cover the piece (open, loosely bagged, damp room, fully bagged, box) so that it hits the date you want. Each saved piece you rate ("too wet / just right / too dry") calibrates the model to your studio. The data stays in your browser's localStorage.
 
-Built with Vite and strict TypeScript, with no framework. The original single-file prototype is in git history, in the `reference` folder at commit `f4ac746`.
+Built with Vite and strict TypeScript, with no framework. The one runtime dependency is [Cally](https://github.com/WickyNilliams/cally) (MIT, web components), the calendar behind the day buttons in "Termin"; it follows the page language through its `locale` and the design tokens through its CSS parts. The original single-file prototype is in git history, in the `reference` folder at commit `f4ac746`.
 
 Licensed under the MIT licence (see [LICENSE](LICENSE)). The bundled Inter font has its own OFL licence (`public/fonts/`).
 
@@ -47,7 +47,7 @@ src/
     piece.ts          derivePiece: area, slowness, target loss / trimming window
     physics.ts        psat, RateModel interface, physicalRateModel
     simulate.ts       time-stepping simulation of a covering plan
-    planner.ts        planDrying: single / two-phase plans, warnings, alternatives
+    planner.ts        planDrying: single / two-phase plans, warnings, alternatives; optional allow-list of covers
     calibration.ts    Calibrator interface, geometricMeanCalibrator, feedbackToSample
     weight.ts         weight check (loss vs. window, time remaining)
     tips.ts           which practical tips apply
@@ -65,9 +65,9 @@ src/
   ui/
     shell.ts          static page markup from the catalog
     footer.ts         site footer: author's profile links with inline SVG icons
-    form.ts           reads inputs; formConditionsSource
+    form.ts           reads inputs (including the day + 24 h time pickers of "Termin"); formConditionsSource
     render.ts         HTML for result, pieces, calibration, weight check
-    app.ts            state + event wiring
+    app.ts            state + event wiring (including the calendar dialogs of "Termin")
     wizard.ts         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
     cards.ts          after the wizard, sections 1-3 collapse to one-line summaries that open on click
     welcome.ts        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction

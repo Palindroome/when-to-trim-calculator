@@ -1,7 +1,48 @@
-import { AIRFLOWS, BATS, CLAYS, SHAPES, STAGES, WETNESS } from '../domain/types';
+import { AIRFLOWS, BATS, CLAYS, COVERS, SHAPES, STAGES, WETNESS } from '../domain/types';
 import type { Messages } from '../i18n';
 
 export const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
+
+/** Quick choices for the throwing time, keys of `m.dateTime.presets`. */
+export const THROWN_PRESETS = ['now', 'hourAgo', 'morning', 'lastEvening'] as const;
+export type ThrownPreset = (typeof THROWN_PRESETS)[number];
+
+const CHEVRON = (d: string): string =>
+  `<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+
+/**
+ * One date-time field: a day button that opens a calendar (Cally) in a dialog, a 24 h time text field
+ * and quick-choice buttons. The chosen day key lives in the hidden `<id>-day`; the app fills the
+ * button text and sets up the calendar. Every control is named "<field> <part>".
+ */
+function dateTimeField(m: Messages, id: 'thrown' | 'when', legend: string, chipsId: string, chips: string): string {
+  const d = m.dateTime;
+  return `<fieldset class="datetime">
+        <legend id="${id}-legend">${legend}</legend>
+        <div class="dt-row">
+          <div class="dt-day"><label id="${id}-day-label" for="${id}-day-btn">${d.day}</label>
+            <input id="${id}-day" type="hidden">
+            <button type="button" class="day-btn" id="${id}-day-btn" aria-haspopup="dialog" aria-controls="${id}-cal" aria-labelledby="${id}-legend ${id}-day-label ${id}-day-text">
+              <span id="${id}-day-text"></span>
+              <svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.5" y="3.5" width="13" height="12" rx="1.5"/><path d="M2.5 7.5h13M6 2v3M12 2v3"/></svg>
+            </button></div>
+          <div class="dt-time"><label id="${id}-time-label" for="${id}-time">${d.time}</label>
+            <input id="${id}-time" type="text" inputmode="numeric" autocomplete="off" placeholder="${d.timePlaceholder}" aria-labelledby="${id}-legend ${id}-time-label"></div>
+        </div>
+        <p class="field-msg hide" id="${id}-time-msg">${d.invalidTime}</p>
+        <div class="chips" id="${chipsId}">
+          ${chips}
+        </div>
+        <dialog class="calendar" id="${id}-cal" aria-labelledby="${id}-legend">
+          <calendar-date id="${id}-calendar" locale="${m.lang}" first-day-of-week="1">
+            <span slot="heading" id="${id}-cal-heading" aria-hidden="true"></span>
+            <span slot="previous">${CHEVRON('M11 4 6 9l5 5')}<span class="vh">${d.previousMonth}</span></span>
+            <span slot="next">${CHEVRON('m7 4 5 5-5 5')}<span class="vh">${d.nextMonth}</span></span>
+            <calendar-month></calendar-month>
+          </calendar-date>
+        </dialog>
+      </fieldset>`;
+}
 
 const options = <K extends string>(order: readonly K[], labels: Record<K, string>, selected?: K): string =>
   order
@@ -28,6 +69,15 @@ const THEME_ICONS: Record<ThemeChoice, string> = {
     '<circle cx="9" cy="9" r="3.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4"/>',
   dark: '<path d="M15.5 10.5A6.5 6.5 0 1 1 7.5 2.5a5 5 0 0 0 8 8z"/>',
 };
+
+/** Check (ticked) and cross (unticked) icons of a cover pill; CSS shows the one matching the checkbox. */
+const PILL_ICONS = ['on', 'off']
+  .map(
+    (k) =>
+      `<svg class="ico ${k}" viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">` +
+      `<path d="${k === 'on' ? 'M2.5 7.5l3 3 6-7' : 'M3.5 3.5l7 7M10.5 3.5l-7 7'}"/></svg>`,
+  )
+  .join('');
 
 /** `System | Light | Dark` segmented control with icons; names come from the catalog. */
 function themeSwitch(m: Messages, current: ThemeChoice): string {
@@ -138,13 +188,18 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
     </div>
     <p class="summary compact-only"></p>
     <div class="card-body" id="body-3">
-    <div class="grid dates">
-      <div><label for="thrown">${f.thrown}</label><input id="thrown" type="datetime-local"></div>
-      <div><label for="when">${f.when}</label><input id="when" type="datetime-local"></div>
+    <div class="dates">
+      ${dateTimeField(m, 'thrown', f.thrown, 'thrown-quick', THROWN_PRESETS.map((p) => `<button type="button" class="chip" data-preset="${p}" aria-pressed="false">${m.dateTime.presets[p]}</button>`).join('\n          '))}
+      ${dateTimeField(m, 'when', f.when, 'quick', QUICK_DAYS.map((d) => `<button type="button" class="chip" data-d="${d}" aria-pressed="false">${m.quickDate(d)}</button>`).join('\n          '))}
     </div>
-    <div class="chips" id="quick">
-      ${QUICK_DAYS.map((d) => `<button class="chip" data-d="${d}">${m.quickDate(d)}</button>`).join('\n      ')}
-    </div>
+    <fieldset class="covers" id="covers">
+      <legend>${m.covers.filterTitle}</legend>
+      <div class="opts">
+        ${COVERS.map((c) => `<label class="pill"><input type="checkbox" data-cover="${c}" checked><span class="face">${PILL_ICONS}${m.covers.label[c]}</span></label>`).join('\n        ')}
+      </div>
+      <p class="muted" id="covers-hint">${m.covers.filterHint}</p>
+      <p class="muted hide" id="covers-last" aria-live="polite">${m.covers.filterLastOne}</p>
+    </fieldset>
     </div>
   </section>
 
