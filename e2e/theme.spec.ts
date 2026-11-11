@@ -1,6 +1,6 @@
 // Dark colour scheme and the System | Light | Dark switch (#7).
-import { expect, test, type Page } from '@playwright/test';
-import { STORAGE_KEY, elementContrast, openApp, tokenContrast, type ElementColor } from './helpers';
+import { expect, type Page, test } from '@playwright/test';
+import { type ElementColor, elementContrast, openApp, STORAGE_KEY, tokenContrast } from './helpers';
 
 const THEME_KEY = 'kiedy-trymowac-theme';
 const LANG_KEY = 'kiedy-trymowac-lang';

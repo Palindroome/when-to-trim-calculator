@@ -2,8 +2,8 @@
 // A new language: copy en.ts, translate, type it as `Messages`, register it in ./index.ts.
 // Keys ending in `Html` contain trusted markup and are inserted unescaped.
 
-import type { AirflowId, BatId, ClayId, Cover, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
 import type { TipId } from '../domain/tips';
+import type { AirflowId, BatId, ClayId, Cover, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 

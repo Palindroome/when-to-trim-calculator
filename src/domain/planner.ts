@@ -1,4 +1,4 @@
-import { hoursToLoss, type DryingContext } from './simulate';
+import { type DryingContext, hoursToLoss } from './simulate';
 import { COVERS, type Cover, type Plan, type StageId } from './types';
 
 export type PlanOption =

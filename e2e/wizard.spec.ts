@@ -1,7 +1,8 @@
 // First-run wizard and the summary cards it leads to.
-import { expect, test, type Page } from '@playwright/test';
+
 import { readFileSync } from 'node:fs';
-import { STORAGE_KEY, WIZARD_KEY, fill, openApp, snapshot, type Snapshot } from './helpers';
+import { expect, type Page, test } from '@playwright/test';
+import { fill, openApp, type Snapshot, STORAGE_KEY, snapshot, WIZARD_KEY } from './helpers';
 
 const GOLDEN = JSON.parse(readFileSync(new URL('./golden.json', import.meta.url), 'utf-8')) as Record<string, Snapshot>;
 

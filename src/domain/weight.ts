@@ -1,5 +1,5 @@
 import { MS_PER_HOUR } from './params';
-import { hoursToLoss, type DryingContext } from './simulate';
+import { type DryingContext, hoursToLoss } from './simulate';
 import type { Cover } from './types';
 
 export type WeightAssessment =

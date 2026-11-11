@@ -1,5 +1,5 @@
 // Site footer: the author's profile links, where to report a problem, and the licence.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import { openApp, tokenContrast } from './helpers';
 
 const GITHUB = 'https://github.com/Palindroome';

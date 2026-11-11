@@ -1,9 +1,9 @@
 // HTML builders for the dynamic parts of the page. Pure functions of their inputs.
 import type { CoverCalibration } from '../domain/calibration';
-import { MS_PER_HOUR, type ModelParams } from '../domain/params';
+import { type ModelParams, MS_PER_HOUR } from '../domain/params';
 import type { PlanOption, PlanResult } from '../domain/planner';
 import type { TipId } from '../domain/tips';
-import { COVERS, FEEDBACK_KINDS, type Conditions, type Cover, type Piece, type PieceInput } from '../domain/types';
+import { COVERS, type Conditions, type Cover, FEEDBACK_KINDS, type Piece, type PieceInput } from '../domain/types';
 import type { WeightAssessment } from '../domain/weight';
 import type { Formatter, Messages } from '../i18n';
 import type { StoredPiece } from '../storage/pieces';

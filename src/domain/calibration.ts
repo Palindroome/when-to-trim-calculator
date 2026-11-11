@@ -1,4 +1,4 @@
-import { MS_PER_HOUR, type ModelParams } from './params';
+import { type ModelParams, MS_PER_HOUR } from './params';
 import { COVERS, type Cover, type CoverMultipliers, type FeedbackKind } from './types';
 
 /**

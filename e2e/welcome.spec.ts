@@ -1,6 +1,6 @@
 // Welcome screen: first visit and after an hour without interaction; saved pieces are never touched.
-import { expect, test, type Page } from '@playwright/test';
-import { ACTIVITY_KEY, NOW, STORAGE_KEY, openApp } from './helpers';
+import { expect, type Page, test } from '@playwright/test';
+import { ACTIVITY_KEY, NOW, openApp, STORAGE_KEY } from './helpers';
 
 const MIN = 60 * 1000;
 const at = (offsetMin: number): Date => new Date(Date.parse(NOW) + offsetMin * MIN);

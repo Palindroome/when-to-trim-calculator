@@ -1,5 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { STORAGE_KEY, expectDateTime, fill, openApp, setDateTime, snapshot } from './helpers';
+import { expect, type Page, test } from '@playwright/test';
+import { expectDateTime, fill, openApp, STORAGE_KEY, setDateTime, snapshot } from './helpers';
 
 const EMPTY =
   'Nie ma jeszcze zapisanych prac. Zapisz pracę z planem, a gdy będziesz ją trymować, oceń, jak trafiła prognoza. Po kilku ocenach czasy dopasują się do Twojej pracowni.';

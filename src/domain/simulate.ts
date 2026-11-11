@@ -1,4 +1,4 @@
-import { MS_PER_HOUR, type ModelParams } from './params';
+import { type ModelParams, MS_PER_HOUR } from './params';
 import type { RateModel } from './physics';
 import type { Conditions, CoverMultipliers, Piece, Plan } from './types';
 

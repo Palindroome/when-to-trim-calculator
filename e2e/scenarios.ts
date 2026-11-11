@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { choose, field, fill, setDateTime, setNight, type DateField, type Field, type SelectField } from './helpers';
+import { choose, type DateField, type Field, field, fill, type SelectField, setDateTime, setNight } from './helpers';
 
 export type Step =
   | { fill: Field | DateField; value: string }
