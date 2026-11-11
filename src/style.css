@@ -95,8 +95,18 @@ h2 .n{color:var(--text-muted);font-size:var(--text-sm);font-weight:500;font-vari
 
 /* ---------- form ---------- */
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4)}
-.dates{display:flex;flex-wrap:wrap}
-.dates>div{flex:1 1 0}
+/* section 3: two day + time pickers, side by side when each gets about 280px */
+.dates{display:flex;flex-wrap:wrap;gap:var(--space-5) var(--space-4)}
+.datetime{flex:1 1 17.5rem;min-width:0;margin:0;padding:0;border:0}
+.datetime legend{padding:0;margin-bottom:var(--space-1);font-size:var(--text-sm);font-weight:600;color:var(--text)}
+.datetime label{color:var(--text-muted)}
+.dt-row{display:flex;gap:var(--space-2)}
+.dt-day{flex:1 1 auto;min-width:0}
+.dt-day select{padding-right:var(--space-6)}
+.dt-day input{margin-top:var(--space-2)}
+.dt-time{flex:none;width:calc(6ch + 2 * var(--space-3) + 2px)}
+.dt-time input[aria-invalid="true"]{border-color:var(--warn);border-width:var(--line-strong)}
+.field-msg{margin:var(--space-1) 0 0;font-size:var(--text-sm);color:var(--warn)}
 .full{grid-column:1/-1}
 @media (max-width:479px){.grid{grid-template-columns:minmax(0,1fr)}}
 label{display:block;font-size:var(--text-sm);font-weight:500;color:var(--text);margin-bottom:var(--space-1)}
@@ -115,21 +125,14 @@ select{appearance:none;padding-right:var(--space-7);cursor:pointer;
   color:var(--text-muted);background:var(--surface-2);border-radius:var(--radius-sm);padding:0 var(--space-2);font-size:var(--text-xs);line-height:var(--leading)}
 .unit input{padding-right:var(--space-7)}
 
-/* quick dates: a segmented control */
-.chips{display:flex;margin-top:var(--space-4)}
-.chip{flex:1 1 auto;min-height:var(--control-h);margin:0 0 0 -1px;padding:var(--space-1) var(--space-2);font-family:inherit;font-size:var(--text-sm);font-weight:500;line-height:var(--leading-tight);
-  color:var(--text);background:var(--surface);border:1px solid var(--input-border);border-radius:0;cursor:pointer;position:relative}
-.chip:first-child{margin-left:0;border-radius:var(--radius-md) 0 0 var(--radius-md)}
-.chip:last-child{border-radius:0 var(--radius-md) var(--radius-md) 0}
+/* quick dates: separate buttons that wrap (each picker is too narrow for connected segments) */
+.chips{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-3)}
+.chip{flex:1 1 auto;min-height:var(--control-h);margin:0;padding:var(--space-1) var(--space-3);font-family:inherit;font-size:var(--text-sm);font-weight:500;line-height:var(--leading-tight);white-space:nowrap;
+  color:var(--text);background:var(--surface);border:1px solid var(--input-border);border-radius:var(--radius-md);cursor:pointer;position:relative}
 .chip:hover{background:var(--surface-2)}
 .chip:active{transform:scale(.97)}
 .chip.on{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);z-index:1}
 .chip:focus-visible{z-index:2}
-/* too narrow for five connected segments: separate buttons that wrap */
-@media (max-width:479px){
-  .chips{flex-wrap:wrap;gap:var(--space-2)}
-  .chip,.chip:first-child,.chip:last-child{margin:0;border-radius:var(--radius-md);white-space:nowrap;padding:var(--space-1) var(--space-3)}
-}
 
 /* night checkbox as a switch */
 .check{display:flex;gap:var(--space-3);align-items:center;min-height:var(--control-h);margin:0;font-size:var(--text-md);font-weight:400;color:var(--text);cursor:pointer}

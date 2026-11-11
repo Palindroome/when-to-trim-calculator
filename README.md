@@ -64,7 +64,7 @@ src/
   ui/
     shell.ts          static page markup from the catalog
     footer.ts         site footer: author's profile links with inline SVG icons
-    form.ts           reads inputs; formConditionsSource
+    form.ts           reads inputs (including the day + 24 h time pickers of "Termin"); formConditionsSource
     render.ts         HTML for result, pieces, calibration, weight check
     app.ts            state + event wiring
     wizard.ts         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page

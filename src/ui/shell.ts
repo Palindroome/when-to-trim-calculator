@@ -3,6 +3,33 @@ import type { Messages } from '../i18n';
 
 export const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
 
+/** Quick choices for the throwing time, keys of `m.dateTime.presets`. */
+export const THROWN_PRESETS = ['now', 'hourAgo', 'morning', 'lastEvening'] as const;
+export type ThrownPreset = (typeof THROWN_PRESETS)[number];
+
+/**
+ * One date-time field: a day select (options filled by the app), a native date input revealed by
+ * "other date", a 24 h time text field and quick-choice buttons. Every control is named "<field> <part>".
+ */
+function dateTimeField(m: Messages, id: 'thrown' | 'when', legend: string, chipsId: string, chips: string): string {
+  const d = m.dateTime;
+  const name = (part: string): string => `aria-labelledby="${id}-legend ${id}-${part}-label"`;
+  return `<fieldset class="datetime">
+        <legend id="${id}-legend">${legend}</legend>
+        <div class="dt-row">
+          <div class="dt-day"><label id="${id}-day-label" for="${id}-day">${d.day}</label>
+            <select id="${id}-day" ${name('day')}></select>
+            <input id="${id}-date" type="date" class="hide" ${name('day')}></div>
+          <div class="dt-time"><label id="${id}-time-label" for="${id}-time">${d.time}</label>
+            <input id="${id}-time" type="text" inputmode="numeric" autocomplete="off" placeholder="${d.timePlaceholder}" ${name('time')}></div>
+        </div>
+        <p class="field-msg hide" id="${id}-time-msg">${d.invalidTime}</p>
+        <div class="chips" id="${chipsId}">
+          ${chips}
+        </div>
+      </fieldset>`;
+}
+
 const options = <K extends string>(order: readonly K[], labels: Record<K, string>, selected?: K): string =>
   order
     .map((k) => `<option value="${k}"${k === selected ? ' selected' : ''}>${labels[k]}</option>`)
@@ -124,12 +151,9 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
     </div>
     <p class="summary compact-only"></p>
     <div class="card-body" id="body-3">
-    <div class="grid dates">
-      <div><label for="thrown">${f.thrown}</label><input id="thrown" type="datetime-local"></div>
-      <div><label for="when">${f.when}</label><input id="when" type="datetime-local"></div>
-    </div>
-    <div class="chips" id="quick">
-      ${QUICK_DAYS.map((d) => `<button class="chip" data-d="${d}">${m.quickDate(d)}</button>`).join('\n      ')}
+    <div class="dates">
+      ${dateTimeField(m, 'thrown', f.thrown, 'thrown-quick', THROWN_PRESETS.map((p) => `<button type="button" class="chip" data-preset="${p}" aria-pressed="false">${m.dateTime.presets[p]}</button>`).join('\n          '))}
+      ${dateTimeField(m, 'when', f.when, 'quick', QUICK_DAYS.map((d) => `<button type="button" class="chip" data-d="${d}" aria-pressed="false">${m.quickDate(d)}</button>`).join('\n          '))}
     </div>
     </div>
   </section>

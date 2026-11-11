@@ -41,9 +41,11 @@ export type Field =
   | 'Wilgotność nocą'
   | 'Mokra przechowalnia: temp.'
   | 'Mokra przechowalnia: wilg.'
-  | 'Wytoczona'
-  | 'Chcę trymować'
   | 'Masa teraz';
+
+/** The two day + time pickers in "3 Termin", by their Polish legend. */
+export type DateField = 'Wytoczona' | 'Chcę trymować';
+const DATE_IDS: Record<DateField, string> = { Wytoczona: 'thrown', 'Chcę trymować': 'when' };
 
 export type SelectField =
   | 'Kształt'
@@ -64,6 +66,34 @@ export async function fill(page: Page, label: Field, value: string): Promise<voi
 
 export async function choose(page: Page, label: SelectField, value: string): Promise<void> {
   await field(page, label).selectOption(value);
+}
+
+/**
+ * Sets a picker as a user would, from `YYYY-MM-DDTHH:mm`: the day from the list, or "inna data…" and the
+ * date input for a day outside it, then the time. An empty value clears the time (an unreadable date-time).
+ */
+export async function setDateTime(page: Page, label: DateField, value: string): Promise<void> {
+  const id = DATE_IDS[label];
+  const [day = '', time = ''] = value.split('T');
+  if (day) {
+    const select = page.locator(`#${id}-day`);
+    const listed = await select.locator(`option[value="${day}"]`).count();
+    await select.selectOption(listed ? day : 'other');
+    if (!listed) await page.locator(`#${id}-date`).fill(day);
+  }
+  await page.locator(`#${id}-time`).fill(time);
+}
+
+/** The picker's value as `YYYY-MM-DDTHH:mm` (the day from the list or from the "other date" input). */
+export async function dateTimeValue(page: Page, label: DateField): Promise<string> {
+  return page.evaluate((id) => {
+    const value = (part: string): string => (document.getElementById(`${id}-${part}`) as HTMLInputElement).value;
+    return `${value('day') === 'other' ? value('date') : value('day')}T${value('time')}`;
+  }, DATE_IDS[label]);
+}
+
+export async function expectDateTime(page: Page, label: DateField, value: string): Promise<void> {
+  await expect.poll(() => dateTimeValue(page, label)).toBe(value);
 }
 
 export async function setNight(page: Page, on: boolean): Promise<void> {

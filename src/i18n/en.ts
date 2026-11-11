@@ -128,6 +128,24 @@ export const en: Messages = {
 
   quickDate: (days: number): string => (days === 1 ? 'tomorrow' : days === 7 ? 'in a week' : `in ${days} days`),
 
+  dateTime: {
+    day: 'Day',
+    time: 'Time',
+    timePlaceholder: 'hh:mm',
+    invalidTime: 'Enter the time as hh:mm, e.g. 9:30.',
+    otherDay: 'other date…',
+    today: 'today',
+    yesterday: 'yesterday',
+    tomorrow: 'tomorrow',
+    relativeDay: (relative: string, date: string): string => `${relative} · ${date}`,
+    presets: {
+      now: 'now',
+      hourAgo: 'an hour ago',
+      morning: 'this morning',
+      lastEvening: 'last evening',
+    },
+  },
+
   weightHint:
     'Weigh the piece (without the bat) when thrown and now. The mass lost tells you more than touch, especially with a thick base.',
 
@@ -249,6 +267,8 @@ export const en: Messages = {
     days: (n: number): string => `${n} d`,
     daysHours: (d: number, h: number): string => `${d} d ${h} h`,
     beyondHorizon: (days: number): string => `> ${days} days`,
+    /** e.g. "Wed 4 Mar" */
+    date: (weekday: string, day: number, _month: string, monthShort: string): string => `${weekday} ${day} ${monthShort}`,
     /** e.g. "Wed 4 Mar 10:00" */
     dateTime: (weekday: string, day: number, _month: string, hh: string, mm: string, monthShort: string): string =>
       `${weekday} ${day} ${monthShort} ${hh}:${mm}`,

@@ -10,9 +10,10 @@ test.describe('layout', () => {
       const result = (await page.locator('#result .rec').boundingBox())!;
       expect(result.x).toBeGreaterThanOrEqual(form.x + form.width);
       expect(Math.abs(result.y - form.y)).toBeLessThan(2);
-      const thrown = await page.locator('#thrown').boundingBox();
-      const when = await page.locator('#when').boundingBox();
-      expect(when?.y).toBe(thrown?.y);
+      const thrown = (await page.locator('#thrown-day').boundingBox())!;
+      const when = (await page.locator('#when-day').boundingBox())!;
+      expect(when.y).toBe(thrown.y);
+      expect(when.x).toBeGreaterThan(thrown.x + thrown.width);
 
       // at the end of <main> the whole result is inside the window
       await page.evaluate(() => document.querySelector('main')!.scrollIntoView({ block: 'end' }));
@@ -52,29 +53,26 @@ test.describe('layout', () => {
   });
 
   for (const [width, height] of [[320, 640], [375, 812], [414, 896], [480, 900]] as const) {
-    test(`${width}px: no horizontal scroll, date-time fields fully visible`, async ({ page }) => {
+    test(`${width}px: no horizontal scroll, date-time controls fully visible and 44px high`, async ({ page }) => {
       await page.setViewportSize({ width, height });
       await openApp(page);
+      // reveal the "other date" inputs too, so they are measured
+      for (const id of ['thrown', 'when']) await page.locator(`#${id}-day`).selectOption('other');
       const { scrollWidth, clientWidth } = await page.evaluate(() => ({
         scrollWidth: document.documentElement.scrollWidth,
         clientWidth: document.documentElement.clientWidth,
       }));
       expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
-      for (const id of ['#thrown', '#when']) {
-        const box = await page.locator(id).boundingBox();
-        expect(box!.x).toBeGreaterThanOrEqual(0);
-        expect(box!.x + box!.width).toBeLessThanOrEqual(clientWidth);
-        // not squeezed below the width the browser needs to show the whole date and time
-        const natural = await page.locator(id).evaluate((el) => {
-          const c = el.cloneNode() as HTMLInputElement;
-          c.value = (el as HTMLInputElement).value;
-          c.style.cssText = 'width:auto;position:absolute;visibility:hidden';
-          document.body.append(c);
-          const w = c.getBoundingClientRect().width;
-          c.remove();
-          return w;
-        });
-        expect(box!.width).toBeGreaterThanOrEqual(natural);
+      const controls = page.locator('.datetime').locator('select, input, button');
+      expect(await controls.count()).toBe(2 * 3 + 4 + 5);
+      for (const box of await controls.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect))) {
+        expect(box.x).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
+        expect(box.height).toBeGreaterThanOrEqual(44);
+      }
+      // the time field shows the whole HH:MM
+      for (const id of ['#thrown-time', '#when-time']) {
+        expect(await page.locator(id).evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
       }
     });
   }

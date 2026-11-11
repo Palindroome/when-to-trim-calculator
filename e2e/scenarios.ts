@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test';
-import { choose, field, fill, setNight, type Field, type SelectField } from './helpers';
+import { choose, field, fill, setDateTime, setNight, type DateField, type Field, type SelectField } from './helpers';
 
 export type Step =
-  | { fill: Field; value: string }
+  | { fill: Field | DateField; value: string }
   | { type: Field; value: string }
   | { select: SelectField; value: string }
   | { night: boolean }
@@ -15,7 +15,10 @@ export interface Scenario {
 
 export async function applySteps(page: Page, steps: Step[]): Promise<void> {
   for (const s of steps) {
-    if ('fill' in s) await fill(page, s.fill, s.value);
+    if ('fill' in s) {
+      if (s.fill === 'Wytoczona' || s.fill === 'Chcę trymować') await setDateTime(page, s.fill, s.value);
+      else await fill(page, s.fill, s.value);
+    }
     else if ('type' in s) {
       const input = field(page, s.type);
       await input.fill('');

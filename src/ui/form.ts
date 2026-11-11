@@ -10,6 +10,7 @@ import type {
   StageId,
   WetnessId,
 } from '../domain/types';
+import type { Formatter, Messages } from '../i18n';
 import { byId } from './dom';
 
 /** Parses a number field, accepting a decimal comma; falls back when not a finite number. */
@@ -18,10 +19,45 @@ export function parseNumber(raw: string, fallback: number): number {
   return isFinite(v) ? v : fallback;
 }
 
-/** Formats a date for a `datetime-local` input (local time, minutes precision). */
-export function toLocalInput(d: Date): string {
-  const pad = (n: number): string => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const pad = (n: number): string => String(n).padStart(2, '0');
+
+/** Local calendar day as `YYYY-MM-DD`: the value of a day option and of the native date input. */
+export const toDayKey = (d: Date): string => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+/** Local time as 24 h `HH:MM`. */
+export const toTime = (d: Date): string => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+/** Reads a typed 24 h time ("9", "917", "9:17", "9.17", "09:17", ...) as `HH:MM`; null when it is not a valid time. */
+export function normalizeTime(raw: string): string | null {
+  const match = /^(\d{1,2})(?:[:.]?(\d{2}))?$/.exec(raw.trim());
+  if (!match) return null;
+  const h = Number(match[1]);
+  const min = Number(match[2] ?? 0);
+  return h < 24 && min < 60 ? `${pad(h)}:${pad(min)}` : null;
+}
+
+/** Epoch ms of a local day key and a typed time, parsed like the former `datetime-local` value; NaN when invalid. */
+export function combineLocalDateTime(dayKey: string, time: string): number {
+  const t = normalizeTime(time);
+  return t ? new Date(`${dayKey}T${t}`).getTime() : NaN;
+}
+
+/** Day option value that reveals the native date input for a day outside the list. */
+export const OTHER_DAY = 'other';
+
+/** Days `from`..`to` (inclusive) relative to the day of `nowMs`, labelled from the catalog, e.g. "dziś · śr 4.03". */
+export function dayOptions(m: Messages, fmt: Formatter, nowMs: number, from: number, to: number): { value: string; label: string }[] {
+  const relative: Record<number, string> = { [-1]: m.dateTime.yesterday, 0: m.dateTime.today, 1: m.dateTime.tomorrow };
+  const options: { value: string; label: string }[] = [];
+  for (let i = from; i <= to; i++) {
+    const d = new Date(nowMs);
+    d.setHours(12, 0, 0, 0); // midday: adding days never crosses into a neighbouring day on DST changes
+    d.setDate(d.getDate() + i);
+    const date = fmt.date(d.getTime());
+    const word = relative[i];
+    options.push({ value: toDayKey(d), label: word ? m.dateTime.relativeDay(word, date) : date });
+  }
+  return options;
 }
 
 const value = (id: string): string => byId<HTMLInputElement | HTMLSelectElement>(id).value;
@@ -58,11 +94,20 @@ export const formConditionsSource: ConditionsSource = {
   },
 };
 
-/** Throwing time; an empty/invalid field means "now". */
-export const readThrownMs = (nowMs: number): number => new Date(value('thrown')).getTime() || nowMs;
+/** The two day + time pickers in section 3; their controls are `<id>-day`, `<id>-date` and `<id>-time`. */
+export type DateTimeId = 'thrown' | 'when';
 
-/** Wanted trim time (NaN when empty). */
-export const readWhenMs = (): number => new Date(value('when')).getTime();
+/** Day key of a picker: the chosen day option, or the native date input after "other date". */
+const readDayKey = (id: DateTimeId): string =>
+  value(`${id}-day`) === OTHER_DAY ? value(`${id}-date`) : value(`${id}-day`);
+
+const readDateTime = (id: DateTimeId): number => combineLocalDateTime(readDayKey(id), value(`${id}-time`));
+
+/** Throwing time; an empty/invalid field means "now". */
+export const readThrownMs = (nowMs: number): number => readDateTime('thrown') || nowMs;
+
+/** Wanted trim time (NaN when empty or invalid). */
+export const readWhenMs = (): number => readDateTime('when');
 
 export const readName = (): string => value('name').trim();
 

@@ -15,9 +15,21 @@ import type { Theme } from '../storage/preferences';
 import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
 import { renderFooter } from './footer';
-import { readName, readPieceInput, readThrownMs, readWeightInputs, readWhenMs, toLocalInput } from './form';
+import {
+  dayOptions,
+  normalizeTime,
+  OTHER_DAY,
+  readName,
+  readPieceInput,
+  readThrownMs,
+  readWeightInputs,
+  readWhenMs,
+  toDayKey,
+  toTime,
+  type DateTimeId,
+} from './form';
 import { renderCalibration, renderSummaries, renderPieceList, renderResult, renderWeight, planText, type View } from './render';
-import { renderShell, type ThemeChoice } from './shell';
+import { renderShell, type ThemeChoice, type ThrownPreset } from './shell';
 import { createSummaryCards } from './cards';
 import { createWizard } from './wizard';
 
@@ -47,6 +59,12 @@ export interface AppDeps {
 /** Default trim date offered on load: thrown + 2 days, at 10:00. */
 const DEFAULT_QUICK_DAYS = 2;
 const QUICK_DATE_HOUR = 10;
+/** Thrown presets "dziś rano" (today) and "wczoraj wieczorem" (yesterday). */
+const MORNING_HOUR = 8;
+const EVENING_HOUR = 19;
+/** Day options for the throwing time: the last 14 days up to today. */
+const THROWN_PAST_DAYS = 13;
+const DATE_IDS: readonly DateTimeId[] = ['thrown', 'when'];
 
 /** Plan that can be saved with the current inputs. */
 interface Saveable {
@@ -62,6 +80,8 @@ interface FormState {
   fields: { id: string; value: string; checked: boolean }[];
   /** `data-d` of the selected quick-date chip */
   quick: string | undefined;
+  /** `data-preset` of the selected thrown preset */
+  thrownPreset: string | undefined;
 }
 
 export function startApp(deps: AppDeps): void {
@@ -79,6 +99,14 @@ export function startApp(deps: AppDeps): void {
   const wizard = createWizard(root, deps.wizard, (outcome) => cards.set(outcome === 'done'));
 
   const chips = (): NodeListOf<HTMLButtonElement> => root.querySelectorAll<HTMLButtonElement>('#quick .chip');
+  const presets = (): NodeListOf<HTMLButtonElement> => root.querySelectorAll<HTMLButtonElement>('#thrown-quick .chip');
+  /** Highlights the buttons for which `on` holds, for sight (`.on`) and for assistive tech (`aria-pressed`). */
+  const press = (buttons: NodeListOf<HTMLButtonElement>, on: (b: HTMLButtonElement) => boolean): void => {
+    buttons.forEach((b) => {
+      b.classList.toggle('on', on(b));
+      b.setAttribute('aria-pressed', String(on(b)));
+    });
+  };
 
   function context(piece: Piece, startMs: number): DryingContext {
     return { piece, conditions: conditions.read(), startMs, multipliers: calibration().multipliers(), model: rateModel, params };
@@ -203,12 +231,72 @@ export function startApp(deps: AppDeps): void {
 
   // ---------- dates ----------
   function setWhenDays(days: number): void {
-    const s = new Date(byId<HTMLInputElement>('thrown').value || now());
-    const t = new Date(s.getTime());
+    const t = new Date(readThrownMs(now()));
     t.setDate(t.getDate() + days);
     t.setHours(QUICK_DATE_HOUR, 0, 0, 0);
-    byId<HTMLInputElement>('when').value = toLocalInput(t);
-    chips().forEach((c) => c.classList.toggle('on', +(c.dataset.d ?? NaN) === days));
+    setDateTime('when', t.getTime());
+    press(chips(), (c) => +(c.dataset.d ?? NaN) === days);
+  }
+
+  function setThrownPreset(preset: ThrownPreset): void {
+    const t = new Date(now());
+    t.setSeconds(0, 0);
+    if (preset === 'hourAgo') t.setHours(t.getHours() - 1);
+    if (preset === 'morning') t.setHours(MORNING_HOUR, 0);
+    if (preset === 'lastEvening') {
+      t.setDate(t.getDate() - 1);
+      t.setHours(EVENING_HOUR, 0);
+    }
+    setDateTime('thrown', t.getTime());
+    press(presets(), (b) => b.dataset.preset === preset);
+  }
+
+  /** Puts a time into a picker; a day outside the option list goes to the "other date" input. */
+  function setDateTime(id: DateTimeId, ms: number): void {
+    const d = new Date(ms);
+    const day = byId<HTMLSelectElement>(`${id}-day`);
+    day.value = toDayKey(d);
+    if (!day.value) day.value = OTHER_DAY;
+    byId<HTMLInputElement>(`${id}-date`).value = toDayKey(d);
+    byId<HTMLInputElement>(`${id}-time`).value = toTime(d);
+    syncDay(id);
+    checkTime(id, true);
+  }
+
+  /** Shows the native date input only while "other date" is chosen. */
+  function syncDay(id: DateTimeId): void {
+    byId(`${id}-date`).classList.toggle('hide', byId<HTMLSelectElement>(`${id}-day`).value !== OTHER_DAY);
+  }
+
+  /**
+   * Flags a time that cannot be read. While typing (`done` false) it only clears the flag, so a half-typed
+   * "9:" is not reported; on leaving the field (`done`) a valid time is written out as HH:MM.
+   */
+  function checkTime(id: DateTimeId, done: boolean): void {
+    const input = byId<HTMLInputElement>(`${id}-time`);
+    const time = normalizeTime(input.value);
+    if (time && done) input.value = time;
+    const invalid = !time && input.value.trim() !== '';
+    if (invalid && !done) return;
+    byId(`${id}-time-msg`).classList.toggle('hide', !invalid);
+    if (invalid) {
+      input.setAttribute('aria-invalid', 'true');
+      input.setAttribute('aria-describedby', `${id}-time-msg`);
+    } else {
+      input.removeAttribute('aria-invalid');
+      input.removeAttribute('aria-describedby');
+    }
+  }
+
+  /** Fills the day selects: thrown from 13 days ago to today, trim from yesterday to the model horizon. */
+  function fillDays(): void {
+    const html = (from: number, to: number): string =>
+      dayOptions(m, view.fmt, now(), from, to)
+        .map((o) => `<option value="${o.value}">${o.label}</option>`)
+        .concat(`<option value="${OTHER_DAY}">${m.dateTime.otherDay}</option>`)
+        .join('');
+    byId('thrown-day').innerHTML = html(-THROWN_PAST_DAYS, 0);
+    byId('when-day').innerHTML = html(-1, params.horizonHours / 24);
   }
 
   // ---------- language ----------
@@ -220,6 +308,7 @@ export function startApp(deps: AppDeps): void {
         checked: e instanceof HTMLInputElement && e.checked,
       })),
       quick: root.querySelector<HTMLElement>('#quick .chip.on')?.dataset.d,
+      thrownPreset: root.querySelector<HTMLElement>('#thrown-quick .chip.on')?.dataset.preset,
     };
   }
 
@@ -229,7 +318,12 @@ export function startApp(deps: AppDeps): void {
       e.value = f.value;
       if (e instanceof HTMLInputElement && e.type === 'checkbox') e.checked = f.checked;
     }
-    chips().forEach((c) => c.classList.toggle('on', c.dataset.d === s.quick));
+    press(chips(), (c) => c.dataset.d === s.quick);
+    press(presets(), (b) => b.dataset.preset === s.thrownPreset);
+    for (const id of DATE_IDS) {
+      syncDay(id);
+      checkTime(id, true);
+    }
   }
 
   function switchLanguage(code: string): void {
@@ -267,12 +361,13 @@ export function startApp(deps: AppDeps): void {
     wizard.mount(m);
     cards.mount(m);
     byId('wnow').innerHTML = COVERS.map((c) => `<option value="${c}">${m.covers.label[c]}</option>`).join('');
+    fillDays();
     if (form) {
       restoreForm(form);
     } else {
       const start = new Date(now());
       start.setSeconds(0, 0);
-      byId<HTMLInputElement>('thrown').value = toLocalInput(start);
+      setDateTime('thrown', start.getTime());
       setWhenDays(DEFAULT_QUICK_DAYS);
     }
     wire();
@@ -293,6 +388,23 @@ export function startApp(deps: AppDeps): void {
         compute();
       };
     });
+    presets().forEach((b) => {
+      b.onclick = () => {
+        setThrownPreset(b.dataset.preset as ThrownPreset);
+        compute();
+      };
+    });
+    for (const id of DATE_IDS) {
+      const day = byId<HTMLSelectElement>(`${id}-day`);
+      day.addEventListener('input', () => {
+        // keep the date input on the chosen day, so "other date" starts from it
+        if (day.value !== OTHER_DAY) byId<HTMLInputElement>(`${id}-date`).value = day.value;
+        syncDay(id);
+      });
+      const time = byId<HTMLInputElement>(`${id}-time`);
+      time.addEventListener('input', () => checkTime(id, false));
+      time.addEventListener('change', () => checkTime(id, true));
+    }
     const night = byId<HTMLInputElement>('night');
     const syncNight = (): void => {
       root.querySelectorAll('.night').forEach((e) => e.classList.toggle('hide', !night.checked));
@@ -305,7 +417,8 @@ export function startApp(deps: AppDeps): void {
         return;
       }
       e.addEventListener('input', () => {
-        if (e.id === 'when') chips().forEach((c) => c.classList.remove('on'));
+        if (e.id.startsWith('when-')) press(chips(), () => false);
+        if (e.id.startsWith('thrown-')) press(presets(), () => false);
         compute();
       });
     });
