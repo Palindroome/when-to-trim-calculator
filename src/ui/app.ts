@@ -15,7 +15,7 @@ import type { Theme } from '../storage/preferences';
 import type { WizardStore } from '../storage/wizard';
 import { byId } from './dom';
 import { renderFooter } from './footer';
-import { readName, readPieceInput, readThrownMs, readWeightInputs, readWhenMs, toLocalInput } from './form';
+import { readAllowedCovers, readName, readPieceInput, readThrownMs, readWeightInputs, readWhenMs, toLocalInput } from './form';
 import { renderCalibration, renderSummaries, renderPieceList, renderResult, renderWeight, planText, type View } from './render';
 import { renderShell, type ThemeChoice } from './shell';
 import { createSummaryCards } from './cards';
@@ -62,6 +62,8 @@ interface FormState {
   fields: { id: string; value: string; checked: boolean }[];
   /** `data-d` of the selected quick-date chip */
   quick: string | undefined;
+  /** ticked cover checkboxes */
+  allowed: Cover[];
 }
 
 export function startApp(deps: AppDeps): void {
@@ -91,7 +93,8 @@ export function startApp(deps: AppDeps): void {
     const startMs = readThrownMs(now());
     const H = (readWhenMs() - startMs) / MS_PER_HOUR;
     const ctx = context(piece, startMs);
-    const plan = planDrying(ctx, H, input.stage);
+    const allowed = readAllowedCovers();
+    const plan = planDrying(ctx, H, input.stage, { allowed });
     const rec = plan.recommendation;
 
     let window: { start: number; end: number } | undefined;
@@ -118,6 +121,7 @@ export function startApp(deps: AppDeps): void {
       tips: tipsFor(rec, piece, ctx.conditions, params),
       calibration: perCover,
       canSave: saveable !== null,
+      allowed,
     });
     cards.update(
       renderSummaries(view, { name: readName(), piece: input, conditions: ctx.conditions, thrownMs: startMs, whenMs: readWhenMs() }),
@@ -214,12 +218,13 @@ export function startApp(deps: AppDeps): void {
   // ---------- language ----------
   function captureForm(): FormState {
     return {
-      fields: [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input,select')].map((e) => ({
+      fields: [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input[id],select')].map((e) => ({
         id: e.id,
         value: e.value,
         checked: e instanceof HTMLInputElement && e.checked,
       })),
       quick: root.querySelector<HTMLElement>('#quick .chip.on')?.dataset.d,
+      allowed: readAllowedCovers(),
     };
   }
 
@@ -230,6 +235,21 @@ export function startApp(deps: AppDeps): void {
       if (e instanceof HTMLInputElement && e.type === 'checkbox') e.checked = f.checked;
     }
     chips().forEach((c) => c.classList.toggle('on', c.dataset.d === s.quick));
+    coverBoxes().forEach((b) => {
+      b.checked = s.allowed.includes(b.dataset.cover as Cover);
+    });
+  }
+
+  // ---------- cover filter ----------
+  const coverBoxes = (): NodeListOf<HTMLInputElement> => root.querySelectorAll<HTMLInputElement>('input[data-cover]');
+
+  /** The last ticked cover cannot be unticked: disable it and show why. */
+  function syncCovers(): void {
+    const ticked = [...coverBoxes()].filter((b) => b.checked);
+    coverBoxes().forEach((b) => {
+      b.disabled = ticked.length === 1 && b.checked;
+    });
+    byId('covers-last').classList.toggle('hide', ticked.length !== 1);
   }
 
   function switchLanguage(code: string): void {
@@ -275,6 +295,7 @@ export function startApp(deps: AppDeps): void {
       byId<HTMLInputElement>('thrown').value = toLocalInput(start);
       setWhenDays(DEFAULT_QUICK_DAYS);
     }
+    syncCovers();
     wire();
     renderPieces();
     compute();
@@ -306,6 +327,7 @@ export function startApp(deps: AppDeps): void {
       }
       e.addEventListener('input', () => {
         if (e.id === 'when') chips().forEach((c) => c.classList.remove('on'));
+        if (e.dataset.cover) syncCovers();
         compute();
       });
     });

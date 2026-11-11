@@ -140,6 +140,9 @@ export const en: Messages = {
       damp: 'Damp room',
     },
     phrase: coverPhrase,
+    filterTitle: 'Covering methods I can use',
+    filterHint: "Untick what you can't or don't want to use this time. It applies only to this piece and its saved plan.",
+    filterLastOne: 'Keep at least one method ticked.',
   },
 
   plan: {
@@ -157,6 +160,7 @@ export const en: Messages = {
     windowOpenEnd: '…',
     compareTitle: 'How long each option takes',
     dampNote: 'only if it must stay very wet or for waits of 4+ days',
+    excludedBar: 'excluded',
     legend: (deadline: string): string =>
       `The vertical line is your deadline (${deadline}). The number next to a name is how many pieces have calibrated that option.`,
     noDeadline: '–',
@@ -170,6 +174,11 @@ export const en: Messages = {
       `Even uncovered it will be ready in ${duration} at the earliest. Put it somewhere warmer with moving air, or move the deadline.`,
     tooSlow: (duration: string): string =>
       `Even with the tightest covering it will take ${duration} or less. Wrap it tightly and check earlier.`,
+    tooFastWith: (duration: string, cover: string): string =>
+      `Even with the fastest method available (${cover}) it will be ready in ${duration} at the earliest. Put it somewhere warmer with moving air, move the deadline, or tick other covering methods.`,
+    tooSlowWith: (duration: string, cover: string): string =>
+      `Even with the slowest method available (${cover}) it will take ${duration} or less. Check earlier, or tick other covering methods.`,
+    excludedWouldMeet: 'With the excluded covering methods it would make this deadline.',
   },
 
   tips: {

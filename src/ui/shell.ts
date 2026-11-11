@@ -1,4 +1,4 @@
-import { AIRFLOWS, BATS, CLAYS, SHAPES, STAGES, WETNESS } from '../domain/types';
+import { AIRFLOWS, BATS, CLAYS, COVERS, SHAPES, STAGES, WETNESS } from '../domain/types';
 import type { Messages } from '../i18n';
 
 export const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
@@ -131,6 +131,14 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
     <div class="chips" id="quick">
       ${QUICK_DAYS.map((d) => `<button class="chip" data-d="${d}">${m.quickDate(d)}</button>`).join('\n      ')}
     </div>
+    <fieldset class="covers" id="covers">
+      <legend>${m.covers.filterTitle}</legend>
+      <div class="opts">
+        ${COVERS.map((c) => `<label class="check"><input type="checkbox" role="switch" data-cover="${c}" checked> ${m.covers.label[c]}</label>`).join('\n        ')}
+      </div>
+      <p class="muted" id="covers-hint">${m.covers.filterHint}</p>
+      <p class="muted hide" id="covers-last" aria-live="polite">${m.covers.filterLastOne}</p>
+    </fieldset>
     </div>
   </section>
 
