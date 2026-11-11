@@ -24,7 +24,7 @@ describe('derivePiece', () => {
     const p = derivePiece(DEFAULT_INPUT, P);
     expect(p.mass).toBe(500);
     expect(p.area).toBeCloseTo(((500 / 1.9 / 0.6) * 1.6) / 1e4, 12);
-    expect(p.slow).toBeCloseTo(Math.pow(1.5, 0.6), 12);
+    expect(p.slow).toBeCloseTo(1.5 ** 0.6, 12);
     expect(p).toMatchObject({ lossPct: 6, softPct: 5, hardPct: 7.5 });
   });
 
@@ -241,6 +241,7 @@ describe('planDrying with allowed covers', () => {
     expect(used(r)).not.toContain('open');
     expect(r.recommendation.status).toBe('onTarget');
     if (r.recommendation.status !== 'onTarget') return;
+    // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
     expect(r.recommendation.option).toMatchObject({ kind: 'twoPhase', first: 'partial', then: 'full' });
   });
 
@@ -335,9 +336,9 @@ describe('geometric-mean calibrator', () => {
       ],
       P,
     );
-    expect(c.estimate('full').multiplier).toBeCloseTo(Math.pow(4, 0.5), 12);
+    expect(c.estimate('full').multiplier).toBeCloseTo(4 ** 0.5, 12);
     expect(c.estimate('full').samples).toBe(2);
-    expect(c.estimate('box').multiplier).toBeCloseTo(Math.pow(3, 1 / 3), 12);
+    expect(c.estimate('box').multiplier).toBeCloseTo(3 ** (1 / 3), 12);
     expect(c.estimate('open').samples).toBe(0);
   });
 

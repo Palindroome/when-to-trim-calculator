@@ -36,7 +36,7 @@ export const geometricMeanCalibrator: CalibratorFactory = (initial, params) => {
     const values = samples
       .filter((s) => s.cover === cover)
       .map((s) => s.value)
-      .filter((x) => x > 0 && isFinite(x));
+      .filter((x) => x > 0 && Number.isFinite(x));
     if (!values.length) return { multiplier: 1, samples: 0 };
     const g = Math.exp(values.reduce((a, x) => a + Math.log(x), 0) / values.length);
     const w = values.length / (values.length + params.calibration.priorWeight);

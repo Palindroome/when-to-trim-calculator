@@ -67,7 +67,7 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
   const gated = allowedSet.filter((c) => c !== 'damp' || allowDamp);
   const candidates = gated.length ? gated : allowedSet;
 
-  const singleOptions = candidates.map((c) => single(c, singles[c])).filter((o) => isFinite(o.hours));
+  const singleOptions = candidates.map((c) => single(c, singles[c])).filter((o) => Number.isFinite(o.hours));
 
   // two-phase: a faster cover first (rim firms up), then a slower one
   const twoPhase: Extract<PlanOption, { kind: 'twoPhase' }>[] = [];
@@ -96,6 +96,7 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
         { cover: a, hours: x },
         { cover: b, hours: Infinity },
       ];
+      // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
       twoPhase.push({ kind: 'twoPhase', first: a, then: b, switchAfterHours: x, plan, hours: hoursToLoss(plan, ctx, target) });
     }
   }
