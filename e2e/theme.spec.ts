@@ -4,7 +4,7 @@ import { STORAGE_KEY, elementContrast, openApp, tokenContrast, type ElementColor
 
 const THEME_KEY = 'kiedy-trymowac-theme';
 const LANG_KEY = 'kiedy-trymowac-lang';
-const BG = { light: '#fafaf9', dark: '#171412' } as const;
+const BG = { light: '#f4ede3', dark: '#171412' } as const;
 
 const scheme = (page: Page) =>
   page.evaluate(() => {
@@ -64,7 +64,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       const s = await scheme(page);
       expect(s.colorScheme).toBe(colorScheme);
       expect(s.bg).toBe(BG[colorScheme]);
-      expect(s.body).toBe(colorScheme === 'dark' ? 'rgb(23, 20, 18)' : 'rgb(250, 250, 249)');
+      expect(s.body).toBe(colorScheme === 'dark' ? 'rgb(23, 20, 18)' : 'rgb(244, 237, 227)');
       await expect(themeButton(page, 'Systemowy')).toHaveAttribute('aria-pressed', 'true');
     });
 

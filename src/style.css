@@ -1,6 +1,6 @@
 @font-face{font-family:"Inter";src:url("/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
 
-/* Design tokens: direction A "Studio neutral". Components use only these; dark mode (#7) overrides the colour roles. */
+/* Design tokens: direction "Bisque". Components use only these; dark mode (#7) overrides the colour roles. */
 :root{
   color-scheme:light;
   /* type */
@@ -16,14 +16,14 @@
   /* control sizes */
   --control-h:44px; --control-h-sm:32px;
   /* colour roles */
-  --bg:#fafaf9; --surface:#ffffff; --surface-2:#f5f5f4;
-  --border:#e7e5e4; --border-strong:#d6d3d1; --input-border:#8a837d;
-  --text:#1c1917; --text-muted:#57534e;
-  --accent:#a8472a; --accent-hover:#8f3b22; --accent-contrast:#ffffff; --accent-soft:#fbefe9; --ring:#a8472a;
-  --ok:#1f4d29; --ok-soft:#e8f2ea; --warn:#6b4310; --warn-soft:#fbf0dc; --wet:#1e4060; --wet-soft:#e6eef6;
+  --bg:#f4ede3; --surface:#fcf9f4; --surface-2:#efe6da;
+  --border:#e2d6c6; --border-strong:#cfbfa9; --input-border:#8a7766;
+  --text:#2b211b; --text-muted:#5c4e43;
+  --accent:#9a4528; --accent-hover:#7f3820; --accent-contrast:#ffffff; --accent-soft:#f5e3d7; --ring:#9a4528;
+  --ok:#2e5527; --ok-soft:#e6eddb; --warn:#6c4410; --warn-soft:#f7e9cf; --wet:#22465e; --wet-soft:#e2eaee;
   --track:var(--surface-2); --fill:var(--accent);
-  --shadow-1:0 1px 2px rgb(28 25 23 / .06);
-  --shadow-2:0 1px 3px rgb(28 25 23 / .08), 0 8px 24px rgb(28 25 23 / .06);
+  --shadow-1:0 1px 2px rgb(60 40 25 / .07);
+  --shadow-2:0 1px 3px rgb(60 40 25 / .09), 0 8px 24px rgb(60 40 25 / .07);
   /* dark values, defined once and assigned by the two dark blocks below */
   --d-bg:#171412; --d-surface:#211d1a; --d-surface-2:#2b2622;
   --d-border:#3d3632; --d-border-strong:#57504a; --d-input-border:#8c847d;
