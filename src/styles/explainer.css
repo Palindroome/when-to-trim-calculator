@@ -1,0 +1,8 @@
+/* ---------- explainer ---------- */
+details summary{display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);min-height:var(--control-h);cursor:pointer;font-weight:600;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"";flex:none;width:var(--space-2);height:var(--space-2);margin-right:var(--space-1);border-right:var(--line-strong) solid var(--text-muted);border-bottom:var(--line-strong) solid var(--text-muted);transform:rotate(45deg)}
+details[open] summary::after{transform:rotate(-135deg)}
+details ul{margin:var(--space-3) 0 0;padding-left:var(--space-5)}
+details p,details li{font-size:var(--text-md);color:var(--text-muted)}
+details li{margin:var(--space-2) 0}

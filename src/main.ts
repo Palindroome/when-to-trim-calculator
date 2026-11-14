@@ -1,4 +1,19 @@
-import './style.css';
+// Stylesheets in cascade order: tokens first, then the base and layout, then one partial per component.
+import './styles/tokens.css';
+import './styles/base.css';
+import './styles/layout.css';
+import './styles/header.css';
+import './styles/form.css';
+import './styles/datetime.css';
+import './styles/covers.css';
+import './styles/buttons.css';
+import './styles/result.css';
+import './styles/pieces.css';
+import './styles/explainer.css';
+import './styles/footer.css';
+import './styles/wizard.css';
+import './styles/welcome.css';
+import './styles/cards.css';
 import { geometricMeanCalibrator } from './domain/calibration';
 import { DEFAULT_PARAMS } from './domain/params';
 import { physicalRateModel } from './domain/physics';

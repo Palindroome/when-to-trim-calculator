@@ -48,8 +48,12 @@ Each state is captured in the light and the dark colour scheme (`light-…png`, 
 index.html            page skeleton (colour-scheme metas, inline script applying a stored theme before first paint, font preload, <main>, <footer>); everything else is rendered by src/
 public/fonts/         self-hosted Inter variable font (Latin subset) and its OFL licence
 src/
-  main.ts             composition root: picks language, params, storage, conditions source, models
-  style.css           design tokens (one :root block: type, space, radii, colour roles, shadows; dark values as --d-*) + components
+  main.ts             composition root: picks language, params, storage, conditions source, models; imports the stylesheets in cascade order
+  styles/
+    tokens.css        design tokens (one :root block: type, space, radii, colour roles, shadows; dark values as --d-*) and the two dark blocks
+    base.css          font, reset, page background, utilities (.vh, .hide, .muted)
+    layout.css        page layout and cards, including the two-column desktop grid
+    *.css             one partial per component: header, form, datetime, covers, buttons, result, pieces, explainer, footer, wizard, welcome, cards
   domain/             pure logic, no DOM; unit-tested
     types.ts          ids (ShapeId, ClayId, ...), Piece, Conditions, Plan
     covers.ts         CoverId, CoverDefinition (factor, airflow, environment, planner gate), coverById
@@ -103,7 +107,7 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
   Weekday and month names, decimal separator, duration wording and the date-time pattern live in the `format` section of the catalog.
 
   Saved pieces store their plan sentence (`label`) in the language that was active at save time. The piece list re-renders it from `plan` in the current language and falls back to `label` for unexpected plan shapes.
-- **Colour schemes.** Components use only the colour-role tokens in `src/style.css`. Dark mode overrides those same tokens with the `--d-*` values, either when the system prefers dark (`prefers-color-scheme`) or when `data-theme="dark"` is set on `<html>`; `data-theme="light"` forces the light values. The `System | Light | Dark` switch next to the language switch sets that attribute and stores `light` / `dark` under `kiedy-trymowac-theme` (System removes the key). A new component that uses the tokens works in both schemes without extra CSS; a new colour role needs a light value and a `--d-*` value assigned in both dark blocks.
+- **Colour schemes.** Components use only the colour-role tokens in `src/styles/tokens.css`. Dark mode overrides those same tokens with the `--d-*` values, either when the system prefers dark (`prefers-color-scheme`) or when `data-theme="dark"` is set on `<html>`; `data-theme="light"` forces the light values. The `System | Light | Dark` switch next to the language switch sets that attribute and stores `light` / `dark` under `kiedy-trymowac-theme` (System removes the key). A new component that uses the tokens works in both schemes without extra CSS; a new colour role needs a light value and a `--d-*` value assigned in both dark blocks.
 - **Fitted parameters.** Every coefficient is in `ModelParams` (`src/domain/params.ts`): evaporation coefficient, cover definitions, shape/clay/surface factors, wetness/stage offsets, window bounds, planner and tip thresholds. Pass a different object to `startApp`.
 - **Covers.** Each covering method is one `CoverDefinition` (`domain/covers.ts`) in `ModelParams.covers`: its drying factor, how airflow reaches the piece (`full` / `damped` / `none`), which conditions apply (`room` with night mode, or `dampRoom`) and an optional planner gate. The list order is the display order (bars, weight-check select, calibration table, cover filter) and the planner's preference order: the first cover is preferred as the first phase of two-phase plans, and the first / last are the fallbacks when even they are too slow / too fast. The app passes this catalog to the planner (`DryingContext.covers`), the tips and the UI; nothing else names a cover. Built-in labels and plan phrases are looked up by id in `covers.label` / `covers.phrase` of the i18n catalog through `coverLabel` / `coverPhrase` in `ui/render.ts`.
 - **Trained models.** There are two seams:

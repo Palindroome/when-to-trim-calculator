@@ -1,0 +1,14 @@
+/* ---------- welcome screen: only the masthead and the introduction, single column ---------- */
+main:not(.welcome) .welcome-screen,main.welcome>:not(.masthead):not(.welcome-screen){display:none}
+main.welcome{display:block;max-width:720px}
+.welcome-screen{margin-top:var(--space-4)}
+.welcome-screen p,.welcome-screen li{margin:0 0 var(--space-3)}
+.welcome-screen h3{font-size:var(--text-md);font-weight:600;margin:var(--space-5) 0 var(--space-3)}
+.welcome-screen ol{margin:0 0 var(--space-4);padding-left:var(--space-5)}
+.welcome-actions{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-5)}
+.welcome-actions button{flex:1 1 auto;width:auto;min-height:var(--control-h)}
+.welcome-actions button[hidden]{display:none}
+.welcome-list{list-style:none;margin:var(--space-5) 0 0;padding:0}
+.welcome-screen .welcome-list .piece{margin:0}
+.welcome-list .piece:last-child{border-bottom:0;padding-bottom:0}
+.welcome-list button{min-height:var(--control-h)}

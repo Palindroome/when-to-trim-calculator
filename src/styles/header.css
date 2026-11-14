@@ -1,0 +1,12 @@
+/* page header */
+/* language and theme switches: small segmented controls */
+.seg{display:flex}
+.seg button{min-width:44px;min-height:var(--control-h-sm);margin:0 0 0 -1px;padding:var(--space-1) var(--space-3);font-family:inherit;font-size:var(--text-sm);font-weight:600;letter-spacing:.04em;
+  color:var(--text-muted);background:var(--surface);border:1px solid var(--input-border);border-radius:0;cursor:pointer;position:relative}
+.seg button:first-child{margin-left:0;border-radius:var(--radius-md) 0 0 var(--radius-md)}
+.seg button:last-child{border-radius:0 var(--radius-md) var(--radius-md) 0}
+.seg button:hover{background:var(--surface-2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);z-index:1}
+.seg button:focus-visible{z-index:2}
+.seg svg{display:block;margin:0 auto}
+@media (pointer:coarse){.seg button{min-height:var(--control-h)}}
