@@ -17,6 +17,8 @@ export default defineConfig({
     // All date math in the app uses local time; pin it so expected values are stable.
     timezoneId: 'Europe/Warsaw',
     locale: 'pl-PL',
+    // No UI animations, so every test sees the final state at once; tests/e2e/motion.spec.ts turns them on.
+    reducedMotion: 'reduce',
     trace: 'retain-on-failure',
   },
   projects: [

@@ -3,6 +3,7 @@ import { AIRFLOWS } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, options } from '../../dom';
+import { toggleHeight } from '../../motion';
 import { stepCard } from '../cards/cards';
 
 export function markup(m: Messages): string {
@@ -31,13 +32,14 @@ export function markup(m: Messages): string {
 
 export function mount(root: HTMLElement, ctx: AppContext): void {
   const night = byId<HTMLInputElement>('night');
-  // the night temperature and humidity are shown only while the switch is on
-  const syncNight = (): void => {
-    root.querySelectorAll('.night').forEach((e) => {
-      e.classList.toggle('hide', !night.checked);
+  // the night temperature and humidity are shown only while the switch is on; flipping it expands or collapses them
+  root.querySelectorAll('.night').forEach((e) => {
+    e.classList.toggle('hide', !night.checked);
+  });
+  night.addEventListener('change', () => {
+    root.querySelectorAll<HTMLElement>('.night').forEach((e) => {
+      toggleHeight(e, night.checked);
     });
-  };
-  night.addEventListener('change', syncNight);
-  syncNight();
+  });
   root.querySelector('#body-2')!.addEventListener('input', () => ctx.compute());
 }

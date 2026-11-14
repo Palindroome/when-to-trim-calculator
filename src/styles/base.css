@@ -40,3 +40,26 @@ body {
   color: var(--text-muted);
   font-size: var(--text-sm);
 }
+/* changing numbers in the result keep their width while they count */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+/* no movement at all under reduced motion; src/ui/motion.ts skips its animations too.
+   transition:none rather than a tiny duration: with the default transition-property (all) a tiny duration
+   would delay every style change by a frame */
+@media (prefers-reduced-motion: reduce) {
+  /* biome-ignore-start lint/complexity/noImportantStyles: must override every component's animation and transition */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  /* separate rule: a browser without ::details-content would drop the whole selector list above */
+  ::details-content {
+    transition: none !important;
+  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: must override every component's animation and transition */
+}

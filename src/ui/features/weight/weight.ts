@@ -6,6 +6,7 @@ import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, esc } from '../../dom';
 import { readPieceInput, readThrownMs, readWeightInputs } from '../../form';
+import { reveal } from '../../motion';
 import { coverLabel, type View } from '../../render';
 
 export function markup(m: Messages, covers: readonly CoverDefinition[]): string {
@@ -52,10 +53,14 @@ export function update(ctx: AppContext): void {
   }
   const piece = derivePiece(readPieceInput(), ctx.view.params);
   const t = ctx.now();
+  const before = out.firstElementChild?.className;
   out.innerHTML = renderWeight(
     ctx.view,
     assessWeight({ ...w, nowMs: t }, ctx.context(piece, readThrownMs(t))),
   );
+  // a new state (too soft / in the window / too hard) fades in
+  const state = out.firstElementChild as HTMLElement | null;
+  if (before && state && state.className !== before) reveal(state);
 }
 
 export function mount(root: HTMLElement, ctx: AppContext): void {

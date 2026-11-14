@@ -232,7 +232,7 @@ export const pl = {
   result: {
     recommendation: 'Rekomendacja',
     warning: 'Uwaga',
-    ready: (date: string, lossPct: string, grams: number): string =>
+    ready: (date: string, lossPct: string, grams: string): string =>
       `Gotowa ok. ${date}: cel to utrata ok. ${lossPct}% masy (${grams} g).`,
     window: (from: string, to: string): string => `Okno: ${from} → ${to}`,
     windowOpenEnd: '…',
@@ -244,6 +244,8 @@ export const pl = {
     noDeadline: '–',
     alternatives: 'Inne sposoby na ten sam termin:',
     save: 'Zapisz tę pracę z planem',
+    /** the save button's label for a moment after saving, also announced in a status region */
+    saved: 'Zapisano',
   },
 
   errors: {

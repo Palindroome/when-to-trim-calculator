@@ -10,6 +10,7 @@ import type { StoredPiece } from '../../../storage/pieces';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
 import { readName } from '../../form';
+import { enter, exit, scrollBehavior } from '../../motion';
 import { coverLabel, coverPhrase, planText, type View } from '../../render';
 
 export function markup(m: Messages): string {
@@ -134,7 +135,8 @@ export function save(ctx: AppContext): void {
   };
   ctx.storePieces([p, ...ctx.pieces]);
   render(ctx);
-  byId('pieces').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  enter(byId('pieces').firstElementChild as HTMLElement);
+  byId('pieces').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
 }
 
 function feedback(ctx: AppContext, id: string, kind: FeedbackKind): void {
@@ -154,16 +156,21 @@ function feedback(ctx: AppContext, id: string, kind: FeedbackKind): void {
   ctx.compute();
 }
 
-function remove(ctx: AppContext, id: string): void {
+/** Deletes the piece at once, then lets its row leave before the list re-renders. */
+function remove(ctx: AppContext, id: string, row: HTMLElement): void {
+  if (row.dataset.leaving) return;
+  row.dataset.leaving = '1';
   ctx.storePieces(ctx.pieces.filter((x) => x.id !== id));
-  render(ctx);
-  ctx.compute();
+  void exit(row).then(() => {
+    render(ctx);
+    ctx.compute();
+  });
 }
 
 export function mount(root: HTMLElement, ctx: AppContext): void {
   root.querySelector('#pieces')!.addEventListener('click', (e) => {
     const b = closest(e, '[data-fb], [data-del]');
     if (b?.dataset.fb) feedback(ctx, b.dataset.id ?? '', b.dataset.fb as FeedbackKind);
-    else if (b) remove(ctx, b.dataset.del ?? '');
+    else if (b) remove(ctx, b.dataset.del ?? '', b.closest<HTMLElement>('.piece')!);
   });
 }

@@ -85,6 +85,8 @@ src/
     render.ts         View, and the cover and plan wording several features share
     calibration.ts    perCoverCalibration: the calibration of every cover, for the bars and the calibration table
     footer.ts         site footer: author's profile links with inline SVG icons
+    motion.ts         every UI animation (WAAPI with a spring as CSS linear(), counting numbers); nothing under reduced motion
+    numbers.ts        counting numbers in the result: their markup, per-frame wording and when they snap
     dom.ts            byId, esc, options, closest (event delegation)
     features/         one folder per feature; each keeps its markup next to its wiring and exports mount(root, ctx)
       header/         heading, language switch, theme switch
@@ -132,4 +134,5 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
   2. Fill them in `save` (`ui/features/pieces/pieces.ts`).
   3. Keep the key `kiedy-trymowac-v1`, or introduce a v2 repository that migrates from v1.
 - **Sensors.** Implement `ConditionsSource` (`domain/conditions.ts`): `read()` returns `Conditions`, and the optional `subscribe(onChange)` triggers a recalculation. `formConditionsSource` in `ui/form.ts` is the current implementation. A sensor source can wrap it and override, for example, `temp` and `rh`.
+- **Motion.** Animations are subtle (120–320 ms, springs without overshoot) and only make changes easier to follow. Only `src/ui/motion.ts` animates; features call its helpers (`captureRects`/`playFrom` around a re-render, `animateNumbers`, `enter`/`exit`, `reveal`, `toggleHeight`, `slideIndicator`, `viewTransition`). Durations and easings are tokens in `tokens.css`; the JS spring is `SPRING` in `motion.ts`. Under `prefers-reduced-motion: reduce` nothing moves, and the settled page is always identical to the reduced-motion one. The e2e suite runs with reduced motion (`playwright.config.ts`); `tests/e2e/motion.spec.ts` turns it off and waits on `window.__motionIdle()`.
 - **Storage.** `PieceRepository` hides localStorage. The localStorage implementation keeps the prototype's v1 format byte-for-byte, so existing data keeps working.
