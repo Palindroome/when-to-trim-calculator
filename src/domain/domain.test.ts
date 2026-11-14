@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { feedbackToSample, geometricMeanCalibrator } from './calibration';
+import { type CoverDefinition, type CoverId, coverById } from './covers';
 import { DEFAULT_PARAMS, MS_PER_HOUR } from './params';
 import { physicalRateModel, psat } from './physics';
 import { derivePiece } from './piece';
@@ -7,10 +8,23 @@ import { dominantCover, type PlanResult, planDrying } from './planner';
 import { hoursToLoss, simulate } from './simulate';
 import { constantRateModel, DEFAULT_CONDITIONS, DEFAULT_INPUT, makeContext, START } from './testing';
 import { tipsFor } from './tips';
-import { COVERS, type Cover } from './types';
 import { assessWeight } from './weight';
 
 const P = DEFAULT_PARAMS;
+const COVERS: CoverId[] = P.covers.map((c) => c.id);
+const def = (id: CoverId): CoverDefinition => coverById(P.covers, id);
+
+describe('cover definitions', () => {
+  it('lists the built-in covers in canonical order with the original factors', () => {
+    expect(COVERS).toEqual(['open', 'partial', 'damp', 'full', 'box']);
+    expect(Object.fromEntries(P.covers.map((c) => [c.id, c.factor]))).toEqual({ open: 1, partial: 0.3, full: 0.07, box: 0.05, damp: 0.6 });
+  });
+
+  it('coverById throws on an unknown id', () => {
+    expect(coverById(P.covers, 'full')).toBe(P.covers[3]);
+    expect(() => coverById(P.covers, 'custom:x')).toThrow('unknown cover: custom:x');
+  });
+});
 
 describe('psat', () => {
   it('matches the Magnus formula', () => {
@@ -60,48 +74,57 @@ describe('derivePiece', () => {
 describe('physical rate model', () => {
   const model = physicalRateModel(P);
   const piece = derivePiece(DEFAULT_INPUT, P);
-  const ones = geometricMeanCalibrator([], P).multipliers();
+  const ones = geometricMeanCalibrator([], P).multipliers(COVERS);
   const at = (h: number) => new Date(2026, 2, 4, h, 0).getTime();
+  const open = def('open');
 
   it('open drying uses the airflow factor and vapour deficit', () => {
     const vpd = psat(20) * 0.5;
-    expect(model.rate('open', at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo((5.1 * piece.area * vpd * 1.6) / piece.slow, 12);
+    expect(model.rate(open, at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo((5.1 * piece.area * vpd * 1.6) / piece.slow, 12);
   });
 
   it('partial cover uses the square root of airflow, full cover none', () => {
-    const open = model.rate('open', at(12), piece, DEFAULT_CONDITIONS, ones);
-    expect(model.rate('partial', at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo((open / 1.6) * Math.sqrt(1.6) * 0.3, 12);
-    expect(model.rate('full', at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo((open / 1.6) * 0.07, 12);
+    const rate = model.rate(open, at(12), piece, DEFAULT_CONDITIONS, ones);
+    expect(model.rate(def('partial'), at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo((rate / 1.6) * Math.sqrt(1.6) * 0.3, 12);
+    expect(model.rate(def('full'), at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo((rate / 1.6) * 0.07, 12);
   });
 
   it('damp room uses its own conditions and no airflow', () => {
     const expected = (5.1 * piece.area * psat(15) * (1 - 0.88) * 0.6) / piece.slow;
-    expect(model.rate('damp', at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo(expected, 12);
+    expect(model.rate(def('damp'), at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo(expected, 12);
+  });
+
+  it('is driven by the definition, not the id', () => {
+    const custom: CoverDefinition = { id: 'custom:x', factor: 0.5, airflow: 'none', environment: 'room' };
+    const rate = model.rate(open, at(12), piece, DEFAULT_CONDITIONS, ones);
+    expect(model.rate(custom, at(12), piece, DEFAULT_CONDITIONS, ones)).toBeCloseTo((rate / 1.6) * 0.5, 12);
+    // a cover without a multiplier entry is uncorrected
+    expect(model.rate(custom, at(12), piece, DEFAULT_CONDITIONS, {})).toBe(model.rate(custom, at(12), piece, DEFAULT_CONDITIONS, ones));
   });
 
   it('switches to night conditions between 22:00 and 07:00 only when enabled', () => {
     const env = { ...DEFAULT_CONDITIONS, night: true };
-    const day = model.rate('open', at(12), piece, env, ones);
-    expect(model.rate('open', at(21), piece, env, ones)).toBe(day);
-    expect(model.rate('open', at(22), piece, env, ones)).not.toBe(day);
-    expect(model.rate('open', at(6), piece, env, ones)).not.toBe(day);
-    expect(model.rate('open', at(7), piece, env, ones)).toBe(day);
-    expect(model.rate('open', at(23), piece, DEFAULT_CONDITIONS, ones)).toBe(day);
+    const day = model.rate(open, at(12), piece, env, ones);
+    expect(model.rate(open, at(21), piece, env, ones)).toBe(day);
+    expect(model.rate(open, at(22), piece, env, ones)).not.toBe(day);
+    expect(model.rate(open, at(6), piece, env, ones)).not.toBe(day);
+    expect(model.rate(open, at(7), piece, env, ones)).toBe(day);
+    expect(model.rate(open, at(23), piece, DEFAULT_CONDITIONS, ones)).toBe(day);
   });
 
   it('clamps humidity and the deficit floor', () => {
-    const saturated = model.rate('open', at(12), piece, { ...DEFAULT_CONDITIONS, rh: 120 }, ones);
+    const saturated = model.rate(open, at(12), piece, { ...DEFAULT_CONDITIONS, rh: 120 }, ones);
     expect(saturated).toBeCloseTo((5.1 * piece.area * Math.max(0.05, psat(20) * 0.01) * 1.6) / piece.slow, 12);
-    const dry0 = model.rate('open', at(12), piece, { ...DEFAULT_CONDITIONS, rh: 0 }, ones);
-    const dry1 = model.rate('open', at(12), piece, { ...DEFAULT_CONDITIONS, rh: 1 }, ones);
+    const dry0 = model.rate(open, at(12), piece, { ...DEFAULT_CONDITIONS, rh: 0 }, ones);
+    const dry1 = model.rate(open, at(12), piece, { ...DEFAULT_CONDITIONS, rh: 1 }, ones);
     expect(dry0).toBe(dry1);
-    const cold = model.rate('open', at(12), piece, { ...DEFAULT_CONDITIONS, temp: -40, rh: 99 }, ones);
+    const cold = model.rate(open, at(12), piece, { ...DEFAULT_CONDITIONS, temp: -40, rh: 99 }, ones);
     expect(cold).toBeCloseTo((5.1 * piece.area * 0.05 * 1.6) / piece.slow, 12);
   });
 
   it('divides by the calibration multiplier', () => {
-    const base = model.rate('box', at(12), piece, DEFAULT_CONDITIONS, ones);
-    expect(model.rate('box', at(12), piece, DEFAULT_CONDITIONS, { ...ones, box: 2 })).toBeCloseTo(base / 2, 12);
+    const base = model.rate(def('box'), at(12), piece, DEFAULT_CONDITIONS, ones);
+    expect(model.rate(def('box'), at(12), piece, DEFAULT_CONDITIONS, { ...ones, box: 2 })).toBeCloseTo(base / 2, 12);
   });
 });
 
@@ -207,14 +230,45 @@ describe('planDrying', () => {
     const soft = makeContext({ input: { stage: 'soft' } });
     expect(uses(planDrying(soft, 49, 'soft'))).toBe(true);
   });
+
+  it('with more than ten covers still ranks "first cover first" two-phase plans ahead', () => {
+    // ten gated covers (never candidates at 49 h) push "box" to index 13 of the catalog
+    const gated = Array.from({ length: 10 }, (_, i): CoverDefinition => ({ ...def('damp'), id: `custom:g${i}` }));
+    const covers = [def('open'), def('partial'), def('full'), ...gated, def('box')];
+    const r = planDrying(makeContext({ covers }), 49, 'trim');
+    // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
+    expect(r.recommendation).toMatchObject({ status: 'onTarget', option: { kind: 'twoPhase', first: 'open', then: 'full' } });
+    expect(r.alternatives.map((a) => (a.kind === 'twoPhase' ? `${a.first}>${a.then}` : a.cover))).toEqual([
+      'open>box',
+      'partial>full',
+      'partial>box',
+    ]);
+  });
+
+  it('falls back to the first / last catalog cover', () => {
+    const covers = ['partial', 'open', 'damp', 'box', 'full'].map((id) => def(id as CoverId));
+    const ctx = makeContext({ covers });
+    const fast = planDrying(ctx, 2, 'trim');
+    expect(fast.recommendation).toMatchObject({
+      status: 'tooFast',
+      fastestHours: fast.singles.open,
+      option: { cover: 'partial', hours: fast.singles.open },
+    });
+    const slow = planDrying(ctx, 24 * 20, 'trim');
+    expect(slow.recommendation).toMatchObject({
+      status: 'tooSlow',
+      slowestHours: slow.singles.box,
+      option: { cover: 'full', hours: slow.singles.full },
+    });
+  });
 });
 
 describe('planDrying with allowed covers', () => {
   const ctx = makeContext();
-  const all: Cover[] = [...COVERS];
-  const except = (...out: Cover[]): Cover[] => all.filter((c) => !out.includes(c));
+  const all: CoverId[] = [...COVERS];
+  const except = (...out: CoverId[]): CoverId[] => all.filter((c) => !out.includes(c));
   /** every cover used by the recommendation and the alternatives */
-  const used = (r: PlanResult): Cover[] => {
+  const used = (r: PlanResult): CoverId[] => {
     const opts = [...('option' in r.recommendation ? [r.recommendation.option] : []), ...r.alternatives];
     return opts.flatMap((o) => o.plan.map((s) => s.cover));
   };
@@ -259,7 +313,7 @@ describe('planDrying with allowed covers', () => {
     const r = planDrying(ctx, 24 * 20, 'trim', { allowed });
     expect(r.recommendation.status).toBe('tooSlow');
     if (r.recommendation.status !== 'tooSlow') return;
-    const slowest = Math.max(...allowed.map((c) => r.singles[c]));
+    const slowest = Math.max(...allowed.map((c) => r.singles[c]!));
     expect(r.recommendation.slowestHours).toBe(slowest);
     expect(r.recommendation.option.kind).toBe('single');
     if (r.recommendation.option.kind !== 'single') return;
@@ -268,7 +322,7 @@ describe('planDrying with allowed covers', () => {
   });
 
   it('one allowed cover: no alternatives, status depends on the deadline', () => {
-    const only = { allowed: ['partial'] as Cover[] };
+    const only = { allowed: ['partial'] as CoverId[] };
     const on = planDrying(ctx, 25, 'trim', only);
     expect(on.recommendation).toMatchObject({ status: 'onTarget', option: { kind: 'single', cover: 'partial' } });
     expect(on.alternatives).toEqual([]);
@@ -300,7 +354,7 @@ describe('planDrying with allowed covers', () => {
   });
 
   it('ignores unknown cover ids', () => {
-    const r = planDrying(ctx, 49, 'trim', { allowed: ['paperBag', 'open', 'full'] as unknown as Cover[] });
+    const r = planDrying(ctx, 49, 'trim', { allowed: ['paperBag', 'open', 'full'] as unknown as CoverId[] });
     expect(used(r).every((c) => c === 'open' || c === 'full')).toBe(true);
   });
 });
@@ -324,7 +378,7 @@ describe('geometric-mean calibrator', () => {
   it('is neutral without samples', () => {
     const c = geometricMeanCalibrator([], P);
     expect(c.estimate('open')).toEqual({ multiplier: 1, samples: 0 });
-    expect(c.multipliers()).toEqual({ open: 1, partial: 1, damp: 1, full: 1, box: 1 });
+    expect(c.multipliers(COVERS)).toEqual({ open: 1, partial: 1, damp: 1, full: 1, box: 1 });
   });
 
   it('shrinks the geometric mean towards 1 with n/(n+2)', () => {
@@ -412,23 +466,28 @@ describe('tipsFor', () => {
   const openPlan = { kind: 'single' as const, cover: 'open' as const, plan: [{ cover: 'open' as const, hours: Infinity }], hours: 10 };
   const rec = { status: 'onTarget' as const, option: openPlan };
   it('dry air or draught only when the plan starts open', () => {
-    expect(tipsFor(rec, piece, { ...DEFAULT_CONDITIONS, airflow: 'draft' }, P)).toEqual(['dryAirRim']);
-    expect(tipsFor(rec, piece, { ...DEFAULT_CONDITIONS, temp: 26, rh: 30 }, P)).toEqual(['dryAirRim']);
+    expect(tipsFor(rec, piece, { ...DEFAULT_CONDITIONS, airflow: 'draft' }, P, P.covers)).toEqual(['dryAirRim']);
+    expect(tipsFor(rec, piece, { ...DEFAULT_CONDITIONS, temp: 26, rh: 30 }, P, P.covers)).toEqual(['dryAirRim']);
     const boxed = {
       status: 'onTarget' as const,
       option: { ...openPlan, cover: 'box' as const, plan: [{ cover: 'box' as const, hours: Infinity }] },
     };
-    expect(tipsFor(boxed, piece, { ...DEFAULT_CONDITIONS, airflow: 'draft' }, P)).toEqual([]);
+    expect(tipsFor(boxed, piece, { ...DEFAULT_CONDITIONS, airflow: 'draft' }, P, P.covers)).toEqual([]);
+  });
+  it('dry air applies to any cover in full airflow', () => {
+    const custom = { id: 'custom:shelf' as const, factor: 0.8, airflow: 'full' as const, environment: 'room' as const };
+    const shelf = { status: 'onTarget' as const, option: { ...openPlan, cover: custom.id, plan: [{ cover: custom.id, hours: Infinity }] } };
+    expect(tipsFor(shelf, piece, { ...DEFAULT_CONDITIONS, airflow: 'draft' }, P, [...P.covers, custom])).toEqual(['dryAirRim']);
   });
   it('uses unclamped humidity (RH > 100 never counts as dry)', () => {
-    expect(tipsFor(rec, piece, { ...DEFAULT_CONDITIONS, rh: 120 }, P)).toEqual([]);
+    expect(tipsFor(rec, piece, { ...DEFAULT_CONDITIONS, rh: 120 }, P, P.covers)).toEqual([]);
   });
   it('thick base and long waits', () => {
     const slow = derivePiece({ ...DEFAULT_INPUT, shape: 'closed' }, P);
-    expect(tipsFor({ status: 'onTarget', option: { ...openPlan, hours: 145 } }, slow, DEFAULT_CONDITIONS, P)).toEqual([
+    expect(tipsFor({ status: 'onTarget', option: { ...openPlan, hours: 145 } }, slow, DEFAULT_CONDITIONS, P, P.covers)).toEqual([
       'thickBase',
       'mould',
     ]);
-    expect(tipsFor({ status: 'invalidDeadline' }, slow, DEFAULT_CONDITIONS, P)).toEqual(['thickBase']);
+    expect(tipsFor({ status: 'invalidDeadline' }, slow, DEFAULT_CONDITIONS, P, P.covers)).toEqual(['thickBase']);
   });
 });

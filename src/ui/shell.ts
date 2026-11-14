@@ -1,5 +1,7 @@
-import { AIRFLOWS, BATS, CLAYS, COVERS, SHAPES, STAGES, WETNESS } from '../domain/types';
+import type { CoverDefinition } from '../domain/covers';
+import { AIRFLOWS, BATS, CLAYS, SHAPES, STAGES, WETNESS } from '../domain/types';
 import type { Messages } from '../i18n';
+import { coverLabel } from './render';
 
 export const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
 
@@ -88,7 +90,7 @@ function themeSwitch(m: Messages, current: ThemeChoice): string {
 }
 
 /** Static page structure (everything except the dynamic result / list areas). */
-export function renderShell(m: Messages, locales: readonly string[], theme: ThemeChoice): string {
+export function renderShell(m: Messages, locales: readonly string[], theme: ThemeChoice, covers: readonly CoverDefinition[]): string {
   const f = m.fields;
   const u = m.units;
   const o = m.options;
@@ -193,7 +195,7 @@ export function renderShell(m: Messages, locales: readonly string[], theme: Them
     <fieldset class="covers" id="covers">
       <legend>${m.covers.filterTitle}</legend>
       <div class="opts">
-        ${COVERS.map((c) => `<label class="pill"><input type="checkbox" data-cover="${c}" checked><span class="face">${PILL_ICONS}${m.covers.label[c]}</span></label>`).join('\n        ')}
+        ${covers.map((c) => `<label class="pill"><input type="checkbox" data-cover="${c.id}" checked><span class="face">${PILL_ICONS}${coverLabel(m, c)}</span></label>`).join('\n        ')}
       </div>
       <p class="muted" id="covers-hint">${m.covers.filterHint}</p>
       <p class="muted hide" id="covers-last" aria-live="polite">${m.covers.filterLastOne}</p>

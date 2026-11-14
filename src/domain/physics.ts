@@ -1,5 +1,6 @@
+import type { CoverDefinition } from './covers';
 import type { ModelParams } from './params';
-import type { Conditions, Cover, CoverMultipliers, Piece } from './types';
+import type { Conditions, CoverMultipliers, Piece } from './types';
 
 /** Saturation vapour pressure over water, hPa (Magnus formula). */
 export const psat = (tempC: number): number => 6.112 * Math.exp((17.62 * tempC) / (243.12 + tempC));
@@ -10,7 +11,7 @@ export const psat = (tempC: number): number => 6.112 * Math.exp((17.62 * tempC) 
  * interface and be passed to the simulator/planner instead.
  */
 export interface RateModel {
-  rate(cover: Cover, timeMs: number, piece: Piece, conditions: Conditions, multipliers: CoverMultipliers): number;
+  rate(cover: CoverDefinition, timeMs: number, piece: Piece, conditions: Conditions, multipliers: CoverMultipliers): number;
 }
 
 /** Evaporation driven by the vapour-pressure deficit, airflow and exposed area. */
@@ -20,7 +21,7 @@ export function physicalRateModel(p: ModelParams): RateModel {
       let temp: number;
       let rh: number;
       let air: number;
-      if (cover === 'damp') {
+      if (cover.environment === 'dampRoom') {
         temp = env.dampTemp;
         rh = env.dampRh;
         air = 1;
@@ -30,11 +31,11 @@ export function physicalRateModel(p: ModelParams): RateModel {
         temp = isNight ? env.nightTemp : env.temp;
         rh = isNight ? env.nightRh : env.rh;
         const airflow = p.airflowFactor[env.airflow];
-        air = cover === 'open' ? airflow : cover === 'partial' ? Math.sqrt(airflow) : 1;
+        air = cover.airflow === 'full' ? airflow : cover.airflow === 'damped' ? Math.sqrt(airflow) : 1;
       }
       const clampedRh = Math.min(p.rhClamp.max, Math.max(p.rhClamp.min, rh));
       const vpd = Math.max(p.minVpd, psat(temp) * (1 - clampedRh / 100));
-      return (p.evaporationCoefficient * piece.area * vpd * air * p.coverFactor[cover]) / (piece.slow * multipliers[cover]);
+      return (p.evaporationCoefficient * piece.area * vpd * air * cover.factor) / (piece.slow * (multipliers[cover.id] ?? 1));
     },
   };
 }

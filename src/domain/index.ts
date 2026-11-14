@@ -1,5 +1,6 @@
 export * from './calibration';
 export * from './conditions';
+export * from './covers';
 export * from './params';
 export * from './physics';
 export * from './piece';

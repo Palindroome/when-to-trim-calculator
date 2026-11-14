@@ -1,9 +1,10 @@
 // HTML builders for the dynamic parts of the page. Pure functions of their inputs.
 import type { CoverCalibration } from '../domain/calibration';
+import { type BuiltInCoverId, type CoverDefinition, type CoverId, coverById } from '../domain/covers';
 import { type ModelParams, MS_PER_HOUR } from '../domain/params';
 import type { PlanOption, PlanResult } from '../domain/planner';
 import type { TipId } from '../domain/tips';
-import { COVERS, type Conditions, type Cover, FEEDBACK_KINDS, type Piece, type PieceInput } from '../domain/types';
+import { type Conditions, FEEDBACK_KINDS, type Piece, type PieceInput } from '../domain/types';
 import type { WeightAssessment } from '../domain/weight';
 import type { Formatter, Messages } from '../i18n';
 import type { StoredPiece } from '../storage/pieces';
@@ -13,39 +14,59 @@ export interface View {
   m: Messages;
   fmt: Formatter;
   params: ModelParams;
+  /** the cover catalog, in display order */
+  covers: readonly CoverDefinition[];
 }
+
+/** A cover's name in the bars, the calibration table and the cover selects. Built-in covers read the catalog. */
+export const coverLabel = (m: Messages, def: CoverDefinition): string => m.covers.label[def.id as BuiltInCoverId];
+
+/** A cover's phrase for the plan sentences. Built-in covers read the catalog. */
+export const coverPhrase = (m: Messages, def: CoverDefinition): string => m.covers.phrase[def.id as BuiltInCoverId];
 
 /** Comparison chart scale: deadline × 1.6, or at least 48 h; the longest finite bar counts between 24 h and 10 days. */
 const CHART = { deadlineHeadroom: 1.6, noDeadlineHours: 48, minFiniteHours: 24, maxFiniteHours: 24 * 10 } as const;
 
 export function planText(v: View, o: PlanOption, startMs: number): string {
-  if (o.kind === 'single') return v.m.plan.single(o.cover);
-  return v.m.plan.twoPhase(o.first, v.fmt.duration(o.switchAfterHours), v.fmt.dateTime(startMs + o.switchAfterHours * MS_PER_HOUR), o.then);
+  const phrase = (id: CoverId): string => coverPhrase(v.m, coverById(v.covers, id));
+  if (o.kind === 'single') return v.m.plan.single(phrase(o.cover));
+  return v.m.plan.twoPhase(
+    phrase(o.first),
+    v.fmt.duration(o.switchAfterHours),
+    v.fmt.dateTime(startMs + o.switchAfterHours * MS_PER_HOUR),
+    phrase(o.then),
+  );
 }
-
-const isCover = (w: unknown): w is Cover => COVERS.includes(w as Cover);
 
 /**
  * A saved piece's plan sentence in the current language, rebuilt from `plan` the way `planText`
  * built it at save time. Unexpected plan shapes fall back to the stored `label`.
  */
 function storedPlanText(v: View, p: StoredPiece): string {
+  const find = (w: unknown): CoverDefinition | undefined => v.covers.find((c) => c.id === w);
   const plan = Array.isArray(p.plan) ? p.plan : [];
   const [a, b] = plan;
-  if (plan.length === 1 && a && a.h === null && isCover(a.w)) return v.m.plan.single(a.w);
+  const first = find(a?.w);
+  const then = find(b?.w);
+  if (plan.length === 1 && a && a.h === null && first) return v.m.plan.single(coverPhrase(v.m, first));
   if (
     plan.length === 2 &&
     a &&
     b &&
-    isCover(a.w) &&
-    isCover(b.w) &&
+    first &&
+    then &&
     typeof a.h === 'number' &&
     a.h > 0 &&
     Number.isFinite(a.h) &&
     b.h === null &&
     Number.isFinite(p.start)
   ) {
-    return v.m.plan.twoPhase(a.w, v.fmt.duration(a.h), v.fmt.dateTime(p.start + a.h * MS_PER_HOUR), b.w);
+    return v.m.plan.twoPhase(
+      coverPhrase(v.m, first),
+      v.fmt.duration(a.h),
+      v.fmt.dateTime(p.start + a.h * MS_PER_HOUR),
+      coverPhrase(v.m, then),
+    );
   }
   return p.label;
 }
@@ -57,10 +78,10 @@ export interface ResultModel {
   /** working window (hours after throwing) — only for an on-target recommendation */
   window?: { start: number; end: number };
   tips: TipId[];
-  calibration: Record<Cover, CoverCalibration>;
+  calibration: Record<CoverId, CoverCalibration>;
   canSave: boolean;
   /** covers the user left ticked; the others get a muted "excluded" bar */
-  allowed: readonly Cover[];
+  allowed: readonly CoverId[];
 }
 
 export function renderResult(v: View, r: ResultModel): string {
@@ -82,14 +103,14 @@ export function renderResult(v: View, r: ResultModel): string {
     if (rec.status === 'invalidDeadline') {
       err = m.errors.invalidDeadline;
     } else {
-      // the fallback is always a single cover
-      const cover = rec.option.plan[0]!.cover;
+      // the fallback is always a single cover; the first / last catalog cover is the default one
+      const cover = coverById(v.covers, rec.option.plan[0]!.cover);
       if (rec.status === 'tooFast') {
         const d = fmt.duration(rec.fastestHours);
-        err = cover === 'open' ? m.errors.tooFast(d) : m.errors.tooFastWith(d, m.covers.label[cover]);
+        err = cover === v.covers[0] ? m.errors.tooFast(d) : m.errors.tooFastWith(d, coverLabel(m, cover));
       } else {
         const d = fmt.duration(rec.slowestHours);
-        err = cover === 'box' ? m.errors.tooSlow(d) : m.errors.tooSlowWith(d, m.covers.label[cover]);
+        err = cover === v.covers[v.covers.length - 1] ? m.errors.tooSlow(d) : m.errors.tooSlowWith(d, coverLabel(m, cover));
       }
     }
     const extra = plan.excludedWouldMeet ? `<div class="extra">${esc(m.errors.excludedWouldMeet)}</div>` : '';
@@ -97,19 +118,19 @@ export function renderResult(v: View, r: ResultModel): string {
   }
 
   // comparison bars
-  const finite = COVERS.map((c) => plan.singles[c]).filter(Number.isFinite);
+  const finite = v.covers.map((c) => plan.singles[c.id]!).filter(Number.isFinite);
   const maxShown = Math.max(
     H > 0 ? H * CHART.deadlineHeadroom : CHART.noDeadlineHours,
     Math.min(Math.max(...finite, CHART.minFiniteHours), CHART.maxFiniteHours),
   );
   html += `<div class="card"><h2>${m.result.compareTitle}</h2><div class="bars">`;
-  for (const c of COVERS) {
-    const t = plan.singles[c];
+  for (const c of v.covers) {
+    const t = plan.singles[c.id]!;
     const pct = Math.min(100, ((Number.isFinite(t) ? t : maxShown) / maxShown) * 100);
-    const off = !r.allowed.includes(c);
+    const off = !r.allowed.includes(c.id);
     const good = !off && H > 0 && Number.isFinite(t) && Math.abs(t - H) / H <= v.params.planner.targetTolerance;
-    const n = r.calibration[c].samples;
-    html += `<div class="bar${off ? ' off' : ''}"><div>${m.covers.label[c]}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c === 'damp' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
+    const n = r.calibration[c.id]!.samples;
+    html += `<div class="bar${off ? ' off' : ''}"><div>${coverLabel(m, c)}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c.environment === 'dampRoom' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
         <div class="track"><div class="fill ${good ? 'good' : ''}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
         <div class="t">${fmt.duration(t)}${pct >= 100 && Number.isFinite(t) ? '+' : ''}</div></div>`;
   }
@@ -173,14 +194,12 @@ export function renderWelcomePieces(v: View, pieces: readonly StoredPiece[], now
     .join('');
 }
 
-export function renderCalibration(v: View, calibration: Record<Cover, CoverCalibration>): string {
+export function renderCalibration(v: View, calibration: Record<CoverId, CoverCalibration>): string {
   const { m, fmt } = v;
-  const rows = COVERS.map((c) => ({ c, ...calibration[c] })).filter((r) => r.samples);
+  const rows = v.covers.map((c) => ({ c, ...calibration[c.id]! })).filter((r) => r.samples);
   if (!rows.length) return '';
   return `<table><tr><th>${m.calibration.cover}</th><th>${m.calibration.multiplier}</th><th>${m.calibration.count}</th></tr>${rows
-    .map(
-      (r) => `<tr><td>${m.covers.label[r.c]}</td><td>${m.calibration.value(fmt.decimal(r.multiplier, 2))}</td><td>${r.samples}</td></tr>`,
-    )
+    .map((r) => `<tr><td>${coverLabel(m, r.c)}</td><td>${m.calibration.value(fmt.decimal(r.multiplier, 2))}</td><td>${r.samples}</td></tr>`)
     .join('')}</table>
          <p class="muted">${m.calibration.noteHtml}</p>`;
 }

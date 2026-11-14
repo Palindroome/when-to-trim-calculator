@@ -1,5 +1,6 @@
 import type { CalibrationSample } from '../domain/calibration';
-import type { Cover, FeedbackKind } from '../domain/types';
+import type { CoverId } from '../domain/covers';
+import type { FeedbackKind } from '../domain/types';
 
 /**
  * Saved piece, exactly as stored by the original prototype under `kiedy-trymowac-v1`
@@ -15,11 +16,11 @@ export interface StoredPiece {
   /** target loss, % */
   lossPct: number;
   /** covering plan; `h: null` = until done */
-  plan: { w: Cover; h: number | null }[];
+  plan: { w: CoverId; h: number | null }[];
   /** plan sentence as displayed when saved (in the UI language of that moment) */
   label: string;
   /** dominant cover, which feedback calibrates */
-  dom: Cover;
+  dom: CoverId;
   /** predicted hours to target */
   predH: number;
   /** calibration multiplier of `dom` when saved */

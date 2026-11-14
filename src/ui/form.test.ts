@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_PARAMS } from '../domain/params';
 import { createFormatter } from '../i18n';
 import { en } from '../i18n/en';
 import { pl } from '../i18n/pl';
@@ -117,6 +118,6 @@ describe('readAllowedCovers', () => {
       { cover: 'damp', checked: false },
     ].map(({ cover, checked }) => ({ checked, dataset: { cover } }));
     vi.stubGlobal('document', { querySelectorAll: (sel: string) => (sel === 'input[data-cover]' ? boxes : []) });
-    expect(readAllowedCovers()).toEqual(['partial', 'full', 'box']);
+    expect(readAllowedCovers(DEFAULT_PARAMS.covers)).toEqual(['partial', 'full', 'box']);
   });
 });
