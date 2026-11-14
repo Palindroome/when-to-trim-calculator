@@ -34,15 +34,13 @@ test('controls: 16px text, 44px primary controls, buttons at least 24×24', asyn
     expect(c.font, c.id).toBeGreaterThanOrEqual(16);
     if (!c.sw) expect(c.h, c.id).toBeGreaterThanOrEqual(44);
   }
-  const buttons = await page
-    .locator('button:visible')
-    .evaluateAll((els) =>
-      els.map((el) => ({
-        text: el.textContent,
-        cls: el.className,
-        ...el.getBoundingClientRect().toJSON(),
-      })),
-    );
+  const buttons = await page.locator('button:visible').evaluateAll((els) =>
+    els.map((el) => ({
+      text: el.textContent,
+      cls: el.className,
+      ...el.getBoundingClientRect().toJSON(),
+    })),
+  );
   expect(buttons.some((b) => b.cls.includes('ghost'))).toBe(true);
   for (const b of buttons) {
     expect(b.width, b.text!).toBeGreaterThanOrEqual(24);
