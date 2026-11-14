@@ -7,3 +7,9 @@
 4ce18daf2507e08fb9c908f6b198e86597efb6c1
 # style(e2e): apply Biome's second formatting pass to design.spec.ts
 74c35ad57aa6fe13346a2b01f8a8478392d8716d
+# style(ci): reformat sources at 100 columns and format CSS
+6f72913e294a7d298fcd6950d838321bb8d68dcf
+# style(ci): move biome-ignore comments back above the lines they guard
+a7488ed4d9729ac976d3f6111ec99a6d6f254d9e
+# style(e2e): apply Biome's second formatting pass to design.spec.ts
+4bace1918bcbf740e1bbc0d96cff97f16c83a289
