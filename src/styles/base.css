@@ -32,8 +32,8 @@ body {
   white-space: nowrap;
   border: 0;
 }
-/* biome-ignore lint/complexity/noImportantStyles: the utility must win over every component's display rule */
 .hide {
+  /* biome-ignore lint/complexity/noImportantStyles: the utility must win over every component's display rule */
   display: none !important;
 }
 .muted {

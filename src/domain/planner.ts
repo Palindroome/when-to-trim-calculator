@@ -148,10 +148,10 @@ export function planDrying(
         { cover: a, hours: x },
         { cover: b, hours: Infinity },
       ];
-      // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
       twoPhase.push({
         kind: 'twoPhase',
         first: a,
+        // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
         then: b,
         switchAfterHours: x,
         plan,

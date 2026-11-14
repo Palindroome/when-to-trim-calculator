@@ -290,9 +290,9 @@ describe('planDrying', () => {
     );
     const covers = [def('open'), def('partial'), def('full'), ...gated, def('box')];
     const r = planDrying(makeContext({ covers }), 49, 'trim');
-    // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
     expect(r.recommendation).toMatchObject({
       status: 'onTarget',
+      // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
       option: { kind: 'twoPhase', first: 'open', then: 'full' },
     });
     expect(
@@ -353,10 +353,10 @@ describe('planDrying with allowed covers', () => {
     expect(used(r)).not.toContain('open');
     expect(r.recommendation.status).toBe('onTarget');
     if (r.recommendation.status !== 'onTarget') return;
-    // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
     expect(r.recommendation.option).toMatchObject({
       kind: 'twoPhase',
       first: 'partial',
+      // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
       then: 'full',
     });
   });
