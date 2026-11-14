@@ -28,7 +28,11 @@ export function markup(m: Messages): string {
 }
 
 /** Rows of the welcome screen's "My pieces" list: the highlights of each piece and a link to its details. */
-export function renderWelcomePieces(v: View, pieces: readonly StoredPiece[], nowMs: number): string {
+export function renderWelcomePieces(
+  v: View,
+  pieces: readonly StoredPiece[],
+  nowMs: number,
+): string {
   const { m } = v;
   return pieces
     .map((p) => {
@@ -62,7 +66,11 @@ export interface WelcomeActions {
   onDetails(id: string): void;
 }
 
-export function createWelcome(root: HTMLElement, ctx: AppContext, actions: WelcomeActions): Welcome {
+export function createWelcome(
+  root: HTMLElement,
+  ctx: AppContext,
+  actions: WelcomeActions,
+): Welcome {
   let open = false;
   /** whether the "My pieces" list is expanded */
   let expanded = false;
@@ -130,7 +138,13 @@ export function createWelcome(root: HTMLElement, ctx: AppContext, actions: Welco
  * Records interactions with the page and shows the welcome screen when the page comes back
  * (tab shown again, page restored from the history) after `idleMs` without one.
  */
-export function trackActivity(root: HTMLElement, welcome: Welcome, activity: ActivityStore, now: () => number, idleMs: number): void {
+export function trackActivity(
+  root: HTMLElement,
+  welcome: Welcome,
+  activity: ActivityStore,
+  now: () => number,
+  idleMs: number,
+): void {
   // kept in memory as well, so a page whose storage fails does not welcome on every return to the tab
   let lastActive = activity.load();
   let lastSaved: number | null = null;

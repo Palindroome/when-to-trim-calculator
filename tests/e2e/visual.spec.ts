@@ -8,7 +8,10 @@ import { STATES } from './states';
 
 test.skip(!process.env.VISUAL, 'set VISUAL=1 to run screenshot comparison');
 
-const sizes = { desktop: { width: 1280, height: 900 }, mobile: { width: 375, height: 812 } } as const;
+const sizes = {
+  desktop: { width: 1280, height: 900 },
+  mobile: { width: 375, height: 812 },
+} as const;
 
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(colorScheme, () => {
@@ -21,8 +24,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
           await setup(page);
           await page.evaluate(() => document.fonts.ready);
           // VISUAL_STRICT=1 demands pixel-identical output
-          const tolerance = process.env.VISUAL_STRICT ? { maxDiffPixels: 0, threshold: 0 } : { maxDiffPixelRatio: 0.001 };
-          await expect(page).toHaveScreenshot(`${colorScheme}-${size}-${name}.png`, { fullPage: true, ...tolerance });
+          const tolerance = process.env.VISUAL_STRICT
+            ? { maxDiffPixels: 0, threshold: 0 }
+            : { maxDiffPixelRatio: 0.001 };
+          await expect(page).toHaveScreenshot(`${colorScheme}-${size}-${name}.png`, {
+            fullPage: true,
+            ...tolerance,
+          });
         });
       }
     }

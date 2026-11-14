@@ -29,7 +29,11 @@ export interface Wizard {
   close(): void;
 }
 
-export function createWizard(root: HTMLElement, store: WizardStore, onEnd: (outcome: WizardOutcome) => void): Wizard {
+export function createWizard(
+  root: HTMLElement,
+  store: WizardStore,
+  onEnd: (outcome: WizardOutcome) => void,
+): Wizard {
   let open = store.load() === null;
   let step = 0;
   let m: Messages;
@@ -50,7 +54,9 @@ export function createWizard(root: HTMLElement, store: WizardStore, onEnd: (outc
     all.forEach((s, k) => {
       s.classList.toggle('current', open && k === i);
     });
-    byId('wizard-progress').textContent = open ? m.wizard.progress(i + 1, all.length, titles()[i]!) : '';
+    byId('wizard-progress').textContent = open
+      ? m.wizard.progress(i + 1, all.length, titles()[i]!)
+      : '';
     byId('wizard-back').hidden = i === 0;
     byId('wizard-next').textContent = i === last ? m.wizard.finish : m.wizard.next;
     if (open && moveFocus) focus(focusTarget(i));

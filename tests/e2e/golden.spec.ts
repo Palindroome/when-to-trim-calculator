@@ -8,7 +8,9 @@ import { expect, test } from '@playwright/test';
 import { openApp, type Snapshot, snapshot } from './helpers';
 import { applySteps, SCENARIOS } from './scenarios';
 
-const GOLDEN = JSON.parse(readFileSync(new URL('./golden.json', import.meta.url), 'utf-8')) as Record<string, Snapshot>;
+const GOLDEN = JSON.parse(
+  readFileSync(new URL('./golden.json', import.meta.url), 'utf-8'),
+) as Record<string, Snapshot>;
 
 test('every scenario has a recorded expectation', () => {
   expect(Object.keys(GOLDEN).sort()).toEqual(SCENARIOS.map((s) => s.name).sort());

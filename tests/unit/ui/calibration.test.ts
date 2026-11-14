@@ -34,7 +34,10 @@ describe('perCoverCalibration', () => {
       multipliers: () => ({}),
       learn: () => {},
     };
-    expect(perCoverCalibration(cal, ['damp', 'box'])).toEqual({ damp: { multiplier: 2, samples: 3 }, box: { multiplier: 2, samples: 3 } });
+    expect(perCoverCalibration(cal, ['damp', 'box'])).toEqual({
+      damp: { multiplier: 2, samples: 3 },
+      box: { multiplier: 2, samples: 3 },
+    });
     expect(asked).toEqual(['damp', 'box']);
   });
 });

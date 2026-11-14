@@ -4,7 +4,14 @@ import type { Plan, StageId } from './types';
 
 export type PlanOption =
   | { kind: 'single'; cover: CoverId; plan: Plan; hours: number }
-  | { kind: 'twoPhase'; first: CoverId; then: CoverId; switchAfterHours: number; plan: Plan; hours: number };
+  | {
+      kind: 'twoPhase';
+      first: CoverId;
+      then: CoverId;
+      switchAfterHours: number;
+      plan: Plan;
+      hours: number;
+    };
 
 export type Recommendation =
   /** the trim date is not after the throwing date */
@@ -73,13 +80,20 @@ function fallback(
 }
 
 /** Finds how to cover the piece so it reaches its target loss at `deadlineHours` after throwing. */
-export function planDrying(ctx: DryingContext, deadlineHours: number, stage: StageId, options: PlanOptions = {}): PlanResult {
+export function planDrying(
+  ctx: DryingContext,
+  deadlineHours: number,
+  stage: StageId,
+  options: PlanOptions = {},
+): PlanResult {
   const H = deadlineHours;
   const cfg = ctx.params.planner;
   const target = ctx.piece.lossPct;
   const ids = ctx.covers.map((c) => c.id);
   const { allowed } = options;
-  const allowedSet = allowed?.length ? ctx.covers.filter((c) => allowed.includes(c.id)) : ctx.covers;
+  const allowedSet = allowed?.length
+    ? ctx.covers.filter((c) => allowed.includes(c.id))
+    : ctx.covers;
   const filtered = allowedSet.length < ctx.covers.length;
 
   // every cover, also the excluded ones, so the bars can compare them all
@@ -88,7 +102,13 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
   const hours = (c: CoverId): number => singles[c]!;
 
   if (!(H > 0)) {
-    return { deadlineHours: H, singles, recommendation: { status: 'invalidDeadline' }, alternatives: [], excludedWouldMeet: false };
+    return {
+      deadlineHours: H,
+      singles,
+      recommendation: { status: 'invalidDeadline' },
+      alternatives: [],
+      excludedWouldMeet: false,
+    };
   }
 
   // gated covers (the damp room is small) are suggested only for very wet work or long waits,
@@ -97,7 +117,9 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
   const gated = allowedSet.filter((c) => c.gate !== 'longWaitOrSoft' || openGate);
   const candidates = (gated.length ? gated : allowedSet).map((c) => c.id);
 
-  const singleOptions = candidates.map((c) => single(c, hours(c))).filter((o) => Number.isFinite(o.hours));
+  const singleOptions = candidates
+    .map((c) => single(c, hours(c)))
+    .filter((o) => Number.isFinite(o.hours));
 
   // two-phase: a faster cover first (rim firms up), then a slower one
   const twoPhase: Extract<PlanOption, { kind: 'twoPhase' }>[] = [];
@@ -127,7 +149,14 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
         { cover: b, hours: Infinity },
       ];
       // biome-ignore lint/suspicious/noThenProperty: `then` is the second cover of a plan, not a thenable
-      twoPhase.push({ kind: 'twoPhase', first: a, then: b, switchAfterHours: x, plan, hours: hoursToLoss(plan, ctx, target) });
+      twoPhase.push({
+        kind: 'twoPhase',
+        first: a,
+        then: b,
+        switchAfterHours: x,
+        plan,
+        hours: hoursToLoss(plan, ctx, target),
+      });
     }
   }
 
@@ -135,7 +164,10 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
     .filter((o) => Math.abs(o.hours - H) / H <= cfg.targetTolerance)
     .sort((p, q) => Math.abs(p.hours - H) - Math.abs(q.hours - H));
   // prefer: the first catalog cover (normally open) first, then the gentlest wrap that is slower than target
-  const rank = (o: (typeof twoPhase)[number]): [number, number] => [o.first === ids[0] ? 0 : 1, ids.indexOf(o.then)];
+  const rank = (o: (typeof twoPhase)[number]): [number, number] => [
+    o.first === ids[0] ? 0 : 1,
+    ids.indexOf(o.then),
+  ];
   twoPhase.sort((p, q) => {
     const [p0, p1] = rank(p);
     const [q0, q1] = rank(q);
@@ -155,6 +187,8 @@ export function planDrying(ctx: DryingContext, deadlineHours: number, stage: Sta
   }
   const alternatives = [...close, ...twoPhase].filter((o) => o !== chosen).slice(0, 3);
   const excludedWouldMeet =
-    filtered && recommendation.status !== 'onTarget' && planDrying(ctx, H, stage).recommendation.status === 'onTarget';
+    filtered &&
+    recommendation.status !== 'onTarget' &&
+    planDrying(ctx, H, stage).recommendation.status === 'onTarget';
   return { deadlineHours: H, singles, recommendation, alternatives, excludedWouldMeet };
 }

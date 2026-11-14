@@ -3,7 +3,14 @@ import 'cally';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, closest } from '../../dom';
-import { type DateTimeId, dayLabel, normalizeTime, readThrownMs, toDayKey, toTime } from '../../form';
+import {
+  type DateTimeId,
+  dayLabel,
+  normalizeTime,
+  readThrownMs,
+  toDayKey,
+  toTime,
+} from '../../form';
 
 export const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
 
@@ -38,7 +45,13 @@ const CHEVRON = (d: string): string =>
  * and quick-choice buttons. The chosen day key lives in the hidden `<id>-day`; this module fills the
  * button text and sets up the calendar. Every control is named "<field> <part>".
  */
-function dateTimeField(m: Messages, id: DateTimeId, legend: string, chipsId: string, chips: string): string {
+function dateTimeField(
+  m: Messages,
+  id: DateTimeId,
+  legend: string,
+  chipsId: string,
+  chips: string,
+): string {
   const d = m.dateTime;
   return `<fieldset class="datetime">
         <legend id="${id}-legend">${legend}</legend>
@@ -75,10 +88,15 @@ export function markup(m: Messages): string {
     </div>`;
 }
 
-const chips = (root: HTMLElement): NodeListOf<HTMLButtonElement> => root.querySelectorAll<HTMLButtonElement>('#quick .chip');
-const presets = (root: HTMLElement): NodeListOf<HTMLButtonElement> => root.querySelectorAll<HTMLButtonElement>('#thrown-quick .chip');
+const chips = (root: HTMLElement): NodeListOf<HTMLButtonElement> =>
+  root.querySelectorAll<HTMLButtonElement>('#quick .chip');
+const presets = (root: HTMLElement): NodeListOf<HTMLButtonElement> =>
+  root.querySelectorAll<HTMLButtonElement>('#thrown-quick .chip');
 /** Highlights the buttons for which `on` holds, for sight (`.on`) and for assistive tech (`aria-pressed`). */
-const press = (buttons: NodeListOf<HTMLButtonElement>, on: (b: HTMLButtonElement) => boolean): void => {
+const press = (
+  buttons: NodeListOf<HTMLButtonElement>,
+  on: (b: HTMLButtonElement) => boolean,
+): void => {
   buttons.forEach((b) => {
     b.classList.toggle('on', on(b));
     b.setAttribute('aria-pressed', String(on(b)));
@@ -117,7 +135,12 @@ function setDateTime(ctx: AppContext, id: DateTimeId, ms: number): void {
 
 /** Writes the chosen day onto its button, e.g. "dziś · śr 4.03". */
 function showDay(ctx: AppContext, id: DateTimeId): void {
-  byId(`${id}-day-text`).textContent = dayLabel(ctx.view.m, ctx.view.fmt, byId<HTMLInputElement>(`${id}-day`).value, ctx.now());
+  byId(`${id}-day-text`).textContent = dayLabel(
+    ctx.view.m,
+    ctx.view.fmt,
+    byId<HTMLInputElement>(`${id}-day`).value,
+    ctx.now(),
+  );
 }
 
 const calendar = (id: DateTimeId): CalendarDate => byId<CalendarDate>(`${id}-calendar`);
@@ -131,7 +154,8 @@ function openCalendar(ctx: AppContext, id: DateTimeId): void {
   if (id === 'thrown') cal.max = today; // a piece cannot be thrown in the future
   const thrown = byId<HTMLInputElement>('thrown-day').value;
   // a new function each time, so the calendar re-renders with the current throwing day
-  cal.getDayParts = (date) => (id === 'when' && date.toISOString().slice(0, 10) === thrown ? 'thrown' : '');
+  cal.getDayParts = (date) =>
+    id === 'when' && date.toISOString().slice(0, 10) === thrown ? 'thrown' : '';
   cal.value = day;
   cal.focusedDate = day;
   showMonth(ctx, id, new Date(`${day}T00:00Z`));
@@ -243,7 +267,9 @@ export function mount(root: HTMLElement, ctx: AppContext): void {
     const dialog = byId<HTMLDialogElement>(`${id}-cal`);
     calendar(id).addEventListener('change', () => pickDay(ctx, id));
     // also fired when paging moves the focused day into another month
-    calendar(id).addEventListener('focusday', (e) => showMonth(ctx, id, (e as CustomEvent<Date>).detail));
+    calendar(id).addEventListener('focusday', (e) =>
+      showMonth(ctx, id, (e as CustomEvent<Date>).detail),
+    );
     // Escape closes the dialog natively; a click on the backdrop lands on the dialog element itself
     dialog.addEventListener('click', (e) => {
       if (e.target === dialog) dialog.close();

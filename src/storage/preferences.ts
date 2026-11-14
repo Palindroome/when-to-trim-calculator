@@ -8,7 +8,10 @@ export type Theme = 'light' | 'dark';
 type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 /** The stored language if it is one of `available`; storage errors and unknown values give null. */
-export function loadLanguage(available: readonly string[], storage?: KeyValueStorage): string | null {
+export function loadLanguage(
+  available: readonly string[],
+  storage?: KeyValueStorage,
+): string | null {
   try {
     const code = (storage ?? localStorage).getItem(LANGUAGE_KEY);
     return code !== null && available.includes(code) ? code : null;

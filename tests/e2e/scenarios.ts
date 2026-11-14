@@ -1,5 +1,14 @@
 import type { Page } from '@playwright/test';
-import { choose, type DateField, type Field, field, fill, type SelectField, setDateTime, setNight } from './helpers';
+import {
+  choose,
+  type DateField,
+  type Field,
+  field,
+  fill,
+  type SelectField,
+  setDateTime,
+  setNight,
+} from './helpers';
 
 export type Step =
   | { fill: Field | DateField; value: string }
@@ -16,7 +25,8 @@ export interface Scenario {
 export async function applySteps(page: Page, steps: Step[]): Promise<void> {
   for (const s of steps) {
     if ('fill' in s) {
-      if (s.fill === 'Wytoczona' || s.fill === 'Chcę trymować') await setDateTime(page, s.fill, s.value);
+      if (s.fill === 'Wytoczona' || s.fill === 'Chcę trymować')
+        await setDateTime(page, s.fill, s.value);
       else await fill(page, s.fill, s.value);
     } else if ('type' in s) {
       const input = field(page, s.type);
@@ -78,7 +88,10 @@ export const SCENARIOS: Scenario[] = [
   { name: 'bat plastic', steps: [{ select: 'Podłoże', value: 'plastic' }] },
   { name: 'bat plaster', steps: [{ select: 'Podłoże', value: 'plaster' }] },
   { name: 'air still', steps: [{ select: 'Ruch powietrza przy półce', value: 'still' }] },
-  { name: 'air draft (draft tip)', steps: [{ select: 'Ruch powietrza przy półce', value: 'draft' }] },
+  {
+    name: 'air draft (draft tip)',
+    steps: [{ select: 'Ruch powietrza przy półce', value: 'draft' }],
+  },
   {
     name: 'dry warm air (vpd tip)',
     steps: [
@@ -109,7 +122,11 @@ export const SCENARIOS: Scenario[] = [
   },
   {
     name: 'night mode with custom night values',
-    steps: [{ night: true }, { fill: 'Temperatura nocą (22–7)', value: '10' }, { fill: 'Wilgotność nocą', value: '80' }],
+    steps: [
+      { night: true },
+      { fill: 'Temperatura nocą (22–7)', value: '10' },
+      { fill: 'Wilgotność nocą', value: '80' },
+    ],
   },
   {
     name: 'night values ignored when night off',

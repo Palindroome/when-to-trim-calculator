@@ -3,10 +3,13 @@ import { openApp, STORAGE_KEY, setDateTime, snapshot } from './helpers';
 
 const LABELS = ['Odkryta', 'Worek częściowo', 'Mokra przechowalnia', 'Cały worek', 'Pudełko'];
 const DEFAULT_PLAN = 'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.';
-const NO_OPEN_PLAN = 'Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.';
+const NO_OPEN_PLAN =
+  'Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.';
 
-const group = (page: Page) => page.getByRole('group', { name: 'Sposoby okrycia, których mogę użyć' });
-const box = (page: Page, label: string) => group(page).getByRole('checkbox', { name: label, exact: true });
+const group = (page: Page) =>
+  page.getByRole('group', { name: 'Sposoby okrycia, których mogę użyć' });
+const box = (page: Page, label: string) =>
+  group(page).getByRole('checkbox', { name: label, exact: true });
 const lastOne = (page: Page) => page.getByText('Zostaw zaznaczony co najmniej jeden sposób.');
 const saveBtn = (page: Page) => page.getByRole('button', { name: 'Zapisz tę pracę z planem' });
 const stored = (page: Page) => page.evaluate((k) => localStorage.getItem(k), STORAGE_KEY);
@@ -16,7 +19,9 @@ async function only(page: Page, keep: string): Promise<void> {
 }
 
 test.describe('covering methods filter', () => {
-  test('all covers are offered and ticked by default; the result is unchanged', async ({ page }) => {
+  test('all covers are offered and ticked by default; the result is unchanged', async ({
+    page,
+  }) => {
     await openApp(page);
     await expect(group(page).getByRole('checkbox')).toHaveCount(5);
     for (const [i, l] of LABELS.entries()) {
@@ -42,7 +47,9 @@ test.describe('covering methods filter', () => {
     await expect(bar.locator('.fill.good')).toHaveCount(0);
     await expect(page.locator('#result .bar.off')).toHaveCount(1);
     // the weight check still lists every cover
-    await expect(page.getByLabel('Przez ten czas była', { exact: true }).locator('option')).toHaveCount(5);
+    await expect(
+      page.getByLabel('Przez ten czas była', { exact: true }).locator('option'),
+    ).toHaveCount(5);
     // ticking it again restores the default plan
     await box(page, 'Odkryta').check();
     await expect(page.locator('.rec .big')).toHaveText(DEFAULT_PLAN);
@@ -82,7 +89,9 @@ test.describe('covering methods filter', () => {
     await expect(page.locator('.rec .extra')).toHaveCount(0);
   });
 
-  test('too slow without the box and the full bag: names the slowest allowed cover', async ({ page }) => {
+  test('too slow without the box and the full bag: names the slowest allowed cover', async ({
+    page,
+  }) => {
     await openApp(page);
     await setDateTime(page, 'Chcę trymować', '2026-03-24T10:00');
     await box(page, 'Pudełko').uncheck();
@@ -96,10 +105,14 @@ test.describe('covering methods filter', () => {
     await openApp(page);
     await only(page, 'Pudełko');
     await expect(page.locator('.rec .k')).toHaveText('Uwaga');
-    await expect(page.locator('.rec .extra')).toHaveText('Z wyłączonymi sposobami okrycia zdążyłaby na ten termin.');
+    await expect(page.locator('.rec .extra')).toHaveText(
+      'Z wyłączonymi sposobami okrycia zdążyłaby na ten termin.',
+    );
   });
 
-  test('the saved piece keeps the plan computed with the exclusions; a reload starts with every cover ticked', async ({ page }) => {
+  test('the saved piece keeps the plan computed with the exclusions; a reload starts with every cover ticked', async ({
+    page,
+  }) => {
     await openApp(page);
     await box(page, 'Odkryta').uncheck();
     await saveBtn(page).click();
@@ -110,7 +123,21 @@ test.describe('covering methods filter', () => {
     expect(p.plan.map((s: { w: string }) => s.w)).not.toContain('open');
     // the stored record format is unchanged: no extra fields
     expect(Object.keys(p).sort()).toEqual(
-      ['id', 'name', 'start', 'mass', 'lossPct', 'plan', 'label', 'dom', 'predH', 'calUsed', 'ws', 'we', 'fb'].sort(),
+      [
+        'id',
+        'name',
+        'start',
+        'mass',
+        'lossPct',
+        'plan',
+        'label',
+        'dom',
+        'predH',
+        'calUsed',
+        'ws',
+        'we',
+        'fb',
+      ].sort(),
     );
     // nothing about the filter is stored anywhere
     expect(await page.evaluate(() => Object.keys(localStorage).sort())).toEqual([

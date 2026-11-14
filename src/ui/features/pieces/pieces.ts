@@ -30,7 +30,8 @@ function storedPlanText(v: View, p: StoredPiece): string {
   const [a, b] = plan;
   const first = find(a?.w);
   const then = find(b?.w);
-  if (plan.length === 1 && a && a.h === null && first) return v.m.plan.single(coverPhrase(v.m, first));
+  if (plan.length === 1 && a && a.h === null && first)
+    return v.m.plan.single(coverPhrase(v.m, first));
   if (
     plan.length === 2 &&
     a &&
@@ -54,14 +55,21 @@ function storedPlanText(v: View, p: StoredPiece): string {
 }
 
 /** A saved piece's name and state badge (waiting / ready / rated), and its thrown and forecast times. */
-export function pieceHighlights(v: View, p: StoredPiece, nowMs: number): { top: string; times: string } {
+export function pieceHighlights(
+  v: View,
+  p: StoredPiece,
+  nowMs: number,
+): { top: string; times: string } {
   const { m, fmt } = v;
   const ready = p.start + p.predH * MS_PER_HOUR;
   const left = (ready - nowMs) / MS_PER_HOUR;
   const status = p.fb
     ? `<span class="badge ok">${m.pieces.rated(m.pieces.feedbackResult[p.fb.kind], fmt.duration(p.fb.actualH))}</span>`
     : `<span class="badge">${left > 0 ? m.pieces.dueIn(fmt.duration(left)) : m.pieces.due}</span>`;
-  return { top: `<div class="top"><b>${esc(p.name)}</b>${status}</div>`, times: m.pieces.meta(fmt.dateTime(p.start), fmt.dateTime(ready)) };
+  return {
+    top: `<div class="top"><b>${esc(p.name)}</b>${status}</div>`,
+    times: m.pieces.meta(fmt.dateTime(p.start), fmt.dateTime(ready)),
+  };
 }
 
 export function renderPieceList(v: View, pieces: readonly StoredPiece[], nowMs: number): string {
@@ -90,7 +98,10 @@ export function renderCalibration(v: View, calibration: Record<CoverId, CoverCal
   const rows = v.covers.map((c) => ({ c, ...calibration[c.id]! })).filter((r) => r.samples);
   if (!rows.length) return '';
   return `<table><tr><th>${m.calibration.cover}</th><th>${m.calibration.multiplier}</th><th>${m.calibration.count}</th></tr>${rows
-    .map((r) => `<tr><td>${coverLabel(m, r.c)}</td><td>${m.calibration.value(fmt.decimal(r.multiplier, 2))}</td><td>${r.samples}</td></tr>`)
+    .map(
+      (r) =>
+        `<tr><td>${coverLabel(m, r.c)}</td><td>${m.calibration.value(fmt.decimal(r.multiplier, 2))}</td><td>${r.samples}</td></tr>`,
+    )
     .join('')}</table>
          <p class="muted">${m.calibration.noteHtml}</p>`;
 }
@@ -130,7 +141,12 @@ function feedback(ctx: AppContext, id: string, kind: FeedbackKind): void {
   const p = ctx.pieces.find((x) => x.id === id);
   if (!p) return;
   const t = ctx.now();
-  const outcome = feedbackToSample({ startMs: p.start, predictedHours: p.predH, multiplierUsed: p.calUsed }, kind, t, ctx.view.params);
+  const outcome = feedbackToSample(
+    { startMs: p.start, predictedHours: p.predH, multiplierUsed: p.calUsed },
+    kind,
+    t,
+    ctx.view.params,
+  );
   if (!outcome) return;
   p.fb = { kind, actualH: outcome.actualHours, sample: outcome.value, at: t };
   ctx.storePieces(ctx.pieces);

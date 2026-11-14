@@ -9,7 +9,11 @@ const LICENCE = 'https://github.com/Palindroome/when-to-trim-calculator/blob/mai
 
 const links = (page: Page) => {
   const footer = page.getByRole('contentinfo');
-  return { footer, github: footer.getByRole('link', { name: /^GitHub/ }), instagram: footer.getByRole('link', { name: /^Instagram/ }) };
+  return {
+    footer,
+    github: footer.getByRole('link', { name: /^GitHub/ }),
+    instagram: footer.getByRole('link', { name: /^Instagram/ }),
+  };
 };
 
 /** The contact and licence links in the footer's sentences, Polish names. */
@@ -60,24 +64,37 @@ test.describe('site footer', () => {
     await expect(instagram).toHaveAccessibleName('Instagram – author’s profile (@palindroom)');
     await expect(github).toHaveAttribute('href', GITHUB);
     await expect(instagram).toHaveAttribute('href', INSTAGRAM);
-    expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
-    await expect(footer.getByRole('link', { name: 'Report a problem on GitHub', exact: true })).toHaveAttribute('href', ISSUES);
-    await expect(footer.getByRole('link', { name: 'send a message on Instagram', exact: true })).toHaveAttribute('href', INSTAGRAM);
-    await expect(footer.getByRole('link', { name: 'MIT licence', exact: true })).toHaveAttribute('href', LICENCE);
+    expect(
+      await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload),
+    ).toBe(true);
+    await expect(
+      footer.getByRole('link', { name: 'Report a problem on GitHub', exact: true }),
+    ).toHaveAttribute('href', ISSUES);
+    await expect(
+      footer.getByRole('link', { name: 'send a message on Instagram', exact: true }),
+    ).toHaveAttribute('href', INSTAGRAM);
+    await expect(footer.getByRole('link', { name: 'MIT licence', exact: true })).toHaveAttribute(
+      'href',
+      LICENCE,
+    );
     await expect(footer).toContainText(
       'Something not working, or does a result look wrong? Report a problem on GitHub or send a message on Instagram.',
     );
     await expect(footer).toContainText('The calculator is free to use under the MIT licence.');
   });
 
-  test('invites problem reports on GitHub or Instagram and links the MIT licence', async ({ page }) => {
+  test('invites problem reports on GitHub or Instagram and links the MIT licence', async ({
+    page,
+  }) => {
     await openApp(page);
     const footer = page.getByRole('contentinfo');
     const [report, message, licence] = textLinks(page);
     await expect(report!).toHaveAttribute('href', ISSUES);
     await expect(message!).toHaveAttribute('href', INSTAGRAM);
     await expect(licence!).toHaveAttribute('href', LICENCE);
-    await expect(footer).toContainText('Coś nie działa albo wynik wygląda na błędny? Zgłoś problem na GitHubie lub napisz na Instagramie.');
+    await expect(footer).toContainText(
+      'Coś nie działa albo wynik wygląda na błędny? Zgłoś problem na GitHubie lub napisz na Instagramie.',
+    );
     await expect(footer).toContainText('Z kalkulatora można korzystać bezpłatnie na licencji MIT.');
     // links inside the sentences are underlined, not told apart by colour alone
     for (const l of [report!, message!, licence!]) {
@@ -89,7 +106,9 @@ test.describe('site footer', () => {
     test.describe(`${colorScheme} scheme`, () => {
       test.use({ colorScheme });
 
-      test('links are keyboard-focusable with a visible ring, and text and icons have enough contrast', async ({ page }) => {
+      test('links are keyboard-focusable with a visible ring, and text and icons have enough contrast', async ({
+        page,
+      }) => {
         await openApp(page);
         const { github } = links(page);
         await github.focus();
@@ -105,7 +124,11 @@ test.describe('site footer', () => {
           document.body.append(probe);
           const muted = getComputedStyle(probe).color;
           probe.remove();
-          return { link: getComputedStyle(el).color, icon: getComputedStyle(el.querySelector('svg')!).color, muted };
+          return {
+            link: getComputedStyle(el).color,
+            icon: getComputedStyle(el.querySelector('svg')!).color,
+            muted,
+          };
         });
         expect(colours.link).toBe(colours.muted);
         expect(colours.icon).toBe(colours.muted);
@@ -122,12 +145,16 @@ test.describe('site footer', () => {
     test.describe(`${width}px phone (coarse pointer)`, () => {
       test.use({ viewport: { width, height }, hasTouch: true, isMobile: true });
 
-      test('no horizontal scroll, links inside the viewport and at least 44px tall, in both languages', async ({ page }) => {
+      test('no horizontal scroll, links inside the viewport and at least 44px tall, in both languages', async ({
+        page,
+      }) => {
         await openApp(page);
         expect(await page.evaluate(() => matchMedia('(pointer:coarse)').matches)).toBe(true);
         for (const lang of ['pl', 'en']) {
           if (lang === 'en') await page.getByRole('button', { name: 'English' }).click();
-          expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+          expect(
+            await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+          ).toBe(true);
           const all = page.getByRole('contentinfo').getByRole('link');
           await expect(all).toHaveCount(5);
           for (const link of await all.all()) {
@@ -144,7 +171,8 @@ test.describe('site footer', () => {
   test('fine pointer: links are at least 32px tall', async ({ page }) => {
     await openApp(page);
     const { github, instagram } = links(page);
-    for (const link of [github, instagram]) expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(32);
+    for (const link of [github, instagram])
+      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(32);
   });
 
   test('1280px: spans the content width below both columns', async ({ page }) => {

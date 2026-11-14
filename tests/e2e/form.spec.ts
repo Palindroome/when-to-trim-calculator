@@ -35,7 +35,18 @@ test.describe('page shell', () => {
 
   test('unit suffixes next to numeric inputs', async ({ page }) => {
     await openApp(page);
-    await expect(page.locator('.unit span')).toHaveText(['g', 'mm', 'mm', '°C', '%', '°C', '%', '°C', '%', 'g']);
+    await expect(page.locator('.unit span')).toHaveText([
+      'g',
+      'mm',
+      'mm',
+      '°C',
+      '%',
+      '°C',
+      '%',
+      '°C',
+      '%',
+      'g',
+    ]);
   });
 
   test('explainer is collapsed and expands on click', async ({ page }) => {
@@ -46,7 +57,9 @@ test.describe('page shell', () => {
     await summary.click();
     await expect(body).toBeVisible();
     await expect(page.locator('details li')).toHaveCount(6);
-    await expect(page.locator('details li').nth(1)).toContainText('cały worek ≈ 7%, szczelne pudełko ≈ 5%');
+    await expect(page.locator('details li').nth(1)).toContainText(
+      'cały worek ≈ 7%, szczelne pudełko ≈ 5%',
+    );
     await expect(page.locator('details li').nth(5)).toContainText('czujniki BLE');
   });
 });
@@ -55,7 +68,10 @@ test.describe('inputs and defaults', () => {
   test('every field starts with the documented default', async ({ page }) => {
     await openApp(page);
     await expect(field(page, 'Nazwa (opcjonalnie)')).toHaveValue('');
-    await expect(field(page, 'Nazwa (opcjonalnie)')).toHaveAttribute('placeholder', 'np. kubki z czwartku');
+    await expect(field(page, 'Nazwa (opcjonalnie)')).toHaveAttribute(
+      'placeholder',
+      'np. kubki z czwartku',
+    );
     await expect(field(page, 'Masa po toczeniu')).toHaveValue('500');
     await expect(field(page, 'Kształt')).toHaveValue('cyl');
     await expect(field(page, 'Grubość ścianki')).toHaveValue('6');
@@ -67,7 +83,9 @@ test.describe('inputs and defaults', () => {
     await expect(field(page, 'Temperatura w pracowni')).toHaveValue('20');
     await expect(field(page, 'Wilgotność powietrza')).toHaveValue('50');
     await expect(field(page, 'Ruch powietrza przy półce')).toHaveValue('light');
-    await expect(page.getByLabel('W nocy jest chłodniej (np. ogrzewanie wyłączone)')).not.toBeChecked();
+    await expect(
+      page.getByLabel('W nocy jest chłodniej (np. ogrzewanie wyłączone)'),
+    ).not.toBeChecked();
     await expect(field(page, 'Temperatura nocą (22–7)')).toHaveValue('15');
     await expect(field(page, 'Wilgotność nocą')).toHaveValue('60');
     await expect(field(page, 'Mokra przechowalnia: temp.')).toHaveValue('15');
@@ -107,10 +125,14 @@ test.describe('inputs and defaults', () => {
     }
   });
 
-  test('date-time pickers: a day button with a calendar and a 24 h text field, no native date inputs', async ({ page }) => {
+  test('date-time pickers: a day button with a calendar and a 24 h text field, no native date inputs', async ({
+    page,
+  }) => {
     await openApp(page);
     await expect(
-      page.locator('#body-3 input[type="datetime-local"], #body-3 input[type="time"], #body-3 input[type="date"], #body-3 select'),
+      page.locator(
+        '#body-3 input[type="datetime-local"], #body-3 input[type="time"], #body-3 input[type="date"], #body-3 select',
+      ),
     ).toHaveCount(0);
     for (const [legend, id, day] of [
       ['Wytoczona', 'thrown', 'dziś · śr 4.03'],
@@ -178,7 +200,9 @@ test.describe('inputs and defaults', () => {
       const sel = field(page, label as Parameters<typeof field>[1]);
       const actual = await sel
         .locator('option')
-        .evaluateAll((os) => os.map((o) => [(o as HTMLOptionElement).value, (o.textContent ?? '').trim()]));
+        .evaluateAll((os) =>
+          os.map((o) => [(o as HTMLOptionElement).value, (o.textContent ?? '').trim()]),
+        );
       expect(actual).toEqual(opts);
     });
   }
@@ -186,22 +210,45 @@ test.describe('inputs and defaults', () => {
 
 test.describe('decimal comma', () => {
   // Typed key by key, as a user would: some browsers silently drop the comma in type=number inputs.
-  const cases: { label: Field; comma: string; dot: string; setup?: (page: Page) => Promise<void> }[] = [
+  const cases: {
+    label: Field;
+    comma: string;
+    dot: string;
+    setup?: (page: Page) => Promise<void>;
+  }[] = [
     { label: 'Masa po toczeniu', comma: '500,5', dot: '500.5' },
     { label: 'Grubość ścianki', comma: '6,5', dot: '6.5' },
     { label: 'Grubość dna', comma: '9,5', dot: '9.5' },
     { label: 'Temperatura w pracowni', comma: '20,5', dot: '20.5' },
     { label: 'Temperatura w pracowni', comma: '-2,5', dot: '-2.5' },
     { label: 'Wilgotność powietrza', comma: '50,5', dot: '50.5' },
-    { label: 'Temperatura nocą (22–7)', comma: '12,5', dot: '12.5', setup: (p) => setNight(p, true) },
+    {
+      label: 'Temperatura nocą (22–7)',
+      comma: '12,5',
+      dot: '12.5',
+      setup: (p) => setNight(p, true),
+    },
     { label: 'Wilgotność nocą', comma: '60,5', dot: '60.5', setup: (p) => setNight(p, true) },
-    { label: 'Mokra przechowalnia: temp.', comma: '14,5', dot: '14.5', setup: (p) => setDateTime(p, 'Chcę trymować', '2026-03-09T10:00') },
-    { label: 'Mokra przechowalnia: wilg.', comma: '88,5', dot: '88.5', setup: (p) => setDateTime(p, 'Chcę trymować', '2026-03-09T10:00') },
+    {
+      label: 'Mokra przechowalnia: temp.',
+      comma: '14,5',
+      dot: '14.5',
+      setup: (p) => setDateTime(p, 'Chcę trymować', '2026-03-09T10:00'),
+    },
+    {
+      label: 'Mokra przechowalnia: wilg.',
+      comma: '88,5',
+      dot: '88.5',
+      setup: (p) => setDateTime(p, 'Chcę trymować', '2026-03-09T10:00'),
+    },
     { label: 'Masa teraz', comma: '470,5', dot: '470.5' },
   ];
   for (const { label, comma, dot, setup } of cases) {
     test(`"${comma}" typed into "${label}" gives the same result as "${dot}"`, async ({ page }) => {
-      const result = async (): Promise<unknown> => [await snapshot(page), await page.locator('#wout').innerText()];
+      const result = async (): Promise<unknown> => [
+        await snapshot(page),
+        await page.locator('#wout').innerText(),
+      ];
       await openApp(page);
       await setup?.(page);
       const input = field(page, label);
@@ -246,7 +293,13 @@ test.describe('date chips', () => {
 
   test('chip labels and default highlight', async ({ page }) => {
     await openApp(page);
-    await expect(chips(page)).toHaveText(['jutro', 'za 2 dni', 'za 3 dni', 'za 5 dni', 'za tydzień']);
+    await expect(chips(page)).toHaveText([
+      'jutro',
+      'za 2 dni',
+      'za 3 dni',
+      'za 5 dni',
+      'za tydzień',
+    ]);
     await expect(page.locator('#quick .chip.on')).toHaveText(['za 2 dni']);
     await expect(page.locator('#quick .chip[aria-pressed="true"]')).toHaveText(['za 2 dni']);
     await expect(page.locator('#quick .chip[aria-pressed="false"]')).toHaveCount(4);
@@ -326,7 +379,9 @@ test.describe('date chips', () => {
 });
 
 test.describe('calendar', () => {
-  test('the day button opens a Polish calendar on the chosen day; picking a day closes it and returns focus', async ({ page }) => {
+  test('the day button opens a Polish calendar on the chosen day; picking a day closes it and returns focus', async ({
+    page,
+  }) => {
     await openApp(page);
     const button = page.locator('#when-day-btn');
     await button.click();
@@ -370,7 +425,9 @@ test.describe('calendar', () => {
     await expectDateTime(page, 'Wytoczona', '2026-03-04T09:00');
   });
 
-  test('keyboard: arrows and Page Down move through days and months, Enter picks', async ({ page }) => {
+  test('keyboard: arrows and Page Down move through days and months, Enter picks', async ({
+    page,
+  }) => {
     await openApp(page);
     const button = page.locator('#when-day-btn');
     await button.focus();
@@ -379,7 +436,9 @@ test.describe('calendar', () => {
     await page.keyboard.press('ArrowRight'); // 7 March
     await page.keyboard.press('ArrowDown'); // 14 March
     await page.keyboard.press('PageDown'); // 14 April
-    await expect(calendarDialog(page, 'Chcę trymować').locator('[slot="heading"]')).toContainText(/kwiecień 2026/i);
+    await expect(calendarDialog(page, 'Chcę trymować').locator('[slot="heading"]')).toContainText(
+      /kwiecień 2026/i,
+    );
     await page.keyboard.press('Enter');
     await expect(calendarDialog(page, 'Chcę trymować')).toBeHidden();
     await expect(button).toBeFocused();
@@ -389,12 +448,18 @@ test.describe('calendar', () => {
     await expect(calendarDay(page, 'Chcę trymować', 14)).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('Shift+Tab');
-    await expect(calendarDialog(page, 'Chcę trymować').getByRole('button', { name: 'Poprzedni miesiąc' })).toBeFocused();
+    await expect(
+      calendarDialog(page, 'Chcę trymować').getByRole('button', { name: 'Poprzedni miesiąc' }),
+    ).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(calendarDialog(page, 'Chcę trymować').locator('[slot="heading"]')).toContainText(/marzec 2026/i);
+    await expect(calendarDialog(page, 'Chcę trymować').locator('[slot="heading"]')).toContainText(
+      /marzec 2026/i,
+    );
   });
 
-  test('today is marked; the trim calendar marks the throwing day; no throwing day after today', async ({ page }) => {
+  test('today is marked; the trim calendar marks the throwing day; no throwing day after today', async ({
+    page,
+  }) => {
     await openApp(page);
     await setDateTime(page, 'Wytoczona', '2026-03-02T18:30');
     await page.locator('#when-day-btn').click();
@@ -403,7 +468,9 @@ test.describe('calendar', () => {
     await expect(calendarDay(page, 'Chcę trymować', 2)).toHaveAttribute('part', /\bthrown\b/);
     await expect(page.locator('#when-cal calendar-month button[part~="thrown"]')).toHaveCount(1);
     // the mark is visible: an inset ring in the accent colour
-    expect(await calendarDay(page, 'Chcę trymować', 2).evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none');
+    expect(
+      await calendarDay(page, 'Chcę trymować', 2).evaluate((el) => getComputedStyle(el).boxShadow),
+    ).not.toBe('none');
     // trim days before the throwing day stay pickable, so the ordering error is still reachable
     await calendarDay(page, 'Chcę trymować', 1).click();
     expect((await snapshot(page)).big).toBe('Termin trymowania musi być po toczeniu.');
@@ -415,13 +482,19 @@ test.describe('calendar', () => {
   });
 
   for (const scheme of ['light', 'dark'] as const) {
-    test(`${scheme}: unavailable days and paging buttons look inert; the backdrop dims the page`, async ({ page }) => {
+    test(`${scheme}: unavailable days and paging buttons look inert; the backdrop dims the page`, async ({
+      page,
+    }) => {
       await page.emulateMedia({ colorScheme: scheme });
       await openApp(page);
       await page.locator('#thrown-day-btn').click();
       const dialog = calendarDialog(page, 'Wytoczona');
       await expect(dialog).toBeVisible();
-      const look = (l: Locator) => l.evaluate((el) => ({ cursor: getComputedStyle(el).cursor, bg: getComputedStyle(el).backgroundColor }));
+      const look = (l: Locator) =>
+        l.evaluate((el) => ({
+          cursor: getComputedStyle(el).cursor,
+          bg: getComputedStyle(el).backgroundColor,
+        }));
 
       // today is the max: later days are disabled and the "next month" button is aria-disabled
       const next = dialog.getByRole('button', { name: 'Następny miesiąc' });
@@ -433,7 +506,10 @@ test.describe('calendar', () => {
         expect((await look(inert)).bg).toBe(before.bg);
       }
       // guard: an available day and an enabled paging button do react to hover
-      for (const live of [calendarDay(page, 'Wytoczona', 3), dialog.getByRole('button', { name: 'Poprzedni miesiąc' })]) {
+      for (const live of [
+        calendarDay(page, 'Wytoczona', 3),
+        dialog.getByRole('button', { name: 'Poprzedni miesiąc' }),
+      ]) {
         const before = await look(live);
         expect(before.cursor).toBe('pointer');
         await live.hover();
@@ -459,7 +535,8 @@ test.describe('calendar', () => {
 
       // the backdrop is a scrim token that makes the page behind it darker in both schemes
       const { backdrop, page: bg } = await page.evaluate(() => ({
-        backdrop: getComputedStyle(document.getElementById('thrown-cal')!, '::backdrop').backgroundColor,
+        backdrop: getComputedStyle(document.getElementById('thrown-cal')!, '::backdrop')
+          .backgroundColor,
         page: getComputedStyle(document.body).backgroundColor,
       }));
       const luminance = (css: string, under: number[] = [0, 0, 0]): number => {
@@ -479,7 +556,12 @@ test.describe('thrown presets', () => {
 
   test('labels; none is highlighted on load', async ({ page }) => {
     await openApp(page);
-    await expect(presets(page)).toHaveText(['teraz', 'godzinę temu', 'dziś rano', 'wczoraj wieczorem']);
+    await expect(presets(page)).toHaveText([
+      'teraz',
+      'godzinę temu',
+      'dziś rano',
+      'wczoraj wieczorem',
+    ]);
     await expect(page.locator('#thrown-quick .chip[aria-pressed="false"]')).toHaveCount(4);
   });
 
@@ -490,7 +572,9 @@ test.describe('thrown presets', () => {
     ['wczoraj wieczorem', '2026-03-03T19:00', '2 d 15 h'],
   ];
   for (const [preset, expected, legend] of cases) {
-    test(`"${preset}" sets the thrown time to ${expected}, recalculates and highlights`, async ({ page }) => {
+    test(`"${preset}" sets the thrown time to ${expected}, recalculates and highlights`, async ({
+      page,
+    }) => {
       await openApp(page, { now: '2026-03-04T09:00:42+01:00' });
       await setDateTime(page, 'Wytoczona', '2026-03-01T12:00');
       await presets(page).getByText(preset, { exact: true }).click();
@@ -507,7 +591,9 @@ test.describe('thrown presets', () => {
     ['time', (p: Page) => p.locator('#thrown-time').fill('7:30')],
     ['day', (p: Page) => setDateTime(p, 'Wytoczona', '2026-03-02T08:00')],
   ] as const) {
-    test(`editing the thrown ${part} by hand clears the highlight, not the trim chip`, async ({ page }) => {
+    test(`editing the thrown ${part} by hand clears the highlight, not the trim chip`, async ({
+      page,
+    }) => {
       await openApp(page);
       await presets(page).getByText('dziś rano', { exact: true }).click();
       await edit(page);
@@ -574,7 +660,9 @@ test.describe('time field', () => {
 });
 
 test.describe('date-time keyboard use', () => {
-  test('Tab goes day → time → presets in each picker, and a value can be set without a mouse', async ({ page }) => {
+  test('Tab goes day → time → presets in each picker, and a value can be set without a mouse', async ({
+    page,
+  }) => {
     await openApp(page);
     await page.locator('#thrown-day-btn').focus();
     const order: string[] = [];
@@ -621,7 +709,9 @@ test.describe('date-time keyboard use', () => {
     await expectDateTime(page, 'Chcę trymować', '2026-03-05T10:00');
     await expect(page.locator('#quick .chip[aria-pressed="true"]')).toHaveText(['jutro']);
     // the focused control shows a ring
-    const outline = await page.locator(':focus').evaluate((el) => parseFloat(getComputedStyle(el).outlineWidth));
+    const outline = await page
+      .locator(':focus')
+      .evaluate((el) => parseFloat(getComputedStyle(el).outlineWidth));
     expect(outline).toBeGreaterThanOrEqual(2);
   });
 });
@@ -651,7 +741,9 @@ test.describe('live recalculation', () => {
     expect((await snapshot(page)).bars).not.toEqual(before.bars);
   });
 
-  test('result card shows a recommendation label and save button for a normal case', async ({ page }) => {
+  test('result card shows a recommendation label and save button for a normal case', async ({
+    page,
+  }) => {
     await openApp(page);
     await expect(page.locator('#result .rec .k')).toHaveText('Rekomendacja');
     await expect(page.getByRole('button', { name: 'Zapisz tę pracę z planem' })).toBeVisible();

@@ -13,7 +13,12 @@ import { save } from '../pieces/pieces';
 export const markup = '<section id="result"></section>';
 
 /** Comparison chart scale: deadline × 1.6, or at least 48 h; the longest finite bar counts between 24 h and 10 days. */
-const CHART = { deadlineHeadroom: 1.6, noDeadlineHours: 48, minFiniteHours: 24, maxFiniteHours: 24 * 10 } as const;
+const CHART = {
+  deadlineHeadroom: 1.6,
+  noDeadlineHours: 48,
+  minFiniteHours: 24,
+  maxFiniteHours: 24 * 10,
+} as const;
 
 export interface ResultModel {
   piece: Piece;
@@ -51,13 +56,21 @@ export function renderResult(v: View, r: ResultModel): string {
       const cover = coverById(v.covers, rec.option.plan[0]!.cover);
       if (rec.status === 'tooFast') {
         const d = fmt.duration(rec.fastestHours);
-        err = cover === v.covers[0] ? m.errors.tooFast(d) : m.errors.tooFastWith(d, coverLabel(m, cover));
+        err =
+          cover === v.covers[0]
+            ? m.errors.tooFast(d)
+            : m.errors.tooFastWith(d, coverLabel(m, cover));
       } else {
         const d = fmt.duration(rec.slowestHours);
-        err = cover === v.covers[v.covers.length - 1] ? m.errors.tooSlow(d) : m.errors.tooSlowWith(d, coverLabel(m, cover));
+        err =
+          cover === v.covers[v.covers.length - 1]
+            ? m.errors.tooSlow(d)
+            : m.errors.tooSlowWith(d, coverLabel(m, cover));
       }
     }
-    const extra = plan.excludedWouldMeet ? `<div class="extra">${esc(m.errors.excludedWouldMeet)}</div>` : '';
+    const extra = plan.excludedWouldMeet
+      ? `<div class="extra">${esc(m.errors.excludedWouldMeet)}</div>`
+      : '';
     html += `<div class="rec err"><div class="k">${m.result.warning}</div><div class="big">${esc(err)}</div>${extra}</div>`;
   }
 
@@ -72,7 +85,11 @@ export function renderResult(v: View, r: ResultModel): string {
     const t = plan.singles[c.id]!;
     const pct = Math.min(100, ((Number.isFinite(t) ? t : maxShown) / maxShown) * 100);
     const off = !r.allowed.includes(c.id);
-    const good = !off && H > 0 && Number.isFinite(t) && Math.abs(t - H) / H <= v.params.planner.targetTolerance;
+    const good =
+      !off &&
+      H > 0 &&
+      Number.isFinite(t) &&
+      Math.abs(t - H) / H <= v.params.planner.targetTolerance;
     const n = r.calibration[c.id]!.samples;
     html += `<div class="bar${off ? ' off' : ''}"><div>${coverLabel(m, c)}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c.environment === 'dampRoom' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
         <div class="track"><div class="fill ${good ? 'good' : ''}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
@@ -86,7 +103,8 @@ export function renderResult(v: View, r: ResultModel): string {
       `</ul>`;
   }
   for (const tip of r.tips) html += `<div class="tip">${esc(m.tips[tip])}</div>`;
-  if (r.canSave) html += `<div class="actions"><button class="main" id="savebtn">${m.result.save}</button></div>`;
+  if (r.canSave)
+    html += `<div class="actions"><button class="main" id="savebtn">${m.result.save}</button></div>`;
   html += `</div>`;
   return html;
 }

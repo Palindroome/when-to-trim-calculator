@@ -12,7 +12,8 @@ export function derivePiece(input: PieceInput, p: ModelParams): Piece {
   const area = (sideArea * shape.areaFactor) / 1e4; // m² exposed
   const thick = Math.max(1, base / wall) ** p.baseThicknessExponent;
   const slow = shape.slowFactor * clay.slowFactor * p.batSlowFactor[input.bat] * thick;
-  const lossPct = clay.leatherHardLossPct + p.wetnessOffsetPct[input.wetness] + p.stageOffsetPct[input.stage];
+  const lossPct =
+    clay.leatherHardLossPct + p.wetnessOffsetPct[input.wetness] + p.stageOffsetPct[input.stage];
   return {
     mass,
     area,

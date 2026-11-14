@@ -1,20 +1,90 @@
 /* ---------- page layout ---------- */
-main{max-width:720px;margin:0 auto;padding:var(--space-5) var(--space-4) var(--space-7)}
-h1{font-size:var(--text-xl);font-weight:700;line-height:var(--leading-tight);letter-spacing:var(--tracking-tight);margin:0 0 var(--space-2)}
-.lead{color:var(--text-muted);margin:0 0 var(--space-5)}
-.masthead{display:flex;flex-wrap:wrap-reverse;align-items:center;justify-content:space-between;gap:var(--space-1) var(--space-3)}
-.toolbar{display:flex;gap:var(--space-2);margin-left:auto}
-h2{font-size:var(--text-lg);font-weight:600;line-height:var(--leading-tight);letter-spacing:var(--tracking-tight);margin:0 0 var(--space-4);display:flex;gap:var(--space-3);align-items:baseline}
-h2 .n{color:var(--text-muted);font-size:var(--text-sm);font-weight:500;font-variant-numeric:tabular-nums}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);padding:var(--space-4);margin:0 0 var(--space-4)}
-@media (min-width:1024px){
-  main{max-width:1200px;padding:var(--space-6) var(--space-6) var(--space-7);display:grid;grid-template-columns:minmax(0,1fr) 400px;column-gap:var(--space-6);align-items:start}
-  main>.masthead,main>.lead,main>.wizard-bar{grid-column:1/-1}
-  main>section{grid-column:1}
-  h1{font-size:var(--text-2xl)}
-  .card{padding:var(--space-5)}
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
+h1 {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--space-2);
+}
+.lead {
+  color: var(--text-muted);
+  margin: 0 0 var(--space-5);
+}
+.masthead {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+.toolbar {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+h2 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+}
+h2 .n {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  padding: var(--space-4);
+  margin: 0 0 var(--space-4);
+}
+@media (min-width: 1024px) {
+  main {
+    max-width: 1200px;
+    padding: var(--space-6) var(--space-6) var(--space-7);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    column-gap: var(--space-6);
+    align-items: start;
+  }
+  main > .masthead,
+  main > .lead,
+  main > .wizard-bar {
+    grid-column: 1 / -1;
+  }
+  main > section {
+    grid-column: 1;
+  }
+  h1 {
+    font-size: var(--text-2xl);
+  }
+  .card {
+    padding: var(--space-5);
+  }
   /* the result stays in view beside the form and scrolls itself if taller than the window;
      the negative bottom margin lets it use main's bottom padding, so it fits at the end of the page too */
-  #result{grid-column:2;grid-row:4/span 6;position:sticky;top:0;max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
-    padding:var(--space-5) var(--space-5) var(--space-6);margin:calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) calc(-1 * var(--space-7))}
+  #result {
+    grid-column: 2;
+    grid-row: 4 / span 6;
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-5) var(--space-5) var(--space-6);
+    margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) calc(-1 * var(--space-7));
+  }
 }

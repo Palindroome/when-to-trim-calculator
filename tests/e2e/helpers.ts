@@ -83,9 +83,12 @@ export async function choose(page: Page, label: SelectField, value: string): Pro
 }
 
 /** The calendar dialog of a picker, and a day button in it by its day of the month. */
-export const calendarDialog = (page: Page, label: DateField): Locator => page.locator(`#${DATE_IDS[label]}-cal`);
+export const calendarDialog = (page: Page, label: DateField): Locator =>
+  page.locator(`#${DATE_IDS[label]}-cal`);
 export const calendarDay = (page: Page, label: DateField, dayOfMonth: number): Locator =>
-  calendarDialog(page, label).locator('calendar-month button[part~="day"]', { hasText: new RegExp(`^${dayOfMonth}$`) });
+  calendarDialog(page, label).locator('calendar-month button[part~="day"]', {
+    hasText: new RegExp(`^${dayOfMonth}$`),
+  });
 
 /**
  * Sets a picker as a user would, from `YYYY-MM-DDTHH:mm`: opens the calendar from the day button, pages to
@@ -113,7 +116,8 @@ export async function setDateTime(page: Page, label: DateField, value: string): 
 /** The picker's value as `YYYY-MM-DDTHH:mm` (the stored day key and the typed time). */
 export async function dateTimeValue(page: Page, label: DateField): Promise<string> {
   return page.evaluate((id) => {
-    const value = (part: string): string => (document.getElementById(`${id}-${part}`) as HTMLInputElement).value;
+    const value = (part: string): string =>
+      (document.getElementById(`${id}-${part}`) as HTMLInputElement).value;
     return `${value('day')}T${value('time')}`;
   }, DATE_IDS[label]);
 }
@@ -143,7 +147,10 @@ export interface Snapshot {
 const norm = (s: string): string => s.replace(/\s+/g, ' ').trim();
 
 /** Collects the whole visible result area into plain strings. */
-export async function snapshot(page: Page, saveLabel = 'Zapisz tę pracę z planem'): Promise<Snapshot> {
+export async function snapshot(
+  page: Page,
+  saveLabel = 'Zapisz tę pracę z planem',
+): Promise<Snapshot> {
   const result = page.locator('#result');
   const text = async (sel: string): Promise<string> => {
     const l = result.locator(sel);
@@ -154,7 +161,8 @@ export async function snapshot(page: Page, saveLabel = 'Zapisz tę pracę z plan
     const l = result.locator(sel);
     return (await l.count()) ? norm((await l.first().textContent()) ?? '') : '';
   };
-  const all = async (sel: string): Promise<string[]> => (await result.locator(sel).allInnerTexts()).map(norm);
+  const all = async (sel: string): Promise<string[]> =>
+    (await result.locator(sel).allInnerTexts()).map(norm);
   return {
     kind: await raw('.rec .k'),
     big: await text('.rec .big'),
@@ -196,10 +204,17 @@ export async function tokenContrast(page: Page, fg: string, bg: string): Promise
 }
 
 /** A computed colour property of the first element matching `selector`, e.g. `['.fill', 'backgroundColor']`. */
-export type ElementColor = [selector: string, property: 'color' | 'backgroundColor' | 'borderTopColor'];
+export type ElementColor = [
+  selector: string,
+  property: 'color' | 'backgroundColor' | 'borderTopColor',
+];
 
 /** WCAG 2.x contrast ratio between colours of rendered elements, so a component that bypasses the tokens is caught too. */
-export async function elementContrast(page: Page, fg: ElementColor, bg: ElementColor): Promise<number> {
+export async function elementContrast(
+  page: Page,
+  fg: ElementColor,
+  bg: ElementColor,
+): Promise<number> {
   const [a, b] = await page.evaluate(
     (refs) =>
       refs.map(([selector, property]) => {

@@ -5,12 +5,15 @@ const out = (page: import('@playwright/test').Page) => page.locator('#wout');
 const state = (page: import('@playwright/test').Page) => page.locator('#wout .state');
 
 const WINDOW = 'jest w oknie trymowania. Jeśli trymujesz później, zawiń ją w worek.';
-const HARD = 'prawdopodobnie już za twarda na gładkie trymowanie. Spróbuj zawinąć ją z wilgotną gąbką na kilka godzin.';
+const HARD =
+  'prawdopodobnie już za twarda na gładkie trymowanie. Spróbuj zawinąć ją z wilgotną gąbką na kilka godzin.';
 
 test.describe('weight check', () => {
   test('hint text is shown', async ({ page }) => {
     await openApp(page);
-    await expect(page.getByText('Zważ pracę (bez batu) przy toczeniu i teraz.', { exact: false })).toBeVisible();
+    await expect(
+      page.getByText('Zważ pracę (bez batu) przy toczeniu i teraz.', { exact: false }),
+    ).toBeVisible();
   });
 
   test('nothing is shown until a current mass is entered', async ({ page }) => {
@@ -62,7 +65,9 @@ test.describe('weight check', () => {
       await openApp(page);
       await fill(page, 'Masa teraz', '490');
       await choose(page, 'Przez ten czas była', w);
-      await expect(state(page)).toHaveText(`Utrata 2,0%: jeszcze za miękka. W tym opatuleniu potrzeba jeszcze ok. ${eta}.`);
+      await expect(state(page)).toHaveText(
+        `Utrata 2,0%: jeszcze za miękka. W tym opatuleniu potrzeba jeszcze ok. ${eta}.`,
+      );
     });
   }
 
@@ -70,19 +75,27 @@ test.describe('weight check', () => {
     await openApp(page);
     await setDateTime(page, 'Wytoczona', '2026-03-03T09:00');
     await fill(page, 'Masa teraz', '490');
-    await expect(state(page)).toHaveText('Utrata 2,0%: jeszcze za miękka. Przy obecnym tempie (0,4 g/h) zostało ok. 2 d.');
+    await expect(state(page)).toHaveText(
+      'Utrata 2,0%: jeszcze za miękka. Przy obecnym tempie (0,4 g/h) zostało ok. 2 d.',
+    );
     await fill(page, 'Masa teraz', '480');
-    await expect(state(page)).toHaveText('Utrata 4,0%: jeszcze za miękka. Przy obecnym tempie (0,8 g/h) zostało ok. 12 h.');
+    await expect(state(page)).toHaveText(
+      'Utrata 4,0%: jeszcze za miękka. Przy obecnym tempie (0,8 g/h) zostało ok. 12 h.',
+    );
     // wrap choice is irrelevant once the observed rate is used
     await choose(page, 'Przez ten czas była', 'box');
-    await expect(state(page)).toHaveText('Utrata 4,0%: jeszcze za miękka. Przy obecnym tempie (0,8 g/h) zostało ok. 12 h.');
+    await expect(state(page)).toHaveText(
+      'Utrata 4,0%: jeszcze za miękka. Przy obecnym tempie (0,8 g/h) zostało ok. 12 h.',
+    );
   });
 
   test('falls back to the model when only 20 minutes have passed', async ({ page }) => {
     await openApp(page);
     await setDateTime(page, 'Wytoczona', '2026-03-04T08:40');
     await fill(page, 'Masa teraz', '480');
-    await expect(state(page)).toHaveText('Utrata 4,0%: jeszcze za miękka. W tym opatuleniu potrzeba jeszcze ok. 2 h.');
+    await expect(state(page)).toHaveText(
+      'Utrata 4,0%: jeszcze za miękka. W tym opatuleniu potrzeba jeszcze ok. 2 h.',
+    );
   });
 
   test('is recomputed when the piece inputs change', async ({ page }) => {
@@ -95,7 +108,9 @@ test.describe('weight check', () => {
     await expect(state(page)).toHaveClass('state dry');
   });
 
-  test('empty thrown mass hides the check (even though the model falls back to 500 g)', async ({ page }) => {
+  test('empty thrown mass hides the check (even though the model falls back to 500 g)', async ({
+    page,
+  }) => {
     await openApp(page);
     await fill(page, 'Masa teraz', '490');
     await fill(page, 'Masa po toczeniu', '');

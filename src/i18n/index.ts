@@ -28,7 +28,12 @@ export interface LocaleHints {
  * Initial UI language: a stored choice, else Polish for existing users,
  * else the first browser language that is registered, else the default.
  */
-export function resolveLocale({ stored, browser, hasExistingData, available }: LocaleHints): string {
+export function resolveLocale({
+  stored,
+  browser,
+  hasExistingData,
+  available,
+}: LocaleHints): string {
   if (stored !== null && available.includes(stored)) return stored;
   if (hasExistingData) return DEFAULT_LOCALE;
   for (const tag of browser) {

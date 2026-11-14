@@ -25,7 +25,8 @@ export function markup(m: Messages, covers: readonly CoverDefinition[]): string 
     </fieldset>`;
 }
 
-const boxes = (root: HTMLElement): NodeListOf<HTMLInputElement> => root.querySelectorAll<HTMLInputElement>('input[data-cover]');
+const boxes = (root: HTMLElement): NodeListOf<HTMLInputElement> =>
+  root.querySelectorAll<HTMLInputElement>('input[data-cover]');
 
 /** The last ticked cover cannot be unticked: disable it and show why. */
 function sync(root: HTMLElement): void {

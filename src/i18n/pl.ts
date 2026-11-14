@@ -4,7 +4,15 @@
 
 import type { BuiltInCoverId } from '../domain/covers';
 import type { TipId } from '../domain/tips';
-import type { AirflowId, BatId, ClayId, FeedbackKind, ShapeId, StageId, WetnessId } from '../domain/types';
+import type {
+  AirflowId,
+  BatId,
+  ClayId,
+  FeedbackKind,
+  ShapeId,
+  StageId,
+  WetnessId,
+} from '../domain/types';
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -46,7 +54,8 @@ export const pl = {
 
   wizard: {
     label: 'Przewodnik krok po kroku',
-    progress: (step: number, total: number, title: string): string => `Krok ${step} z ${total}: ${title}`,
+    progress: (step: number, total: number, title: string): string =>
+      `Krok ${step} z ${total}: ${title}`,
     next: 'Dalej',
     back: 'Wstecz',
     finish: 'Pokaż wynik',
@@ -82,10 +91,26 @@ export const pl = {
     collapse: 'Zwiń',
     editLabel: (section: string): string => `Zmień: ${section}`,
     collapseLabel: (section: string): string => `Zwiń: ${section}`,
-    piece: (name: string, shape: string, mass: string, wall: string, base: string, clay: string): string =>
-      [name, shape, `${mass} g`, `ścianka ${wall} mm, dno ${base} mm`, clay].filter(Boolean).join(' · '),
-    conditions: (temp: string, rh: string, airflow: string, night?: { temp: string; rh: string }): string =>
-      [`${temp} °C, ${rh}%`, airflow, night && `noc ${night.temp} °C, ${night.rh}%`].filter(Boolean).join(' · '),
+    piece: (
+      name: string,
+      shape: string,
+      mass: string,
+      wall: string,
+      base: string,
+      clay: string,
+    ): string =>
+      [name, shape, `${mass} g`, `ścianka ${wall} mm, dno ${base} mm`, clay]
+        .filter(Boolean)
+        .join(' · '),
+    conditions: (
+      temp: string,
+      rh: string,
+      airflow: string,
+      night?: { temp: string; rh: string },
+    ): string =>
+      [`${temp} °C, ${rh}%`, airflow, night && `noc ${night.temp} °C, ${night.rh}%`]
+        .filter(Boolean)
+        .join(' · '),
     schedule: (thrown: string, when: string): string => `Wytoczona ${thrown} · trymowanie ${when}`,
   },
 
@@ -153,7 +178,8 @@ export const pl = {
     } satisfies Record<AirflowId, string>,
   },
 
-  quickDate: (days: number): string => (days === 1 ? 'jutro' : days === 7 ? 'za tydzień' : `za ${days} dni`),
+  quickDate: (days: number): string =>
+    days === 1 ? 'jutro' : days === 7 ? 'za tydzień' : `za ${days} dni`,
 
   /** Day + 24 h time picker in section 3 (thrown and trim date). */
   dateTime: {
@@ -178,7 +204,8 @@ export const pl = {
     },
   },
 
-  weightHint: 'Zważ pracę (bez batu) przy toczeniu i teraz. Utracona masa mówi więcej niż dotyk, zwłaszcza przy grubym dnie.',
+  weightHint:
+    'Zważ pracę (bez batu) przy toczeniu i teraz. Utracona masa mówi więcej niż dotyk, zwłaszcza przy grubym dnie.',
 
   covers: {
     label: {
@@ -190,7 +217,8 @@ export const pl = {
     } satisfies Record<BuiltInCoverId, string>,
     phrase: coverPhrase,
     filterTitle: 'Sposoby okrycia, których mogę użyć',
-    filterHint: 'Odznacz to, czego tym razem nie możesz lub nie chcesz użyć. Dotyczy tylko tej pracy i jej zapisanego planu.',
+    filterHint:
+      'Odznacz to, czego tym razem nie możesz lub nie chcesz użyć. Dotyczy tylko tej pracy i jej zapisanego planu.',
     filterLastOne: 'Zostaw zaznaczony co najmniej jeden sposób.',
   },
 
@@ -204,7 +232,8 @@ export const pl = {
   result: {
     recommendation: 'Rekomendacja',
     warning: 'Uwaga',
-    ready: (date: string, lossPct: string, grams: number): string => `Gotowa ok. ${date}: cel to utrata ok. ${lossPct}% masy (${grams} g).`,
+    ready: (date: string, lossPct: string, grams: number): string =>
+      `Gotowa ok. ${date}: cel to utrata ok. ${lossPct}% masy (${grams} g).`,
     window: (from: string, to: string): string => `Okno: ${from} → ${to}`,
     windowOpenEnd: '…',
     compareTitle: 'Ile to potrwa w każdym wariancie',
@@ -233,16 +262,21 @@ export const pl = {
   tips: {
     dryAirRim:
       'Powietrze jest suche lub jest przeciąg. Brzeg i ucha wyschną dużo szybciej niż dno, więc owiń je paskiem folii albo obróć pracę dnem do góry, gdy brzeg zesztywnieje.',
-    thickBase: 'Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej.',
-    mould: 'Ponad 6 dni w wilgoci: zajrzyj co 2–3 dni, czy nie pojawia się pleśń, zwłaszcza na drewnianym podłożu.',
+    thickBase:
+      'Grube dno lub forma zamknięta: przed trymowaniem sprawdź wagą albo dotykiem samo dno. Ścianki zwykle są gotowe wcześniej.',
+    mould:
+      'Ponad 6 dni w wilgoci: zajrzyj co 2–3 dni, czy nie pojawia się pleśń, zwłaszcza na drewnianym podłożu.',
   } satisfies Record<TipId, string>,
 
   weight: {
-    tooSoft: (loss: string, estimate: string): string => `Utrata ${loss}%: jeszcze za miękka.${estimate}`,
+    tooSoft: (loss: string, estimate: string): string =>
+      `Utrata ${loss}%: jeszcze za miękka.${estimate}`,
     observedRate: (gramsPerHour: string, remaining: string): string =>
       ` Przy obecnym tempie (${gramsPerHour} g/h) zostało ok. ${remaining}.`,
-    modelEstimate: (remaining: string): string => ` W tym opatuleniu potrzeba jeszcze ok. ${remaining}.`,
-    inWindow: (loss: string): string => `Utrata ${loss}%: jest w oknie trymowania. Jeśli trymujesz później, zawiń ją w worek.`,
+    modelEstimate: (remaining: string): string =>
+      ` W tym opatuleniu potrzeba jeszcze ok. ${remaining}.`,
+    inWindow: (loss: string): string =>
+      `Utrata ${loss}%: jest w oknie trymowania. Jeśli trymujesz później, zawiń ją w worek.`,
     tooHard: (loss: string): string =>
       `Utrata ${loss}%: prawdopodobnie już za twarda na gładkie trymowanie. Spróbuj zawinąć ją z wilgotną gąbką na kilka godzin.`,
   },
@@ -252,8 +286,15 @@ export const pl = {
       'Nie ma jeszcze zapisanych prac. Zapisz pracę z planem, a gdy będziesz ją trymować, oceń, jak trafiła prognoza. Po kilku ocenach czasy dopasują się do Twojej pracowni.',
     defaultName: (n: number): string => `Praca ${n}`,
     feedbackPrompt: 'Trymuję teraz i jest:',
-    feedbackButton: { wet: 'za mokra', ok: 'w sam raz', dry: 'za sucha' } satisfies Record<FeedbackKind, string>,
-    feedbackResult: { wet: 'była za mokra', ok: 'w sam raz', dry: 'była za sucha' } satisfies Record<FeedbackKind, string>,
+    feedbackButton: { wet: 'za mokra', ok: 'w sam raz', dry: 'za sucha' } satisfies Record<
+      FeedbackKind,
+      string
+    >,
+    feedbackResult: {
+      wet: 'była za mokra',
+      ok: 'w sam raz',
+      dry: 'była za sucha',
+    } satisfies Record<FeedbackKind, string>,
     rated: (result: string, after: string): string => `${result} · po ${after}`,
     dueIn: (duration: string): string => `za ${duration}`,
     due: 'powinna być gotowa',
@@ -266,7 +307,8 @@ export const pl = {
     multiplier: 'Mnożnik czasu',
     count: 'Prace',
     value: (m: string): string => `× ${m}`,
-    noteHtml: 'Mnożnik &gt; 1 oznacza, że w Twojej pracowni ten wariant schnie wolniej, niż zakłada model.',
+    noteHtml:
+      'Mnożnik &gt; 1 oznacza, że w Twojej pracowni ten wariant schnie wolniej, niż zakłada model.',
   },
 
   explainer: {
@@ -289,10 +331,12 @@ export const pl = {
     instagram: 'Instagram',
     instagramLabel: 'Instagram – profil autora (@palindroom)',
     /** `report` and `message` are the link texts placed into `contactHtml`, `licence` into `licenceHtml` */
-    contactHtml: (report: string, message: string): string => `Coś nie działa albo wynik wygląda na błędny? ${report} lub ${message}.`,
+    contactHtml: (report: string, message: string): string =>
+      `Coś nie działa albo wynik wygląda na błędny? ${report} lub ${message}.`,
     report: 'Zgłoś problem na GitHubie',
     message: 'napisz na Instagramie',
-    licenceHtml: (licence: string): string => `Z kalkulatora można korzystać bezpłatnie na ${licence}.`,
+    licenceHtml: (licence: string): string =>
+      `Z kalkulatora można korzystać bezpłatnie na ${licence}.`,
     licence: 'licencji MIT',
   },
 
@@ -300,7 +344,20 @@ export const pl = {
   format: {
     weekdaysShort: ['nd', 'pn', 'wt', 'śr', 'czw', 'pt', 'sob'],
     /** Passed to `dateTime`; the Polish format shows the month number instead. */
-    monthsShort: ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'],
+    monthsShort: [
+      'sty',
+      'lut',
+      'mar',
+      'kwi',
+      'maj',
+      'cze',
+      'lip',
+      'sie',
+      'wrz',
+      'paź',
+      'lis',
+      'gru',
+    ],
     decimalSeparator: ',',
     minutes: (n: number): string => `${n} min`,
     hours: (n: number): string => `${n} h`,
@@ -308,10 +365,17 @@ export const pl = {
     daysHours: (d: number, h: number): string => `${d} d ${h} h`,
     beyondHorizon: (days: number): string => `> ${days} dni`,
     /** e.g. "śr 4.03" */
-    date: (weekday: string, day: number, month: string, _monthShort: string): string => `${weekday} ${day}.${month}`,
+    date: (weekday: string, day: number, month: string, _monthShort: string): string =>
+      `${weekday} ${day}.${month}`,
     /** e.g. "śr 4.03 10:00" */
-    dateTime: (weekday: string, day: number, month: string, hh: string, mm: string, _monthShort: string): string =>
-      `${weekday} ${day}.${month} ${hh}:${mm}`,
+    dateTime: (
+      weekday: string,
+      day: number,
+      month: string,
+      hh: string,
+      mm: string,
+      _monthShort: string,
+    ): string => `${weekday} ${day}.${month} ${hh}:${mm}`,
   },
 };
 
