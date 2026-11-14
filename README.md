@@ -36,11 +36,11 @@ The build uses `base: './'`, so `dist/` works from any sub-path, for example Git
 Screenshots are compared with an earlier run of the build.
 
 ```bash
-VISUAL=1 npx playwright test e2e/visual.spec.ts --update-snapshots  # baseline from the build, before a change
-VISUAL=1 npx playwright test e2e/visual.spec.ts                     # compare after the change (VISUAL_STRICT=1: pixel-exact)
+VISUAL=1 npx playwright test tests/e2e/visual.spec.ts --update-snapshots  # baseline from the build, before a change
+VISUAL=1 npx playwright test tests/e2e/visual.spec.ts                     # compare after the change (VISUAL_STRICT=1: pixel-exact)
 ```
 
-Each state is captured in the light and the dark colour scheme (`light-…png`, `dark-…png`). Baselines go to `e2e/__screenshots__/`. That folder is git-ignored because the images depend on the machine.
+Each state is captured in the light and the dark colour scheme (`light-…png`, `dark-…png`). Baselines go to `tests/e2e/__screenshots__/`. That folder is git-ignored because the images depend on the machine.
 
 ## Structure
 
@@ -81,7 +81,9 @@ src/
     wizard.ts         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
     cards.ts          after the wizard, sections 1-3 collapse to one-line summaries that open on click
     welcome.ts        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction
-e2e/                  Playwright suite (runs against the production build)
+tests/
+  unit/               Vitest unit tests, laid out like src/ (domain, i18n, storage, ui)
+  e2e/                Playwright suite (runs against the production build), golden.json
 scripts/agent/        helper scripts for the agent workflow (issue, worktree, checks, viewport, hygiene, labels); see CLAUDE.md
 ```
 

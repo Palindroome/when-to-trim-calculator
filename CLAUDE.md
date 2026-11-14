@@ -71,7 +71,7 @@ CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit, e2e, build and shell
 - **Planned features:** more languages, ML-fitted drying parameters per studio, and temperature/humidity sensors.
   - Keep them easy to add by using the existing seams and layer boundaries.
   - Don't build speculative abstractions for them before an issue asks for one (see the coding principles in `.claude/agents/implementer.md`).
-- **Behaviour changes:** a change in behaviour must be intentional and covered by tests. When outputs change, re-record `e2e/golden.json` (see `e2e/record.spec.ts`) and confirm that only the intended scenarios changed.
+- **Behaviour changes:** a change in behaviour must be intentional and covered by tests. When outputs change, re-record `tests/e2e/golden.json` (see `tests/e2e/record.spec.ts`) and confirm that only the intended scenarios changed.
 - **Language:** write issues, PRs, commits and code in English. UI text stays Polish in `pl.ts`.
 
 ## Commit message convention

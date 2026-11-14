@@ -1,11 +1,11 @@
 // Shared fixtures for unit tests (not imported by the app).
-import { geometricMeanCalibrator } from './calibration';
-import type { CoverDefinition } from './covers';
-import { DEFAULT_PARAMS, type ModelParams } from './params';
-import { physicalRateModel, type RateModel } from './physics';
-import { derivePiece } from './piece';
-import type { DryingContext } from './simulate';
-import type { Conditions, PieceInput } from './types';
+import { geometricMeanCalibrator } from '../../../src/domain/calibration';
+import type { CoverDefinition } from '../../../src/domain/covers';
+import { DEFAULT_PARAMS, type ModelParams } from '../../../src/domain/params';
+import { physicalRateModel, type RateModel } from '../../../src/domain/physics';
+import { derivePiece } from '../../../src/domain/piece';
+import type { DryingContext } from '../../../src/domain/simulate';
+import type { Conditions, PieceInput } from '../../../src/domain/types';
 
 export const DEFAULT_INPUT: PieceInput = {
   massG: 500,

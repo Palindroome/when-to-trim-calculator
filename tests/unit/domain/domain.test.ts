@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { feedbackToSample, geometricMeanCalibrator } from './calibration';
-import { type CoverDefinition, type CoverId, coverById } from './covers';
-import { DEFAULT_PARAMS, MS_PER_HOUR } from './params';
-import { physicalRateModel, psat } from './physics';
-import { derivePiece } from './piece';
-import { dominantCover, type PlanResult, planDrying } from './planner';
-import { hoursToLoss, simulate } from './simulate';
+import { feedbackToSample, geometricMeanCalibrator } from '../../../src/domain/calibration';
+import { type CoverDefinition, type CoverId, coverById } from '../../../src/domain/covers';
+import { DEFAULT_PARAMS, MS_PER_HOUR } from '../../../src/domain/params';
+import { physicalRateModel, psat } from '../../../src/domain/physics';
+import { derivePiece } from '../../../src/domain/piece';
+import { dominantCover, type PlanResult, planDrying } from '../../../src/domain/planner';
+import { hoursToLoss, simulate } from '../../../src/domain/simulate';
+import { tipsFor } from '../../../src/domain/tips';
+import { assessWeight } from '../../../src/domain/weight';
 import { constantRateModel, DEFAULT_CONDITIONS, DEFAULT_INPUT, makeContext, START } from './testing';
-import { tipsFor } from './tips';
-import { assessWeight } from './weight';
 
 const P = DEFAULT_PARAMS;
 const COVERS: CoverId[] = P.covers.map((c) => c.id);

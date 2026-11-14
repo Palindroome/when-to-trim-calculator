@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { shouldWelcome } from './welcome';
+import { shouldWelcome } from '../../../src/ui/welcome';
 
 const HOUR = 60 * 60 * 1000;
 const NOW = Date.parse('2026-03-04T09:00:00+01:00');

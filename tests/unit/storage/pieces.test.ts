@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calibrationSamples, LocalStoragePieceRepository, STORAGE_KEY, type StoredPiece } from './pieces';
+import { calibrationSamples, LocalStoragePieceRepository, STORAGE_KEY, type StoredPiece } from '../../../src/storage/pieces';
 
 class MemoryStorage {
   data = new Map<string, string>();

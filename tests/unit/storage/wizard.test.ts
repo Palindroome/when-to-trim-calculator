@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LocalStorageWizardStore, WIZARD_KEY } from './wizard';
+import { LocalStorageWizardStore, WIZARD_KEY } from '../../../src/storage/wizard';
 
 const memory = (init: Record<string, string> = {}) => {
   const data = new Map(Object.entries(init));

@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_PARAMS } from '../domain/params';
-import { createFormatter } from '../i18n';
-import { en } from '../i18n/en';
-import { pl } from '../i18n/pl';
-import { combineLocalDateTime, dayLabel, normalizeTime, parseNumber, readAllowedCovers, toDayKey, toTime } from './form';
+import { DEFAULT_PARAMS } from '../../../src/domain/params';
+import { createFormatter } from '../../../src/i18n';
+import { en } from '../../../src/i18n/en';
+import { pl } from '../../../src/i18n/pl';
+import { combineLocalDateTime, dayLabel, normalizeTime, parseNumber, readAllowedCovers, toDayKey, toTime } from '../../../src/ui/form';
 
 describe('parseNumber', () => {
   it.each([

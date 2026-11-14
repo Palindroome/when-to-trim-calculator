@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { en } from './en';
-import { createFormatter } from './format';
-import { DEFAULT_LOCALE, getMessages, LOCALES, resolveLocale } from './index';
-import { pl } from './pl';
+import { en } from '../../../src/i18n/en';
+import { createFormatter } from '../../../src/i18n/format';
+import { DEFAULT_LOCALE, getMessages, LOCALES, resolveLocale } from '../../../src/i18n/index';
+import { pl } from '../../../src/i18n/pl';
 
 const fmt = createFormatter(pl, 30);
 

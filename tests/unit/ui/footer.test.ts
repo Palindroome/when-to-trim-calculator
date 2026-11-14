@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { en } from '../i18n/en';
-import { pl } from '../i18n/pl';
-import { renderFooter } from './footer';
+import { en } from '../../../src/i18n/en';
+import { pl } from '../../../src/i18n/pl';
+import { renderFooter } from '../../../src/ui/footer';
 
 describe('renderFooter', () => {
   it('links to both profiles, each with one decorative inline SVG', () => {

@@ -1,5 +1,5 @@
-// Re-records e2e/golden.json from whatever app the config points at.
-// Only runs on demand:  RECORD_GOLDEN=1 npx playwright test e2e/record.spec.ts
+// Re-records tests/e2e/golden.json from whatever app the config points at.
+// Only runs on demand:  RECORD_GOLDEN=1 npx playwright test tests/e2e/record.spec.ts
 // Use it deliberately (e.g. after an intended model change) and review the diff.
 
 import { writeFileSync } from 'node:fs';

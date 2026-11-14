@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ACTIVITY_KEY, LocalStorageActivityStore } from './activity';
+import { ACTIVITY_KEY, LocalStorageActivityStore } from '../../../src/storage/activity';
 
 const memory = (init: Record<string, string> = {}) => {
   const data = new Map(Object.entries(init));

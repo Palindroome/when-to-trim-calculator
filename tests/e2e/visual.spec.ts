@@ -1,6 +1,6 @@
 // Visual regression check of the build, opt-in (VISUAL=1). Baselines are machine-specific and not committed:
-//   1. VISUAL=1 npx playwright test e2e/visual.spec.ts --update-snapshots   (baseline from the build)
-//   2. VISUAL=1 npx playwright test e2e/visual.spec.ts                      (compare after a change)
+//   1. VISUAL=1 npx playwright test tests/e2e/visual.spec.ts --update-snapshots   (baseline from the build)
+//   2. VISUAL=1 npx playwright test tests/e2e/visual.spec.ts                      (compare after a change)
 // The page uses the self-hosted Inter font; screenshots wait for it to load.
 import { expect, test } from '@playwright/test';
 import { openApp } from './helpers';

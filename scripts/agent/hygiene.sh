@@ -60,7 +60,7 @@ if [[ -n "$N" ]]; then
   git log -1 --format=%B "$B" | grep -qE "^Fixes #$N\b" && echo "ok: last commit has Fixes #$N" || bad "last commit has no 'Fixes #$N' footer"
 fi
 
-stray=$(git diff --name-only "origin/main...$B" | grep -E '(^|/)(test-results|playwright-report|dist)/|\.(png|jpg|log|orig)$|(^|/)tmp|\.sh$' | grep -vE '^scripts/|^e2e/__screenshots__/')
+stray=$(git diff --name-only "origin/main...$B" | grep -E '(^|/)(test-results|playwright-report|dist)/|\.(png|jpg|log|orig)$|(^|/)tmp|\.sh$' | grep -vE '^scripts/|^tests/e2e/__screenshots__/')
 [[ -z "$stray" ]] && echo "ok: no stray files" || bad "possible stray files:"$'\n'"$stray"
 
 # Backstop for the src/domain overrides in biome.json, which `npm run lint` enforces.
