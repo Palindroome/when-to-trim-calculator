@@ -77,14 +77,27 @@ src/
     wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
     activity.ts       ActivityStore: time of the last interaction, for the welcome screen (own key, `kiedy-trymowac-last-active`)
   ui/
-    shell.ts          static page markup from the catalog
-    footer.ts         site footer: author's profile links with inline SVG icons
+    app.ts            state (saved pieces, the plan to save, the language), compute() and the composition of the features
+    context.ts        AppDeps (what startApp gets) and AppContext (what the features get from the app)
+    shell.ts          the page's sections in order, each from its feature
     form.ts           reads inputs (including the day + 24 h time pickers of "Termin"); formConditionsSource
-    render.ts         HTML for result, pieces, calibration, weight check
-    app.ts            state + event wiring (including the calendar dialogs of "Termin")
-    wizard.ts         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
-    cards.ts          after the wizard, sections 1-3 collapse to one-line summaries that open on click
-    welcome.ts        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction
+    form-state.ts     captures and restores the form around a language switch
+    render.ts         View, and the cover and plan wording several features share
+    calibration.ts    perCoverCalibration: the calibration of every cover, for the bars and the calibration table
+    footer.ts         site footer: author's profile links with inline SVG icons
+    dom.ts            byId, esc, options, closest (event delegation)
+    features/         one folder per feature; each keeps its markup next to its wiring and exports mount(root, ctx)
+      header/         heading, language switch, theme switch
+      piece/          section 1 "Praca"
+      conditions/     section 2 "Warunki", night switch
+      datetime/       section 3 day + time pickers: calendar dialog (Cally), quick choices
+      covers/         section 3 cover filter
+      result/         recommendation, comparison bars, alternatives, tips, save button
+      weight/         section 4 weight check
+      pieces/         section 5: saved pieces, feedback, calibration table
+      wizard/         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
+      cards/          after the wizard, sections 1-3 collapse to one-line summaries that open on click
+      welcome/        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction
 tests/
   unit/               Vitest unit tests, laid out like src/ (domain, i18n, storage, ui)
   e2e/                Playwright suite (runs against the production build), golden.json
@@ -108,6 +121,7 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
 
   Saved pieces store their plan sentence (`label`) in the language that was active at save time. The piece list re-renders it from `plan` in the current language and falls back to `label` for unexpected plan shapes.
 - **Colour schemes.** Components use only the colour-role tokens in `src/styles/tokens.css`. Dark mode overrides those same tokens with the `--d-*` values, either when the system prefers dark (`prefers-color-scheme`) or when `data-theme="dark"` is set on `<html>`; `data-theme="light"` forces the light values. The `System | Light | Dark` switch next to the language switch sets that attribute and stores `light` / `dark` under `kiedy-trymowac-theme` (System removes the key). A new component that uses the tokens works in both schemes without extra CSS; a new colour role needs a light value and a `--d-*` value assigned in both dark blocks.
+- **UI sections.** A page section is a folder in `src/ui/features/` that exports its markup and `mount(root, ctx)`. `mount` runs on every freshly rendered shell (first render and each language switch) and adds one delegated listener on the section; content re-rendered inside the section needs no new listeners. To add one, put its markup in `renderShell` (`ui/shell.ts`), its `mount` in `FEATURES` (`ui/app.ts`), and its styles in a partial in `src/styles/`, imported from `main.ts` at its place in the cascade.
 - **Fitted parameters.** Every coefficient is in `ModelParams` (`src/domain/params.ts`): evaporation coefficient, cover definitions, shape/clay/surface factors, wetness/stage offsets, window bounds, planner and tip thresholds. Pass a different object to `startApp`.
 - **Covers.** Each covering method is one `CoverDefinition` (`domain/covers.ts`) in `ModelParams.covers`: its drying factor, how airflow reaches the piece (`full` / `damped` / `none`), which conditions apply (`room` with night mode, or `dampRoom`) and an optional planner gate. The list order is the display order (bars, weight-check select, calibration table, cover filter) and the planner's preference order: the first cover is preferred as the first phase of two-phase plans, and the first / last are the fallbacks when even they are too slow / too fast. The app passes this catalog to the planner (`DryingContext.covers`), the tips and the UI; nothing else names a cover. Built-in labels and plan phrases are looked up by id in `covers.label` / `covers.phrase` of the i18n catalog through `coverLabel` / `coverPhrase` in `ui/render.ts`.
 - **Trained models.** There are two seams:
@@ -115,7 +129,7 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
   - `Calibrator` / `CalibratorFactory` (`domain/calibration.ts`) turns feedback samples into per-cover time multipliers (`estimate`, `multipliers`, `learn`). Replace `geometricMeanCalibrator` to plug in a learned correction.
 - **Training data.** Each rated piece already stores start time, mass, target loss, the plan, predicted vs. actual hours, the calibration used and the feedback. It does not store the piece inputs (shape, walls, clay, ...) or the conditions. Adding them would change the stored format, so it was deliberately left out. To collect them:
   1. Add optional fields, e.g. `input` and `conditions`, to `StoredPiece`. Older readers ignore unknown fields, and older records simply lack them.
-  2. Fill them in `savePiece` (`ui/app.ts`).
+  2. Fill them in `save` (`ui/features/pieces/pieces.ts`).
   3. Keep the key `kiedy-trymowac-v1`, or introduce a v2 repository that migrates from v1.
 - **Sensors.** Implement `ConditionsSource` (`domain/conditions.ts`): `read()` returns `Conditions`, and the optional `subscribe(onChange)` triggers a recalculation. `formConditionsSource` in `ui/form.ts` is the current implementation. A sensor source can wrap it and override, for example, `temp` and `rh`.
 - **Storage.** `PieceRepository` hides localStorage. The localStorage implementation keeps the prototype's v1 format byte-for-byte, so existing data keeps working.

@@ -4,7 +4,9 @@ import { createFormatter, type Messages } from '../../../src/i18n';
 import { en } from '../../../src/i18n/en';
 import { pl } from '../../../src/i18n/pl';
 import type { StoredPiece } from '../../../src/storage/pieces';
-import { renderPieceList, renderSummaries, type SummaryInput, type View } from '../../../src/ui/render';
+import { renderSummaries, type SummaryInput } from '../../../src/ui/features/cards/cards';
+import { renderPieceList } from '../../../src/ui/features/pieces/pieces';
+import type { View } from '../../../src/ui/render';
 
 const view = (m: Messages): View => ({ m, params: DEFAULT_PARAMS, fmt: createFormatter(m, 30), covers: DEFAULT_PARAMS.covers });
 const start = new Date(2026, 2, 4, 9, 0).getTime();
