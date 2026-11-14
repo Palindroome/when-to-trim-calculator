@@ -84,8 +84,8 @@ bash $S/worktree.sh <branch>   # W=~/wtc-worktrees/<branch>
   - new seams follow the existing interfaces (`RateModel`, `Calibrator`, `ConditionsSource`, `PieceRepository`).
 - Tests:
   - Write or extend tests first where practical, so they fail before the fix and pass after it.
-  - Unit tests go next to the code (`*.test.ts`); e2e tests go in `e2e/`.
-  - When outputs change on purpose, re-record `e2e/golden.json` with `e2e/record.spec.ts`, then inspect `git diff e2e/golden.json`. Only the intended scenarios may change.
+  - Unit tests go in `tests/unit/`, in the folder that matches the code under `src/` (`*.test.ts`); e2e tests go in `tests/e2e/`.
+  - When outputs change on purpose, re-record `tests/e2e/golden.json` with `tests/e2e/record.spec.ts`, then inspect `git diff tests/e2e/golden.json`. Only the intended scenarios may change.
 - Update `README.md` when structure, commands or extension points change.
 
 ## 5. Verify (all must pass before you hand off)
@@ -99,7 +99,7 @@ bash $W/scripts/agent/check.sh unit          # a single step while iterating
 - For UI changes, run `bash $W/scripts/agent/viewport.sh` (320/375/1280 px: no horizontal overflow, `#result` renders, no console errors). Add `--shots /tmp/<dir>` if you want screenshots to look at.
 - **Test servers.** Other agents may be testing in other worktrees at the same time, and a server on the default port (4173) may belong to one of them. Never reuse a running server.
   - The scripts pick a free port and stop their own servers.
-  - For your own Playwright runs (for example re-recording `e2e/golden.json`), put the command in a scratch `.sh` with `. ~/.nvm/nvm.sh` and `E2E_PORT=<free port>`.
+  - For your own Playwright runs (for example re-recording `tests/e2e/golden.json`), put the command in a scratch `.sh` with `. ~/.nvm/nvm.sh` and `E2E_PORT=<free port>`.
   - Kill only processes you started.
 - Do not hand off with failing checks. If you are stuck, report what fails and why.
   - A failure in a test your change doesn't touch may be a known flake: look for an open issue with `search.sh`, re-run that step once, and report it.

@@ -2,7 +2,7 @@
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
-    "includes": ["**", "!**/*.md", "!e2e/golden.json", "!public"]
+    "includes": ["**", "!**/*.md", "!tests/e2e/golden.json", "!public"]
   },
   "formatter": {
     "indentStyle": "space",
@@ -25,7 +25,7 @@
   },
   "overrides": [
     {
-      "includes": ["e2e/**"],
+      "includes": ["tests/e2e/**"],
       "linter": { "rules": { "performance": { "useDomNodeTextContent": "off" } } }
     },
     {

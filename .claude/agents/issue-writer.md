@@ -63,7 +63,7 @@ Files and functions with approximate lines, short code excerpts, and why it happ
 The preferred approach, plus alternatives and their trade-offs. Note constraints: architecture rules, the storage format, behaviour that must not change.
 
 ## Tests to add or update
-The unit and e2e tests to write, existing tests or golden scenarios (`e2e/golden.json`) that are expected to change, and the commands to run.
+The unit and e2e tests to write, existing tests or golden scenarios (`tests/e2e/golden.json`) that are expected to change, and the commands to run.
 
 ## Acceptance criteria
 - [ ] Verifiable checklist the validator will use.

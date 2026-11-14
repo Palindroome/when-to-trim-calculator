@@ -1,0 +1,15 @@
+/* ---------- pieces and calibration ---------- */
+.hint{margin:calc(-1 * var(--space-2)) 0 var(--space-4)}
+.empty{margin:0 0 var(--space-2)}
+.piece{padding:var(--space-4) 0;border-bottom:1px solid var(--border)}
+.piece:first-child{padding-top:0}
+.piece .top{display:flex;justify-content:space-between;gap:var(--space-2);align-items:baseline}
+.piece b{font-weight:600}
+.piece .meta{font-size:var(--text-sm);color:var(--text-muted);margin:var(--space-1) 0 var(--space-3);font-variant-numeric:tabular-nums}
+.piece .fb{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center}
+.piece .del{margin-left:auto}
+.badge{font-size:var(--text-xs);font-weight:500;border-radius:var(--radius-sm);padding:0 var(--space-2);background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+table{width:100%;border-collapse:collapse;font-size:var(--text-sm);font-variant-numeric:tabular-nums;margin-top:var(--space-4)}
+td,th{text-align:left;padding:var(--space-2) var(--space-1);border-bottom:1px solid var(--border)}
+th{font-weight:500;color:var(--text-muted);font-size:var(--text-xs)}

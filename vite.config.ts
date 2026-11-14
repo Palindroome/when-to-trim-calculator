@@ -5,7 +5,7 @@ export default defineConfig({
   base: './',
   build: { outDir: 'dist', emptyOutDir: true },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['tests/unit/**/*.test.ts'],
     environment: 'node',
   },
 });

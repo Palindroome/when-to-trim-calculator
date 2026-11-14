@@ -45,7 +45,7 @@ Other agents may be testing in other worktrees at the same time, and a server on
 3. **Behaviour.**
    - **Bugs:** reproduce on `origin/main` first, then confirm the fix on the branch. Use `bash $S/worktree.sh --main` and run your probe or `check.sh` in that worktree, or use the live site.
    - **UI changes:** run `bash $V/scripts/agent/viewport.sh`. It checks 320, 375 and 1280 px for horizontal overflow (`scrollWidth <= clientWidth`), a rendered `#result` and console errors. Write your own probe only for states the script doesn't reach (for example after the wizard, or with saved pieces).
-   - **Model or output changes:** inspect `git diff origin/main...<branch> -- e2e/golden.json`. Only scenarios named in the issue may change, and each change must be explained.
+   - **Model or output changes:** inspect `git diff origin/main...<branch> -- tests/e2e/golden.json`. Only scenarios named in the issue may change, and each change must be explained.
    - Try edge cases the issue implies, beyond the ones the implementer tested.
 4. **Diff review** (`git diff origin/main...<branch>`). Start with `--stat`, then look at the diff per file or directory. Don't print it all at once. Check it against the coding principles in `.claude/agents/implementer.md`:
    - correctness;

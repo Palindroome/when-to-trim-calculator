@@ -1,0 +1,60 @@
+/* Design tokens: direction "Bisque" with a plum accent (lavender in dark mode). Components use only these; dark mode (#7) overrides the colour roles. */
+:root{
+  color-scheme:light;
+  /* type */
+  --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-num:var(--font-sans);
+  --text-xs:13px; --text-sm:14px; --text-md:16px; --text-lg:20px; --text-xl:28px; --text-2xl:36px;
+  --leading:1.5; --leading-tight:1.25; --tracking-tight:-0.01em;
+  /* space (4px base) */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px;
+  /* shape */
+  --radius-sm:4px; --radius-md:6px; --radius-lg:10px;
+  --rule-width:4px; --line-strong:2px; --ring-width:2px;
+  /* control sizes */
+  --control-h:44px; --control-h-sm:32px;
+  /* colour roles */
+  --bg:#f4ede3; --surface:#fcf9f4; --surface-2:#efe6da;
+  --border:#e2d6c6; --border-strong:#cfbfa9; --input-border:#8a7766;
+  --text:#2b211b; --text-muted:#5c4e43;
+  --accent:#6e3b5c; --accent-hover:#572e49; --accent-contrast:#ffffff; --accent-soft:#efe1e8; --ring:#6e3b5c;
+  --ok:#2e5527; --ok-soft:#e6eddb; --warn:#6c4410; --warn-soft:#f7e9cf; --wet:#22465e; --wet-soft:#e2eaee;
+  --track:var(--surface-2); --fill:var(--accent);
+  --shadow-1:0 1px 2px rgb(60 40 25 / .07);
+  --shadow-2:0 1px 3px rgb(60 40 25 / .09), 0 8px 24px rgb(60 40 25 / .07);
+  /* dims the page behind a modal dialog */
+  --scrim:rgb(28 25 23 / .4);
+  /* dark values, defined once and assigned by the two dark blocks below */
+  --d-bg:#171412; --d-surface:#211d1a; --d-surface-2:#2b2622;
+  --d-border:#3d3632; --d-border-strong:#57504a; --d-input-border:#8c847d;
+  --d-text:#f5f5f4; --d-text-muted:#b8b0a8;
+  --d-accent:#b4a0d4; --d-accent-hover:#c7b7e2; --d-accent-contrast:#1c1917; --d-accent-soft:#2c2638;
+  --d-ok:#a3d9ad; --d-ok-soft:#18291c; --d-warn:#f2c779; --d-warn-soft:#33270f; --d-wet:#a3c8ea; --d-wet-soft:#15243a;
+  --d-fill:#9a918a;
+  --d-scrim:rgb(0 0 0 / .6);
+}
+/* dark: follows the system unless Light is chosen, or chosen explicitly (data-theme on <html>) */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:var(--d-bg); --surface:var(--d-surface); --surface-2:var(--d-surface-2);
+    --border:var(--d-border); --border-strong:var(--d-border-strong); --input-border:var(--d-input-border);
+    --text:var(--d-text); --text-muted:var(--d-text-muted);
+    --accent:var(--d-accent); --accent-hover:var(--d-accent-hover); --accent-contrast:var(--d-accent-contrast); --accent-soft:var(--d-accent-soft); --ring:var(--d-accent);
+    --ok:var(--d-ok); --ok-soft:var(--d-ok-soft); --warn:var(--d-warn); --warn-soft:var(--d-warn-soft); --wet:var(--d-wet); --wet-soft:var(--d-wet-soft);
+    --track:var(--d-border); --fill:var(--d-fill);
+    --shadow-1:none; --shadow-2:none;
+    --scrim:var(--d-scrim);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:var(--d-bg); --surface:var(--d-surface); --surface-2:var(--d-surface-2);
+  --border:var(--d-border); --border-strong:var(--d-border-strong); --input-border:var(--d-input-border);
+  --text:var(--d-text); --text-muted:var(--d-text-muted);
+  --accent:var(--d-accent); --accent-hover:var(--d-accent-hover); --accent-contrast:var(--d-accent-contrast); --accent-soft:var(--d-accent-soft); --ring:var(--d-accent);
+  --ok:var(--d-ok); --ok-soft:var(--d-ok-soft); --warn:var(--d-warn); --warn-soft:var(--d-warn-soft); --wet:var(--d-wet); --wet-soft:var(--d-wet-soft);
+  --track:var(--d-border); --fill:var(--d-fill);
+  --shadow-1:none; --shadow-2:none;
+  --scrim:var(--d-scrim);
+}
