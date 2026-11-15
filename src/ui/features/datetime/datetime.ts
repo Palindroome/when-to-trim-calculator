@@ -13,11 +13,11 @@ import {
 } from '../../form';
 import { slideIndicator } from '../../motion';
 
-export const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
+const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
 
 /** Quick choices for the throwing time, keys of `m.dateTime.presets`. */
-export const THROWN_PRESETS = ['now', 'hourAgo', 'morning', 'lastEvening'] as const;
-export type ThrownPreset = (typeof THROWN_PRESETS)[number];
+const THROWN_PRESETS = ['now', 'hourAgo', 'morning', 'lastEvening'] as const;
+type ThrownPreset = (typeof THROWN_PRESETS)[number];
 
 /** Default trim date offered on load: thrown + 2 days, at 10:00. */
 const DEFAULT_QUICK_DAYS = 2;

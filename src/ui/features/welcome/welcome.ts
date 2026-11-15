@@ -28,11 +28,7 @@ export function markup(m: Messages): string {
 }
 
 /** Rows of the welcome screen's "My pieces" list: the highlights of each piece and a link to its details. */
-export function renderWelcomePieces(
-  v: View,
-  pieces: readonly StoredPiece[],
-  nowMs: number,
-): string {
+function renderWelcomePieces(v: View, pieces: readonly StoredPiece[], nowMs: number): string {
   const { m } = v;
   return pieces
     .map((p) => {
@@ -59,7 +55,7 @@ export interface Welcome {
   readonly open: boolean;
 }
 
-export interface WelcomeActions {
+interface WelcomeActions {
   /** "New piece", after the welcome screen has closed */
   onNew(): void;
   /** "Details" of a piece in the list, after the welcome screen has closed */

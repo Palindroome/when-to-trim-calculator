@@ -23,7 +23,7 @@ const CHART = {
   maxFiniteHours: 24 * 10,
 } as const;
 
-export interface ResultModel {
+interface ResultModel {
   piece: Piece;
   startMs: number;
   plan: PlanResult;
@@ -36,7 +36,7 @@ export interface ResultModel {
   allowed: readonly CoverId[];
 }
 
-export function renderResult(v: View, r: ResultModel): string {
+function renderResult(v: View, r: ResultModel): string {
   const { m, fmt } = v;
   const { piece, startMs: start, plan } = r;
   const rec = plan.recommendation;

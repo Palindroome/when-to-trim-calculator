@@ -94,7 +94,7 @@ export function renderPieceList(v: View, pieces: readonly StoredPiece[], nowMs: 
     .join('');
 }
 
-export function renderCalibration(v: View, calibration: Record<CoverId, CoverCalibration>): string {
+function renderCalibration(v: View, calibration: Record<CoverId, CoverCalibration>): string {
   const { m, fmt } = v;
   const rows = v.covers.map((c) => ({ c, ...calibration[c.id]! })).filter((r) => r.samples);
   if (!rows.length) return '';
