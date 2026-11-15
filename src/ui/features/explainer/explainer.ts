@@ -131,7 +131,8 @@ export function renderSteps(
   out.push(
     step('surface', e.surface.title, [
       text(e.surface.text),
-      code(f.surface, f.surfaceSymbols),
+      // the unit conversions of derivePiece: wall mm → cm, area cm² → m²
+      code(f.surface(num('mmToCm', dec(10, 0)), num('cm2ToM2', '10 000')), f.surfaceSymbols),
       formula(
         e.surface.sheet(
           n('mass', piece.mass, 1),
@@ -156,7 +157,7 @@ export function renderSteps(
   out.push(
     step('slowness', e.slowness.title, [
       text(e.slowness.text(one('neutral'))),
-      code(f.slowness, f.slownessSymbols),
+      code(f.slowness(one('thickFloor')), f.slownessSymbols),
       formula(
         e.slowness.thick(
           n('base', piece.base, 1),
@@ -240,7 +241,7 @@ export function renderSteps(
       ),
       code(f.psat(n('magnusA', MAGNUS.a, 3), n('magnusB', MAGNUS.b, 2), n('magnusC', MAGNUS.c, 2))),
       code(
-        f.vpd,
+        f.vpd(one('whole'), num('percent', dec(100, 0))),
         f.airSymbols(
           n('minVpd', p.minVpd, 2),
           n('rhMin', p.rhClamp.min, 1),
@@ -298,7 +299,7 @@ export function renderSteps(
   out.push(
     step('rate', e.rate.title, [
       text(t.physical ? e.rate.text : e.rate.modelText),
-      ...(t.physical ? [code(f.rate, f.rateSymbols)] : []),
+      ...(t.physical ? [code(f.rate(one('calibrationOne')), f.rateSymbols)] : []),
       rows(rateRows),
       ...(nightRates.length
         ? [text(e.rate.night(nightFrom(), nightTo(), nightRates.join(', ')))]

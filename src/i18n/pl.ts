@@ -325,18 +325,21 @@ export const pl = {
     formula: {
       inputs: 'm = max(m_min, m_wpisana)',
       inputsSymbols: 'tak samo ścianka s i dno d; bez dna d = s',
-      surface: 'A = m ÷ ρ ÷ (s ÷ 10) × f_kształt ÷ 10 000',
+      surface: (mmToCm: string, cm2ToM2: string): string =>
+        `A = m ÷ ρ ÷ (s ÷ ${mmToCm}) × f_kształt ÷ ${cm2ToM2}`,
       surfaceSymbols: 'A – powierzchnia w m², m – masa w g, ρ – gęstość gliny, s – ścianka w mm',
-      slowness: 'S = f_kształt × f_masa × f_podłoże × max(1, d ÷ s)^p',
+      slowness: (floor: string): string =>
+        `S = f_kształt × f_masa × f_podłoże × max(${floor}, d ÷ s)^p`,
       slownessSymbols: 'd – dno, s – ścianka, p – wykładnik grubego dna',
       target: 'cel = u_masa + Δ_mokrość + Δ_cel; okno = [cel − Δ_dół, cel + Δ_góra]',
       targetSymbols: 'u_masa – utrata dla masy ceramicznej, w % masy',
       psat: (a: string, b: string, c: string): string =>
         `e_s(T) = ${a} × exp(${b} × T ÷ (${c} + T))`,
-      vpd: 'VPD = max(VPD_min, e_s(T) × (1 − clamp(RH, RH_min, RH_max) ÷ 100))',
+      vpd: (whole: string, percent: string): string =>
+        `VPD = max(VPD_min, e_s(T) × (${whole} − clamp(RH, RH_min, RH_max) ÷ ${percent}))`,
       airSymbols: (vpdMin: string, rhMin: string, rhMax: string): string =>
         `T – temperatura w °C, RH – wilgotność względna w %, ograniczona do ${rhMin}–${rhMax}%; VPD_min = ${vpdMin} hPa`,
-      rate: 'r = 1 ÷ M × f_okrycie × f_ruch × k × A × VPD ÷ S',
+      rate: (one: string): string => `r = ${one} ÷ M × f_okrycie × f_ruch × k × A × VPD ÷ S`,
       rateSymbols:
         'najpierw to, co zależy od wariantu: mnożnik kalibracji M (dzieli tempo), okrycie i ruch powietrza pod nim; k – współczynnik parowania',
       time: 'utrata(t + Δt) = utrata(t) + r(t) × Δt, aż utrata ≥ cel',
@@ -438,6 +441,9 @@ export const pl = {
       whole: 'całość, czyli 100% wilgotności',
       sealedAir: 'pod szczelnym okryciem ruch powietrza nie dociera',
       calibrationOne: 'kalibracja dzieli tempo przez swój mnożnik',
+      mmToCm: 'przeliczenie milimetrów na centymetry',
+      cm2ToM2: 'przeliczenie cm² na m²',
+      percent: 'przeliczenie procentów na ułamek',
     },
     inputs: {
       title: 'Dane pracy',

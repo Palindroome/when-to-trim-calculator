@@ -292,19 +292,21 @@ export const en: Messages = {
     formula: {
       inputs: 'm = max(m_min, m_entered)',
       inputsSymbols: 'the same for the wall w and the base b; without a base, b = w',
-      surface: 'A = m ÷ ρ ÷ (w ÷ 10) × f_shape ÷ 10 000',
+      surface: (mmToCm: string, cm2ToM2: string): string =>
+        `A = m ÷ ρ ÷ (w ÷ ${mmToCm}) × f_shape ÷ ${cm2ToM2}`,
       surfaceSymbols: 'A – surface in m², m – mass in g, ρ – clay density, w – wall in mm',
-      slowness: 'S = f_shape × f_clay × f_bat × max(1, b ÷ w)^p',
+      slowness: (floor: string): string => `S = f_shape × f_clay × f_bat × max(${floor}, b ÷ w)^p`,
       slownessSymbols: 'b – base, w – wall, p – thick-base exponent',
       target:
         'target = l_clay + Δ_wetness + Δ_target; window = [target − Δ_below, target + Δ_above]',
       targetSymbols: 'l_clay – loss for the clay body, in % of the mass',
       psat: (a: string, b: string, c: string): string =>
         `e_s(T) = ${a} × exp(${b} × T ÷ (${c} + T))`,
-      vpd: 'VPD = max(VPD_min, e_s(T) × (1 − clamp(RH, RH_min, RH_max) ÷ 100))',
+      vpd: (whole: string, percent: string): string =>
+        `VPD = max(VPD_min, e_s(T) × (${whole} − clamp(RH, RH_min, RH_max) ÷ ${percent}))`,
       airSymbols: (vpdMin: string, rhMin: string, rhMax: string): string =>
         `T – temperature in °C, RH – relative humidity in %, limited to ${rhMin}–${rhMax}%; VPD_min = ${vpdMin} hPa`,
-      rate: 'r = 1 ÷ M × f_cover × f_air × k × A × VPD ÷ S',
+      rate: (one: string): string => `r = ${one} ÷ M × f_cover × f_air × k × A × VPD ÷ S`,
       rateSymbols:
         'first what depends on the option: the calibration multiplier M (it divides the rate), the cover and the airflow under it; k – evaporation coefficient',
       time: 'loss(t + Δt) = loss(t) + r(t) × Δt, until loss ≥ target',
@@ -400,6 +402,9 @@ export const en: Messages = {
       whole: 'the whole, i.e. 100% humidity',
       sealedAir: 'no airflow reaches the piece under a tight cover',
       calibrationOne: 'calibration divides the rate by its multiplier',
+      mmToCm: 'millimetres to centimetres',
+      cm2ToM2: 'cm² to m²',
+      percent: 'percent to a fraction',
     },
     inputs: {
       title: 'Your piece',

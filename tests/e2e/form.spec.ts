@@ -307,8 +307,8 @@ test.describe('page shell', () => {
         );
         for (let n = walker.nextNode(); n; n = walker.nextNode()) {
           const el = n.parentElement!;
-          // formulas in code are symbols; link hints and headings hold no numbers of the model
-          if (el.closest('.num-tip, code, .vh')) continue;
+          // the formulas in code too; only the hidden link hints are skipped
+          if (el.closest('.num-tip, .vh')) continue;
           if (/\d/.test(n.textContent ?? '')) out.push(n.textContent!);
         }
         return out;
