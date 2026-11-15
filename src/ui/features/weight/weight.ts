@@ -23,7 +23,7 @@ export function markup(m: Messages, covers: readonly CoverDefinition[]): string 
   </section>`;
 }
 
-export function renderWeight(v: View, a: WeightAssessment | null): string {
+function renderWeight(v: View, a: WeightAssessment | null): string {
   if (!a) return '';
   const { m, fmt } = v;
   const loss = fmt.decimal(a.lossPct, 1);

@@ -73,7 +73,7 @@ function track(p: Promise<unknown>): void {
 }
 
 /** Resolves once every animation started here has finished or been interrupted. */
-export async function motionIdle(): Promise<void> {
+async function motionIdle(): Promise<void> {
   while (running.size) await Promise.all(running);
 }
 

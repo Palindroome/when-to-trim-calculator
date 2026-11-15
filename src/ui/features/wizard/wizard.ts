@@ -20,7 +20,7 @@ export function navMarkup(m: Messages): string {
   </nav>`;
 }
 
-export interface Wizard {
+interface Wizard {
   /** applies the state to a freshly rendered shell (first render and after a language switch) */
   mount(m: Messages): void;
   /** opens the wizard at step 1 and moves focus to its heading */

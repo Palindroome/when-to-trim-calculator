@@ -4,7 +4,7 @@ import type { AppContext } from '../../context';
 import { closest } from '../../dom';
 
 /** Choices of the theme switch; `system` means no `data-theme` on <html> and no stored value. */
-export const THEME_CHOICES = ['system', 'light', 'dark'] as const;
+const THEME_CHOICES = ['system', 'light', 'dark'] as const;
 export type ThemeChoice = (typeof THEME_CHOICES)[number];
 
 const THEME_ICONS: Record<ThemeChoice, string> = {

@@ -54,7 +54,7 @@ export function renderSummaries(v: View, s: SummaryInput): [string, string, stri
   ];
 }
 
-export interface SummaryCards {
+interface SummaryCards {
   /** applies the state to a freshly rendered shell (first render and after a language switch) */
   mount(m: Messages): void;
   /** on: every card collapsed to its summary; off: the plain, expanded form */
