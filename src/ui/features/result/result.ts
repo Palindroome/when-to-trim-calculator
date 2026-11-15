@@ -155,7 +155,7 @@ function showSaved(m: Messages): void {
 
 export function mount(root: HTMLElement, ctx: AppContext): void {
   root.querySelector('#result')!.addEventListener('click', (e) => {
-    if (!closest(e, '#savebtn')) return;
+    if (!closest(e, '#savebtn') || !ctx.saveable) return;
     save(ctx);
     showSaved(ctx.view.m);
   });

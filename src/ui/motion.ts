@@ -110,12 +110,13 @@ function box(el: HTMLElement): Box {
   return { x: r.left - p.left, w: r.width, bg: getComputedStyle(el).backgroundColor };
 }
 
-/** The wording of an element without its counting numbers. */
+/** The wording of an element without its counting numbers (or their final-value siblings while counting). */
 function wording(el: Element): string {
   let s = '';
   for (const n of el.childNodes) {
     if (!(n instanceof Element)) s += n.textContent;
-    else if (n.matches('.num, .vh')) s += '#';
+    else if (n.matches('.vh')) continue;
+    else if (n.matches('.num')) s += '#';
     else s += wording(n);
   }
   return s;
@@ -237,8 +238,13 @@ export function toggleHeight(el: HTMLElement, show: boolean): void {
     : null;
   for (const a of current) a.cancel();
   el.classList.remove('hide');
-  if (prefersReducedMotion()) {
+  // no empty style="" left behind: the settled DOM matches the reduced-motion one
+  const clear = (): void => {
     el.style.overflow = '';
+    if (!el.style.length) el.removeAttribute('style');
+  };
+  if (prefersReducedMotion()) {
+    clear();
     el.classList.toggle('hide', !show);
     return;
   }
@@ -255,7 +261,7 @@ export function toggleHeight(el: HTMLElement, show: boolean): void {
   );
   a.finished.then(
     () => {
-      el.style.overflow = '';
+      clear();
       if (!show) el.classList.add('hide');
     },
     () => {},

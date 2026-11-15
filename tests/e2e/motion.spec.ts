@@ -143,6 +143,23 @@ test.describe('with motion', () => {
     expect(reduced.bars[0]).toContain(final);
   });
 
+  test('a recommendation line whose wording is unchanged does not fade in again mid-count', async ({
+    page,
+  }) => {
+    await fill(page, 'Masa po toczeniu', '1500');
+    // lands while the grams are still counting
+    await fill(page, 'Masa po toczeniu', '1600');
+    const { fading, counting } = await page.evaluate(() => ({
+      fading: document
+        .getAnimations()
+        .map((a) => (a.effect as KeyframeEffect).target as Element | null)
+        .filter((el) => el?.matches('.rec .sub, .rec .win, .rec .big')).length,
+      counting: document.querySelectorAll('#result .num[aria-hidden="true"]').length,
+    }));
+    expect(counting).toBeGreaterThan(0);
+    expect(fading).toBe(0);
+  });
+
   test('focus stays on the edited field while the result animates', async ({ page }) => {
     const mass = field(page, 'Masa po toczeniu');
     await mass.click();
