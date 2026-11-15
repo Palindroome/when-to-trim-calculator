@@ -42,6 +42,7 @@ const ICONS = {
     body: '<rect x="3.5" y="2.5" width="11" height="13" rx="1.5"/><path d="M6.5 6h5M6.5 9h5M6.5 12h3"/>',
   },
   plus: { body: '<path d="M9 3.5v11M3.5 9h11"/>' },
+  info: { body: '<circle cx="9" cy="9" r="6.5"/><path d="M9 8.5v4M9 5.5v.01"/>' },
   // result
   target: { body: '<circle cx="9" cy="9" r="6.5"/><circle cx="9" cy="9" r="3"/>' },
   warning: { body: '<path d="M9 2.5 1.75 15h14.5zM9 7v3.5M9 13v.01"/>' },

@@ -12,12 +12,13 @@ import * as result from './features/result/result';
 import * as weight from './features/weight/weight';
 import * as welcome from './features/welcome/welcome';
 import * as wizard from './features/wizard/wizard';
+import { icon } from './icons';
 
 /** How the calculator works, folded by default. */
 function explainer(m: Messages): string {
   return `<section class="card">
     <details>
-      <summary>${m.explainer.summary}</summary>
+      <summary>${icon('info')}${m.explainer.summary}</summary>
       <ul>
         ${m.explainer.itemsHtml.map((li) => `<li>${li}</li>`).join('\n        ')}
       </ul>

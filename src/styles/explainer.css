@@ -1,7 +1,6 @@
 /* ---------- explainer ---------- */
 details summary {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
   min-height: var(--control-h);
@@ -12,9 +11,15 @@ details summary {
 details summary::-webkit-details-marker {
   display: none;
 }
+details summary > svg {
+  flex: none;
+  color: var(--text-muted);
+}
+/* the chevron sits at the far right, after the icon and the title */
 details summary::after {
   content: "";
   flex: none;
+  margin-left: auto;
   width: var(--space-2);
   height: var(--space-2);
   margin-right: var(--space-1);

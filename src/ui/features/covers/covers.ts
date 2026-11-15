@@ -3,17 +3,20 @@ import type { CoverDefinition, CoverId } from '../../../domain/covers';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId } from '../../dom';
-import { icon } from '../../icons';
+import { coverIcon, icon } from '../../icons';
 import { coverLabel } from '../../render';
 
-/** Check (ticked) and cross (unticked) icons of a cover pill; CSS shows the one matching the checkbox. */
+/**
+ * Check (ticked) and cross (unticked) icons of a cover pill, drawn as a badge on the cover's icon;
+ * CSS shows the one matching the checkbox.
+ */
 const PILL_ICONS = icon('pillOn', 'ico on') + icon('pillOff', 'ico off');
 
 export function markup(m: Messages, covers: readonly CoverDefinition[]): string {
   return `<fieldset class="covers" id="covers">
       <legend>${m.covers.filterTitle}</legend>
       <div class="opts">
-        ${covers.map((c) => `<label class="pill"><input type="checkbox" data-cover="${c.id}" checked><span class="face">${PILL_ICONS}${coverLabel(m, c)}</span></label>`).join('\n        ')}
+        ${covers.map((c) => `<label class="pill"><input type="checkbox" data-cover="${c.id}" checked><span class="face"><span class="mark">${coverIcon(c.id, 'cover-ico')}${PILL_ICONS}</span>${coverLabel(m, c)}</span></label>`).join('\n        ')}
       </div>
       <p class="muted" id="covers-hint">${m.covers.filterHint}</p>
       <p class="muted hide" id="covers-last" aria-live="polite">${m.covers.filterLastOne}</p>
