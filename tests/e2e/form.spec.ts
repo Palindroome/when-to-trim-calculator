@@ -56,7 +56,7 @@ test.describe('page shell', () => {
     await expect(page.locator('#result .bar svg')).toHaveCount(5);
     const summary = page.locator('details > summary');
     await expect(summary.locator('svg')).toHaveCount(1);
-    await expect(summary).toHaveAccessibleName('Jak to liczy (i czego jeszcze nie umie)');
+    await expect(summary).toHaveAccessibleName('Jak to liczy – krok po kroku');
     // each cover pill shows its cover's icon next to the check / cross and keeps its name
     const pills = page.locator('#covers .pill');
     await expect(pills).toHaveCount(5);
