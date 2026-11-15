@@ -142,6 +142,27 @@ export const pl = {
 
   units: { grams: 'g', millimetres: 'mm', celsius: '°C', percent: '%' },
 
+  /** optional fill of temperature and humidity in "Warunki" from a weather forecast */
+  weather: {
+    fetch: 'Pobierz z prognozy pogody',
+    note: 'Po kliknięciu wysyłamy do Open-Meteo.com przybliżoną lokalizację (z dokładnością do ok. 10 km), żeby pobrać prognozę na najbliższe 24 h. Twoich prac nie wysyłamy.',
+    attribution: 'Dane pogodowe:',
+    loading: 'Pobieram prognozę…',
+    filled: (time: string): string => `≈ z prognozy (na zewnątrz), ${time}`,
+    searchLabel: 'Miejscowość',
+    searchPlaceholder: 'np. Kraków',
+    search: 'Szukaj',
+    searching: 'Szukam…',
+    noResults: 'Nie znaleziono takiej miejscowości.',
+    place: (name: string): string => `Miejsce: ${name}`,
+    forget: 'Zapomnij miejsce',
+    errors: {
+      location: 'Nie udało się ustalić lokalizacji. Wpisz miejscowość.',
+      offline: 'Brak połączenia z serwisem pogodowym. Wartości bez zmian.',
+      service: 'Serwis pogodowy nie odpowiedział poprawnie. Wartości bez zmian.',
+    },
+  },
+
   options: {
     shape: {
       cyl: 'Kubek / cylinder',

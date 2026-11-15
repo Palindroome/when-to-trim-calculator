@@ -13,6 +13,7 @@ import type { PieceRepository, StoredPiece } from '../storage/pieces';
 import type { Theme } from '../storage/preferences';
 import type { SessionStore } from '../storage/session';
 import type { WizardStore } from '../storage/wizard';
+import type { WeatherProvider } from '../weather/provider';
 import type { View } from './render';
 
 export interface AppDeps {
@@ -39,6 +40,8 @@ export interface AppDeps {
   /** the page state of this tab, restored by a reload within the idle window */
   session: SessionStore;
   conditions: ConditionsSource;
+  /** forecast source for the "fill from the weather forecast" button in "Warunki"; without it there is no button */
+  weather?: WeatherProvider;
   rateModel: RateModel;
   calibrator: CalibratorFactory;
   now?: () => number;
@@ -57,6 +60,8 @@ export interface AppContext {
   /** the current language, formatter, params and cover catalog */
   readonly view: View;
   now(): number;
+  /** forecast source of the weather fill, when the app has one */
+  readonly weather: WeatherProvider | undefined;
   /** saved pieces, newest first */
   readonly pieces: StoredPiece[];
   /** replaces the saved pieces and writes them to the repository */

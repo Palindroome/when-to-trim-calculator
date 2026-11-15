@@ -63,6 +63,7 @@ export function startApp(deps: AppDeps): void {
       return view;
     },
     now: deps.now ?? Date.now,
+    weather: deps.weather,
     get pieces() {
       return pieces;
     },
@@ -186,7 +187,13 @@ export function startApp(deps: AppDeps): void {
     view = { m, params, fmt: createFormatter(m, params.horizonHours / 24), covers };
     document.documentElement.lang = m.lang;
     document.title = m.title;
-    root.innerHTML = renderShell(m, Object.keys(deps.locales), theme ?? 'system', covers);
+    root.innerHTML = renderShell(
+      m,
+      Object.keys(deps.locales),
+      theme ?? 'system',
+      covers,
+      deps.weather !== undefined,
+    );
     if (deps.footer) deps.footer.innerHTML = renderFooter(m);
     wizard.mount(m);
     cards.mount(m);

@@ -20,6 +20,8 @@ export function renderShell(
   locales: readonly string[],
   theme: header.ThemeChoice,
   covers: readonly CoverDefinition[],
+  /** whether "Warunki" offers the weather-forecast fill */
+  weather: boolean,
 ): string {
   return [
     header.markup(m, locales, theme),
@@ -27,7 +29,7 @@ export function renderShell(
     `<p class="lead">${m.lead}</p>`,
     wizard.barMarkup(m),
     piece.markup(m),
-    conditions.markup(m),
+    conditions.markup(m, weather),
     stepCard(
       3,
       'clock',

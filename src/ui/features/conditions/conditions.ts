@@ -1,12 +1,14 @@
-// Section 2 "Warunki": room temperature and humidity, airflow, the night switch and the damp room.
+// Section 2 "Warunki": room temperature and humidity (optionally from a forecast), airflow, the night switch and the damp room.
 import { AIRFLOWS } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, options } from '../../dom';
 import { toggleHeight } from '../../motion';
 import { stepCard } from '../cards/cards';
+import * as weatherFill from './weather';
 
-export function markup(m: Messages): string {
+/** `weather`: whether to offer the weather-forecast fill below the temperature and humidity. */
+export function markup(m: Messages, weather: boolean): string {
   const f = m.fields;
   const u = m.units;
   return stepCard(
@@ -15,7 +17,7 @@ export function markup(m: Messages): string {
     m.sections.conditions,
     `<div class="grid">
       <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="text" inputmode="decimal" autocomplete="off" value="20"><span>${u.celsius}</span></div></div>
-      <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="text" inputmode="decimal" autocomplete="off" value="50"><span>${u.percent}</span></div></div>
+      <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="text" inputmode="decimal" autocomplete="off" value="50"><span>${u.percent}</span></div></div>${weather ? `\n      ${weatherFill.markup(m)}` : ''}
       <div class="full"><label for="air">${f.airflow}</label>
         <select id="air">
           ${options(AIRFLOWS, m.options.airflow, 'light')}
@@ -43,4 +45,5 @@ export function mount(root: HTMLElement, ctx: AppContext): void {
     });
   });
   root.querySelector('#body-2')!.addEventListener('input', () => ctx.compute());
+  weatherFill.mount(root, ctx);
 }

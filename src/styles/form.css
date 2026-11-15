@@ -135,3 +135,43 @@ select {
   background: var(--accent-contrast);
   transform: translateX(var(--space-4));
 }
+/* "Warunki": fill from the weather forecast */
+.weather {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+}
+.weather p {
+  margin: 0;
+}
+.weather a {
+  color: inherit;
+}
+.wx-search {
+  width: 100%;
+}
+.wx-row {
+  display: flex;
+  gap: var(--space-2);
+}
+.wx-row input {
+  flex: 1;
+  min-width: 0;
+}
+.wx-row button {
+  min-height: var(--control-h);
+}
+.wx-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.wx-results:empty {
+  display: none;
+}
+.wx-status {
+  font-size: var(--text-sm);
+}

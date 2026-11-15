@@ -127,6 +127,26 @@ export const en: Messages = {
 
   units: { grams: 'g', millimetres: 'mm', celsius: '°C', percent: '%' },
 
+  weather: {
+    fetch: 'Fill from the weather forecast',
+    note: 'When you click, your approximate location (to about 10 km) is sent to Open-Meteo.com to get the forecast for the next 24 h. Your pieces are not sent.',
+    attribution: 'Weather data:',
+    loading: 'Getting the forecast…',
+    filled: (time: string): string => `≈ from the forecast (outdoors), ${time}`,
+    searchLabel: 'Town',
+    searchPlaceholder: 'e.g. Krakow',
+    search: 'Search',
+    searching: 'Searching…',
+    noResults: 'No such town found.',
+    place: (name: string): string => `Place: ${name}`,
+    forget: 'Forget place',
+    errors: {
+      location: 'Your location could not be determined. Type a town.',
+      offline: 'The weather service could not be reached. Values unchanged.',
+      service: 'The weather service did not answer properly. Values unchanged.',
+    },
+  },
+
   options: {
     shape: {
       cyl: 'Mug / cylinder',
