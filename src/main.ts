@@ -21,6 +21,7 @@ import { getMessages, LOCALES, resolveLocale } from './i18n';
 import { LocalStorageActivityStore } from './storage/activity';
 import { LocalStoragePieceRepository } from './storage/pieces';
 import { loadLanguage, loadTheme, saveLanguage, saveTheme } from './storage/preferences';
+import { SessionStorageSessionStore } from './storage/session';
 import { LocalStorageWizardStore } from './storage/wizard';
 import { startApp } from './ui/app';
 import { formConditionsSource } from './ui/form';
@@ -52,6 +53,7 @@ startApp({
   repository,
   wizard: new LocalStorageWizardStore(),
   activity: new LocalStorageActivityStore(),
+  session: new SessionStorageSessionStore(),
   conditions: formConditionsSource,
   rateModel: physicalRateModel(params),
   calibrator: geometricMeanCalibrator,

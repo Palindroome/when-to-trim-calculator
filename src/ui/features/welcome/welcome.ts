@@ -50,9 +50,11 @@ export function shouldWelcome(lastActiveMs: number | null, nowMs: number, idleMs
 export interface Welcome {
   /** applies the state to a freshly rendered shell (first render and after a language switch) */
   mount(m: Messages): void;
-  /** shows the welcome screen, with the pieces list collapsed, and moves focus to its heading */
-  show(): void;
+  /** shows the welcome screen, with the pieces list collapsed unless `listed`, and moves focus to its heading */
+  show(listed?: boolean): void;
   readonly open: boolean;
+  /** whether the "My pieces" list is expanded */
+  readonly listed: boolean;
 }
 
 interface WelcomeActions {
@@ -95,9 +97,9 @@ export function createWelcome(
     then();
   }
 
-  function show(): void {
+  function show(listed = false): void {
     open = true;
-    expanded = false;
+    expanded = listed;
     apply();
     const h = byId('welcome-title');
     h.tabIndex = -1;
@@ -121,6 +123,9 @@ export function createWelcome(
   return {
     get open() {
       return open;
+    },
+    get listed() {
+      return expanded;
     },
     mount(messages) {
       m = messages;

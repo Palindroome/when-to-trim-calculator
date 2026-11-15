@@ -11,6 +11,7 @@ import type { Messages } from '../i18n';
 import type { ActivityStore } from '../storage/activity';
 import type { PieceRepository, StoredPiece } from '../storage/pieces';
 import type { Theme } from '../storage/preferences';
+import type { SessionStore } from '../storage/session';
 import type { WizardStore } from '../storage/wizard';
 import type { View } from './render';
 
@@ -35,6 +36,8 @@ export interface AppDeps {
   activity: ActivityStore;
   /** pause after which the welcome screen is shown again (default: 1 hour) */
   idleResetMs?: number;
+  /** the page state of this tab, restored by a reload within the idle window */
+  session: SessionStore;
   conditions: ConditionsSource;
   rateModel: RateModel;
   calibrator: CalibratorFactory;
