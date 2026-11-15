@@ -6,6 +6,7 @@ import { simulate } from '../domain/simulate';
 import { tipsFor } from '../domain/tips';
 import { createFormatter, type Messages } from '../i18n';
 import { calibrationSamples, type StoredPiece } from '../storage/pieces';
+import type { SessionSnapshot } from '../storage/session';
 import { perCoverCalibration } from './calibration';
 import type { AppContext, AppDeps, Saveable } from './context';
 import { byId } from './dom';
@@ -18,7 +19,7 @@ import * as pieceSection from './features/piece/piece';
 import * as piecesSection from './features/pieces/pieces';
 import * as result from './features/result/result';
 import * as weight from './features/weight/weight';
-import { createWelcome, trackActivity } from './features/welcome/welcome';
+import { createWelcome, shouldWelcome, trackActivity } from './features/welcome/welcome';
 import { createWizard } from './features/wizard/wizard';
 import { renderFooter } from './footer';
 import { readAllowedCovers, readName, readPieceInput, readThrownMs, readWhenMs } from './form';
@@ -187,7 +188,36 @@ export function startApp(deps: AppDeps): void {
     compute();
   }
 
-  render(deps.messages, null);
+  /** Brings back the page as it was left in this tab; false when the snapshot cannot be applied. */
+  function resume(s: SessionSnapshot): boolean {
+    try {
+      render(deps.messages, s.form);
+      wizard.resume(s.wizardStep);
+      if (s.screen === 'welcome') welcome.show(s.piecesListed);
+      window.scrollTo(0, s.scrollY);
+      return true;
+    } catch {
+      // e.g. a snapshot from an older version of the page, with fields that no longer exist
+      return false;
+    }
+  }
+
+  function saveSession(): void {
+    deps.session.save({
+      screen: welcome.open ? 'welcome' : 'calculator',
+      piecesListed: welcome.listed,
+      form: captureForm(root, covers),
+      wizardStep: wizard.step,
+      scrollY: window.scrollY,
+    });
+  }
+
+  const idleMs = deps.idleResetMs ?? DEFAULT_IDLE_RESET_MS;
+  const idle = shouldWelcome(deps.activity.load(), ctx.now(), idleMs);
+  const snapshot = idle ? null : deps.session.load();
+  if (!snapshot || !resume(snapshot)) render(deps.messages, null);
   conditions.subscribe?.(compute);
-  trackActivity(root, welcome, deps.activity, ctx.now, deps.idleResetMs ?? DEFAULT_IDLE_RESET_MS);
+  trackActivity(root, welcome, deps.activity, ctx.now, idleMs);
+  for (const type of ['input', 'change', 'click']) root.addEventListener(type, saveSession);
+  window.addEventListener('pagehide', saveSession);
 }

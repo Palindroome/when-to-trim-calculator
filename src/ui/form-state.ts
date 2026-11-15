@@ -1,4 +1,4 @@
-// Everything the user has entered, kept across a language switch (which re-renders the whole page).
+// Everything the user has entered, kept across a language switch (which re-renders the whole page) and a reload.
 import type { CoverDefinition, CoverId } from '../domain/covers';
 import type { AppContext } from './context';
 import { byId } from './dom';

@@ -76,12 +76,13 @@ src/
     preferences.ts    chosen UI language (`kiedy-trymowac-lang`) and theme (`kiedy-trymowac-theme`)
     wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
     activity.ts       ActivityStore: time of the last interaction, for the welcome screen (own key, `kiedy-trymowac-last-active`)
+    session.ts        SessionStore: this tab's page state (screen, form, wizard step, scroll), restored by a reload within the idle window (sessionStorage, `kiedy-trymowac-session`)
   ui/
     app.ts            state (saved pieces, the plan to save, the language), compute() and the composition of the features
     context.ts        AppDeps (what startApp gets) and AppContext (what the features get from the app)
     shell.ts          the page's sections in order, each from its feature
     form.ts           reads inputs (including the day + 24 h time pickers of "Termin"); formConditionsSource
-    form-state.ts     captures and restores the form around a language switch
+    form-state.ts     captures and restores the form around a language switch and a reload
     render.ts         View, and the cover and plan wording several features share
     calibration.ts    perCoverCalibration: the calibration of every cover, for the bars and the calibration table
     footer.ts         site footer: author's profile links with inline SVG icons

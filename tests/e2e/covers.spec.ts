@@ -110,7 +110,7 @@ test.describe('covering methods filter', () => {
     );
   });
 
-  test('the saved piece keeps the plan computed with the exclusions; a reload starts with every cover ticked', async ({
+  test('the saved piece keeps the plan computed with the exclusions; a new tab starts with every cover ticked', async ({
     page,
   }) => {
     await openApp(page);
@@ -139,7 +139,7 @@ test.describe('covering methods filter', () => {
         'fb',
       ].sort(),
     );
-    // nothing about the filter is stored anywhere
+    // nothing about the filter is stored beyond this tab's session
     expect(await page.evaluate(() => Object.keys(localStorage).sort())).toEqual([
       'kiedy-trymowac-last-active',
       'kiedy-trymowac-v1',
@@ -147,6 +147,8 @@ test.describe('covering methods filter', () => {
     ]);
 
     const before = await stored(page);
+    // a new tab: no page state from this one (a plain reload would restore it)
+    await page.addInitScript(() => sessionStorage.removeItem('kiedy-trymowac-session'));
     await page.reload();
     for (const l of LABELS) await expect(box(page, l)).toBeChecked();
     await expect(page.locator('.rec .big')).toHaveText(DEFAULT_PLAN);

@@ -27,6 +27,10 @@ interface Wizard {
   start(): void;
   /** shows the whole page without recording an outcome */
   close(): void;
+  /** current step (0-based), null when the wizard is closed */
+  readonly step: number | null;
+  /** reopens the wizard at `step` without moving focus (after a reload), or closes it for null */
+  resume(step: number | null): void;
 }
 
 export function createWizard(
@@ -100,5 +104,22 @@ export function createWizard(
     show(0, false);
   }
 
-  return { mount, start, close };
+  function resume(i: number | null): void {
+    if (i === null) {
+      close();
+      return;
+    }
+    open = true;
+    show(Math.min(i, steps().length - 1), false);
+  }
+
+  return {
+    mount,
+    start,
+    close,
+    get step() {
+      return open ? step : null;
+    },
+    resume,
+  };
 }
