@@ -192,6 +192,166 @@ test.describe('with motion', () => {
   });
 });
 
+const card = (page: Page, n: number) => page.locator('main > section[data-step]').nth(n - 1);
+
+/** First run through the wizard to the collapsed summary cards, at the desktop size of #61. */
+async function openCards(page: Page): Promise<void> {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openApp(page, { wizard: true });
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await page.getByRole('button', { name: 'Dalej' }).click();
+  await page.getByRole('button', { name: 'Pokaż wynik' }).click();
+  await expect(card(page, 1).locator('.toggle')).toHaveText('Zmień');
+}
+
+interface Layout {
+  /** card 1 height */
+  h: number;
+  /** card 2 top */
+  top: number;
+}
+
+interface Toggled {
+  /** before the click, then every frame, then once settled */
+  samples: Layout[];
+  /** card 1 seeked to half of its animation right after the first click, with its computed overflow */
+  half: Layout & { overflow: string };
+}
+
+/** Clicks card 1's toggle `clicks` times and samples its layout every frame until all motion is idle. */
+async function toggleSampled(page: Page, clicks = 1): Promise<Toggled> {
+  return page.evaluate(async (clicks) => {
+    const cards = document.querySelectorAll<HTMLElement>('main > section[data-step]');
+    const layout = () => ({
+      h: cards[0]!.getBoundingClientRect().height,
+      top: cards[1]!.getBoundingClientRect().top,
+    });
+    const samples = [layout()];
+    let sampling = true;
+    const tick = (): void => {
+      samples.push(layout());
+      if (sampling) requestAnimationFrame(tick);
+    };
+    const toggle = cards[0]!.querySelector<HTMLButtonElement>('.toggle')!;
+    toggle.click();
+    const [a] = cards[0]!.getAnimations();
+    let half = { ...layout(), overflow: '' };
+    if (a) {
+      a.currentTime = Number(a.effect!.getComputedTiming().duration) / 2;
+      half = { ...layout(), overflow: getComputedStyle(cards[0]!).overflow };
+      a.currentTime = 0;
+    }
+    requestAnimationFrame(tick);
+    for (let i = 1; i < clicks; i++) {
+      // the next click lands mid-animation
+      await new Promise((r) => setTimeout(r, 60));
+      toggle.click();
+    }
+    await window.__motionIdle?.();
+    sampling = false;
+    samples.push(layout());
+    return { samples, half };
+  }, clicks);
+}
+
+const layoutNow = (page: Page): Promise<Layout> =>
+  page.evaluate(() => {
+    const cards = document.querySelectorAll<HTMLElement>('main > section[data-step]');
+    return {
+      h: cards[0]!.getBoundingClientRect().height,
+      top: cards[1]!.getBoundingClientRect().top,
+    };
+  });
+
+const between = (v: number, a: number, b: number): boolean =>
+  v > Math.min(a, b) + 1 && v < Math.max(a, b) - 1;
+const inBetween = (s: Layout, from: Layout, to: Layout): boolean =>
+  between(s.h, from.h, to.h) && between(s.top, from.top, to.top);
+
+/** Card 1 and the card below move from `from` to `to` over several frames, clipped meanwhile, and settle on `to`. */
+function expectGradual({ samples, half }: Toggled, from: Layout, to: Layout): void {
+  expect(inBetween(half, from, to)).toBe(true);
+  expect(half.overflow).toBe('hidden');
+  expect(samples[0]).toEqual(from);
+  expect(samples.filter((s) => inBetween(s, from, to)).length).toBeGreaterThanOrEqual(2);
+  expect(samples.at(-1)).toEqual(to);
+}
+
+test.describe('summary cards with motion', () => {
+  test.use({ reducedMotion: 'no-preference' });
+
+  test('a card grows and shrinks smoothly, then settles exactly as with reduced motion', async ({
+    page,
+  }) => {
+    await openCards(page);
+    // the end of the wizard does not animate the cards
+    expect(await card(page, 1).evaluate((el) => el.getAnimations().length)).toBe(0);
+    await waitForMotionIdle(page);
+    const collapsed = await layoutNow(page);
+
+    const opening = await toggleSampled(page);
+    const expanded = opening.samples.at(-1)!;
+    expect(expanded.h).toBeGreaterThan(collapsed.h + 100);
+    expectGradual(opening, collapsed, expanded);
+    await expect(card(page, 1)).not.toHaveAttribute('style');
+    await expect(card(page, 1)).not.toHaveClass(/collapsed/);
+    await expect(card(page, 1).locator('.toggle')).toHaveAttribute('aria-expanded', 'true');
+    await expect(card(page, 1).locator('.toggle')).toHaveText('Zwiń');
+
+    const closing = await toggleSampled(page);
+    expectGradual(closing, expanded, collapsed);
+    await expect(card(page, 1)).not.toHaveAttribute('style');
+    await expect(card(page, 1)).toHaveClass(/collapsed/);
+    await expect(card(page, 1).locator('.toggle')).toHaveAttribute('aria-expanded', 'false');
+    await expect(card(page, 1).locator('.toggle')).toHaveText('Zmień');
+
+    // the same toggles with reduced motion land on the same layout at once
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await card(page, 1).locator('.toggle').click();
+    expect(await layoutNow(page)).toEqual(expanded);
+    await card(page, 1).locator('.toggle').click();
+    expect(await layoutNow(page)).toEqual(collapsed);
+  });
+
+  test('toggling again mid-animation turns back from the current height', async ({ page }) => {
+    await openCards(page);
+    await waitForMotionIdle(page);
+    const collapsed = await layoutNow(page);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await card(page, 1).locator('.toggle').click();
+    const expanded = await layoutNow(page);
+    await card(page, 1).locator('.toggle').click();
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+    const { samples } = await toggleSampled(page, 2);
+    const highest = Math.max(...samples.map((s) => s.h));
+    expect(highest).toBeGreaterThan(collapsed.h + 1);
+    expect(highest).toBeLessThan(expanded.h - 1);
+    for (let i = 1; i < samples.length; i++)
+      expect(Math.abs(samples[i]!.top - samples[i - 1]!.top)).toBeLessThan(
+        (expanded.top - collapsed.top) / 2,
+      );
+    expect(samples.at(-1)).toEqual(collapsed);
+    await expect(card(page, 1)).not.toHaveAttribute('style');
+    await expect(card(page, 1).locator('.toggle')).toHaveAttribute('aria-expanded', 'false');
+  });
+});
+
+test.describe('summary cards with reduced motion', () => {
+  test('a summary card opens and closes at once', async ({ page }) => {
+    await openCards(page);
+    const toggle = card(page, 1).locator('.toggle');
+    await toggle.click();
+    expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+    expect(await helperIdleNow(page)).toBe(true);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await toggle.click();
+    expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+    expect(await helperIdleNow(page)).toBe(true);
+    await expect(card(page, 1)).not.toHaveAttribute('style');
+  });
+});
+
 test.describe('with reduced motion', () => {
   test.beforeEach(async ({ page }) => {
     await openApp(page);
