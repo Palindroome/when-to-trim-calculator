@@ -120,6 +120,35 @@ describe('explainCalculation', () => {
     }
   });
 
+  it('marks the covers the user excluded and the ones the planner chose from', () => {
+    const input = DEFAULT_INPUT;
+    const ctx = makeContext();
+    // default deadline: the damp room's gate is closed
+    const all = explainCalculation(input, ctx, planDrying(ctx, 49, input.stage));
+    expect(all.covers.map((c) => [c.cover, c.excluded, c.considered])).toEqual([
+      ['open', false, true],
+      ['partial', false, true],
+      ['damp', false, false],
+      ['full', false, true],
+      ['box', false, true],
+    ]);
+    // only the damp room allowed: the planner falls back to it although its gate is closed
+    const plan = planDrying(ctx, 49, input.stage, { allowed: ['damp'] });
+    expect(plan.candidates).toEqual(['damp']);
+    const t = explainCalculation(input, ctx, plan, ['damp']);
+    expect(t.gateOpen).toBe(false);
+    expect(t.covers.filter((c) => c.excluded).map((c) => c.cover)).toEqual([
+      'open',
+      'partial',
+      'full',
+      'box',
+    ]);
+    expect(t.covers.find((c) => c.cover === 'damp')).toMatchObject({
+      excluded: false,
+      considered: true,
+    });
+  });
+
   it('gives only the rates for a model that is not the physical one', () => {
     const input = DEFAULT_INPUT;
     const ctx = makeContext({ model: constantRateModel({ open: 10, partial: 3 }) });

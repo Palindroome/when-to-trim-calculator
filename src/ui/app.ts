@@ -159,7 +159,7 @@ export function startApp(deps: AppDeps): void {
       canSave: saveable !== null,
       allowed,
     });
-    explainer.update(view, explainCalculation(input, dc, plan), calibration);
+    explainer.update(view, explainCalculation(input, dc, plan, allowed), calibration);
     cards.update(
       renderSummaries(view, {
         name: readName(),

@@ -8,6 +8,10 @@ import type { AirflowId, PieceInput } from './types';
 /** One cover in steps 6 and 7. */
 export interface CoverTrace {
   cover: CoverId;
+  /** the user unticked it in the cover filter */
+  excluded: boolean;
+  /** the planner chose from it (`PlanResult.candidates`) */
+  considered: boolean;
   /** air factor and cover factor; only for the physical model, whose rate splits into them */
   air?: number;
   factor?: number;
@@ -59,11 +63,15 @@ function firstNightMs(ctx: DryingContext): number {
   return d.getTime();
 }
 
-/** Explains how `plan` (the planner's answer for `ctx`) follows from `input`. */
+/**
+ * Explains how `plan` follows from `input`: the planner's answer for `ctx` with the same `allowed`
+ * covers (omitted or empty = all).
+ */
 export function explainCalculation(
   input: PieceInput,
   ctx: DryingContext,
   plan: PlanResult,
+  allowed: readonly CoverId[] = [],
 ): CalculationTrace {
   const { conditions: env, params: p, startMs, model, multipliers } = ctx;
   const piece = pieceBreakdown(input, p);
@@ -75,6 +83,8 @@ export function explainCalculation(
     const rateAt = (ms: number): number => model.rate(def, ms, ctx.piece, env, multipliers);
     const c: CoverTrace = {
       cover: def.id,
+      excluded: allowed.length > 0 && !allowed.includes(def.id),
+      considered: plan.candidates.includes(def.id),
       multiplier: multipliers[def.id] ?? 1,
       rate: rateAt(startMs),
       hours: plan.singles[def.id]!,

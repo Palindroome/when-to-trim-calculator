@@ -308,7 +308,7 @@ export const en: Messages = {
     },
     slowness: {
       title: 'Slowness',
-      text: 'The shape, clay body, bat and a thick base slow the drying down. 1 is a smooth stoneware mug on a board.',
+      text: 'The shape, clay body, bat and a thick base change the drying speed. A result above 1 means slower, below 1 faster.',
       thick: (base: string, wall: string, exponent: string, thick: string): string =>
         `thick base: (${base} mm ÷ ${wall} mm)^${exponent} = ${thick} (at least 1)`,
       product: (shape: string, clay: string, bat: string, thick: string, slow: string): string =>
@@ -367,7 +367,8 @@ export const en: Messages = {
     time: {
       title: 'Time to the target',
       text: (step: string, grams: string): string =>
-        `A simulation in ${step} steps subtracts the evaporated water until ${grams} g are gone. It takes the night into account on the way.`,
+        `A simulation in ${step} steps subtracts the evaporated water until ${grams} g are gone.`,
+      night: 'Night hours use the night conditions.',
       row: (cover: string, duration: string): string => `${cover}: ${duration}`,
     },
     plan: {
@@ -377,6 +378,9 @@ export const en: Messages = {
         `${covers}: considered, because the target is “${soft}” or the wait is ${min} or longer.`,
       gateClosed: (covers: string, soft: string, min: string): string =>
         `${covers}: left out, because the target is not “${soft}” and the wait is shorter than ${min}.`,
+      gateOnlyChoice: (covers: string, soft: string, min: string): string =>
+        `${covers}: normally only for the “${soft}” target or waits of ${min} or more, but no other covering is ticked.`,
+      excluded: (covers: string): string => `${covers}: unticked in the coverings, left out.`,
       single: (cover: string, hours: string, deadline: string, off: string, tol: string): string =>
         `${cover} meets the deadline: ${hours} against ${deadline}, a difference of ${off}% within ±${tol}%.`,
       twoPhase: (tol: string, first: string, duration: string, then: string): string =>

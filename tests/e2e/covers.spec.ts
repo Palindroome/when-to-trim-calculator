@@ -34,6 +34,32 @@ test.describe('covering methods filter', () => {
     await expect(page.locator('.rec .big')).toHaveText(DEFAULT_PLAN);
   });
 
+  test('the explainer follows the filter: unticked covers are named and marked, a lone gated cover is explained', async ({
+    page,
+  }) => {
+    await openApp(page);
+    const plan = page.locator('#explain-steps > li').nth(7);
+    const time = page.locator('#explain-steps > li').nth(6).locator('.rows li');
+    await box(page, 'Mokra przechowalnia').uncheck();
+    await setDateTime(page, 'Chcę trymować', '2026-03-09T10:00');
+    await expect(plan).toContainText(
+      'Mokra przechowalnia: wyłączone w sposobach okrycia, pomijam.',
+    );
+    await expect(plan).not.toContainText('w grze');
+    await expect(time.nth(2)).toHaveText(/^Mokra przechowalnia: .* · wyłączone$/);
+    await expect(time.nth(0)).not.toContainText('wyłączone');
+    await setDateTime(page, 'Chcę trymować', '2026-03-06T10:00');
+    await box(page, 'Mokra przechowalnia').check();
+    await only(page, 'Mokra przechowalnia');
+    await expect(plan).toContainText(
+      'Mokra przechowalnia: zwykle tylko dla celu „Doklejanie uch / miękka” albo czekania od 4 d, ale innych sposobów okrycia nie zaznaczono.',
+    );
+    await expect(plan).not.toContainText('pomijam, bo');
+    await expect(plan).toContainText(
+      'Odkryta, Worek częściowo, Cały worek, Pudełko: wyłączone w sposobach okrycia, pomijam.',
+    );
+  });
+
   test('an unticked cover is never recommended, and its bar is muted', async ({ page }) => {
     await openApp(page);
     await box(page, 'Odkryta').uncheck();

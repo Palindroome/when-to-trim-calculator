@@ -33,6 +33,8 @@ export interface PlanResult {
   alternatives: PlanOption[];
   /** the allowed covers miss the deadline, but planning with every cover would meet it */
   excludedWouldMeet: boolean;
+  /** the covers the planner chose from: the allowed ones, gated covers only when open or nothing else is allowed */
+  candidates: CoverId[];
 }
 
 export interface PlanOptions {
@@ -113,6 +115,7 @@ export function planDrying(
       recommendation: { status: 'invalidDeadline' },
       alternatives: [],
       excludedWouldMeet: false,
+      candidates: [],
     };
   }
 
@@ -195,5 +198,5 @@ export function planDrying(
     filtered &&
     recommendation.status !== 'onTarget' &&
     planDrying(ctx, H, stage).recommendation.status === 'onTarget';
-  return { deadlineHours: H, singles, recommendation, alternatives, excludedWouldMeet };
+  return { deadlineHours: H, singles, recommendation, alternatives, excludedWouldMeet, candidates };
 }

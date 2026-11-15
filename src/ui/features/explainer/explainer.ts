@@ -1,7 +1,7 @@
 // "How it calculates": the calculation of the current recommendation as numbered steps, folded by default.
 import type { CoverCalibration } from '../../../domain/calibration';
 import { type CoverId, coverById } from '../../../domain/covers';
-import type { CalculationTrace } from '../../../domain/explain';
+import type { CalculationTrace, CoverTrace } from '../../../domain/explain';
 import { MS_PER_HOUR } from '../../../domain/params';
 import type { Climate } from '../../../domain/physics';
 import type { Messages } from '../../../i18n';
@@ -42,6 +42,8 @@ export function renderSteps(
   /** at most `digits` decimals, trailing zeros dropped */
   const n = (x: number, digits: number): string =>
     digits ? fmt.decimal(x, digits).replace(/0+$/, '').replace(/\D$/, '') : fmt.decimal(x, 0);
+  /** g/h: slow covers in humid air get a third decimal instead of rounding to 0 */
+  const gPerHour = (x: number): string => n(x, x < 0.1 ? 3 : 2);
   const signed = (x: number): string => (x < 0 ? `− ${n(-x, 1)}` : `+ ${n(x, 1)}`);
   const label = (id: CoverId): string => coverLabel(m, coverById(v.covers, id));
   const { input, piece } = t;
@@ -152,7 +154,7 @@ export function renderSteps(
   // 6. rate per cover, at the throwing time
   const k = n(p.evaporationCoefficient, 2);
   const rateRows = t.covers.map((c) => {
-    const rate = n(c.rate, 2);
+    const rate = gPerHour(c.rate);
     const def = coverById(v.covers, c.cover);
     const vpdUsed = def.environment === 'dampRoom' ? t.air.damp.vpd : t.air.start.vpd;
     const row =
@@ -174,7 +176,7 @@ export function renderSteps(
   });
   const nightRates = t.covers
     .filter((c) => c.nightRate !== undefined)
-    .map((c) => e.rate.nightRate(label(c.cover), n(c.nightRate!, 2)));
+    .map((c) => e.rate.nightRate(label(c.cover), gPerHour(c.nightRate!)));
   out.push(
     step('rate', e.rate.title, [
       text(t.physical ? e.rate.text(k) : e.rate.modelText),
@@ -189,7 +191,13 @@ export function renderSteps(
   out.push(
     step('time', e.time.title, [
       text(e.time.text(fmt.duration(p.stepHours), n(t.grams.target, 0))),
-      rows(t.covers.map((c) => e.time.row(label(c.cover), fmt.duration(c.hours)))),
+      ...(t.air.night ? [text(e.time.night)] : []),
+      rows(
+        t.covers.map((c) => {
+          const row = e.time.row(label(c.cover), fmt.duration(c.hours));
+          return c.excluded ? `${row} · ${m.result.excludedBar}` : row;
+        }),
+      ),
     ]),
   );
 
@@ -202,11 +210,32 @@ export function renderSteps(
     planLines.push(text(m.errors.invalidDeadline));
   } else {
     planLines.push(text(e.plan.deadline(fmt.duration(H))));
-    const gated = v.covers.filter((c) => c.gate === 'longWaitOrSoft');
-    if (gated.length && t.gateOpen !== undefined) {
-      const names = gated.map((c) => coverLabel(m, c)).join(', ');
-      const gate = t.gateOpen ? e.plan.gateOpen : e.plan.gateClosed;
-      planLines.push(text(gate(names, m.options.stage.soft, fmt.duration(p.planner.dampMinHours))));
+    const names = (cs: CoverTrace[]): string => cs.map((c) => label(c.cover)).join(', ');
+    const excluded = t.covers.filter((c) => c.excluded);
+    if (excluded.length) planLines.push(text(e.plan.excluded(names(excluded))));
+    // gated covers the user left ticked: why they were or were not planned with
+    const gated = t.covers.filter(
+      (c) => !c.excluded && coverById(v.covers, c.cover).gate === 'longWaitOrSoft',
+    );
+    const gate = (
+      cs: CoverTrace[],
+      sentence: (covers: string, soft: string, min: string) => string,
+    ): void => {
+      if (cs.length)
+        planLines.push(
+          text(sentence(names(cs), m.options.stage.soft, fmt.duration(p.planner.dampMinHours))),
+        );
+    };
+    if (t.gateOpen) gate(gated, e.plan.gateOpen);
+    else {
+      gate(
+        gated.filter((c) => !c.considered),
+        e.plan.gateClosed,
+      );
+      gate(
+        gated.filter((c) => c.considered),
+        e.plan.gateOnlyChoice,
+      );
     }
     if (rec.status === 'tooFast')
       planLines.push(text(e.plan.tooFast(fmt.duration(rec.fastestHours), fmt.duration(H))));

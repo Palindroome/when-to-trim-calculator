@@ -340,7 +340,7 @@ export const pl = {
     },
     slowness: {
       title: 'Spowolnienie',
-      text: 'Kształt, masa ceramiczna, podłoże i grube dno spowalniają schnięcie. 1 to kubek z gładkiej kamionki na desce.',
+      text: 'Kształt, masa ceramiczna, podłoże i grube dno zmieniają tempo schnięcia. Wynik powyżej 1 oznacza wolniej, poniżej 1 szybciej.',
       thick: (base: string, wall: string, exponent: string, thick: string): string =>
         `grube dno: (${base} mm ÷ ${wall} mm)^${exponent} = ${thick} (co najmniej 1)`,
       product: (shape: string, clay: string, bat: string, thick: string, slow: string): string =>
@@ -398,7 +398,8 @@ export const pl = {
     time: {
       title: 'Czas do celu',
       text: (step: string, grams: string): string =>
-        `Symulacja co ${step} odejmuje odparowaną wodę, aż ubędzie ${grams} g. Po drodze uwzględnia noc.`,
+        `Symulacja co ${step} odejmuje odparowaną wodę, aż ubędzie ${grams} g.`,
+      night: 'Nocne godziny liczy z warunkami nocnymi.',
       row: (cover: string, duration: string): string => `${cover}: ${duration}`,
     },
     plan: {
@@ -408,6 +409,9 @@ export const pl = {
         `${covers}: w grze, bo cel to „${soft}” albo czekanie trwa ${min} lub dłużej.`,
       gateClosed: (covers: string, soft: string, min: string): string =>
         `${covers}: pomijam, bo cel to nie „${soft}”, a czekanie jest krótsze niż ${min}.`,
+      gateOnlyChoice: (covers: string, soft: string, min: string): string =>
+        `${covers}: zwykle tylko dla celu „${soft}” albo czekania od ${min}, ale innych sposobów okrycia nie zaznaczono.`,
+      excluded: (covers: string): string => `${covers}: wyłączone w sposobach okrycia, pomijam.`,
       single: (cover: string, hours: string, deadline: string, off: string, tol: string): string =>
         `${cover} trafia w termin: ${hours} wobec ${deadline}, różnica ${off}% mieści się w ±${tol}%.`,
       twoPhase: (tol: string, first: string, duration: string, then: string): string =>
