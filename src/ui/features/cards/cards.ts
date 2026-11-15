@@ -1,4 +1,4 @@
-// Sections 1–3 as summary cards: after the wizard each collapses to one line and opens on click.
+// Sections 1–3 as summary cards: each collapses to one line and opens on click; after the wizard they start collapsed.
 import type { Conditions, PieceInput } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import { closest } from '../../dom';
@@ -9,9 +9,9 @@ export function stepCard(n: number, title: string, body: string): string {
   return `<section class="card" data-step>
     <div class="card-head">
       <h2><span class="n">${n}</span>${title}</h2>
-      <button type="button" class="ghost toggle compact-only" aria-expanded="true" aria-controls="body-${n}"></button>
+      <button type="button" class="ghost toggle" aria-expanded="true" aria-controls="body-${n}"></button>
     </div>
-    <p class="summary compact-only"></p>
+    <p class="summary"></p>
     <div class="card-body" id="body-${n}">
     ${body}
     </div>
@@ -57,7 +57,7 @@ export function renderSummaries(v: View, s: SummaryInput): [string, string, stri
 interface SummaryCards {
   /** applies the state to a freshly rendered shell (first render and after a language switch) */
   mount(m: Messages): void;
-  /** on: every card collapsed to its summary; off: the plain, expanded form */
+  /** on: every card collapsed to its summary; off: every card expanded. Either way each card can be toggled. */
   set(on: boolean): void;
   /** summary line per card, in order */
   update(summaries: readonly string[]): void;
@@ -65,16 +65,16 @@ interface SummaryCards {
 
 export function createSummaryCards(root: HTMLElement, initiallyOn: boolean): SummaryCards {
   let on = initiallyOn;
-  const expanded = new Set<number>();
+  /** cards the user flipped from the mode's default: expanded when compact, collapsed when not */
+  const toggled = new Set<number>();
   let m: Messages;
 
   const cards = (): HTMLElement[] => [...root.querySelectorAll<HTMLElement>('[data-step]')];
 
   function apply(): void {
     const titles = [m.sections.piece, m.sections.conditions, m.sections.schedule];
-    root.classList.toggle('compact', on);
     cards().forEach((card, i) => {
-      const open = !on || expanded.has(i);
+      const open = on === toggled.has(i);
       card.classList.toggle('collapsed', !open);
       const t = card.querySelector<HTMLButtonElement>('.toggle')!;
       t.setAttribute('aria-expanded', String(open));
@@ -91,7 +91,7 @@ export function createSummaryCards(root: HTMLElement, initiallyOn: boolean): Sum
     const card = closest(e, '.toggle')?.closest<HTMLElement>('[data-step]');
     if (!card) return;
     const i = cards().indexOf(card);
-    if (!expanded.delete(i)) expanded.add(i);
+    if (!toggled.delete(i)) toggled.add(i);
     apply();
   });
 
@@ -102,7 +102,7 @@ export function createSummaryCards(root: HTMLElement, initiallyOn: boolean): Sum
     },
     set(value) {
       on = value;
-      expanded.clear();
+      toggled.clear();
       apply();
     },
     update(summaries) {
