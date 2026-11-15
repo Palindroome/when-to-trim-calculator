@@ -39,7 +39,12 @@ export function renderShell(
     wizard.barMarkup(m),
     piece.markup(m),
     conditions.markup(m),
-    stepCard(3, m.sections.schedule, `${datetime.markup(m)}\n    ${coverFilter.markup(m, covers)}`),
+    stepCard(
+      3,
+      'clock',
+      m.sections.schedule,
+      `${datetime.markup(m)}\n    ${coverFilter.markup(m, covers)}`,
+    ),
     result.markup,
     wizard.navMarkup(m),
     weight.markup(m, covers),

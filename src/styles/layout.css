@@ -43,6 +43,11 @@ h2 .n {
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
+h2 > svg {
+  flex: none;
+  align-self: center;
+  color: var(--text-muted);
+}
 .card {
   background: var(--surface);
   border: 1px solid var(--border);

@@ -8,6 +8,7 @@ import type { Piece } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
+import { coverIcon, icon } from '../../icons';
 import { animateNumbers, captureRects, playFrom } from '../../motion';
 import { num } from '../../numbers';
 import { coverLabel, planText, type View } from '../../render';
@@ -54,7 +55,7 @@ function renderResult(v: View, r: ResultModel): string {
       ? num(fmt, 'win-end', { kind: 'dateTime', value: start + we * MS_PER_HOUR })
       : m.result.windowOpenEnd;
     html += `<div class="rec">
-        <div class="k">${m.result.recommendation}</div>
+        <div class="k">${icon('target')}${m.result.recommendation}</div>
         <div class="big" data-anim-text="big">${esc(planText(v, rec.option, start))}</div>
         <div class="sub" data-anim-text="sub">${m.result.ready(ready, loss, grams)}</div>
         <div class="win" data-anim-text="win">${m.result.window(num(fmt, 'win-start', { kind: 'dateTime', value: start + ws * MS_PER_HOUR }), winEnd)}</div>
@@ -83,7 +84,7 @@ function renderResult(v: View, r: ResultModel): string {
     const extra = plan.excludedWouldMeet
       ? `<div class="extra">${esc(m.errors.excludedWouldMeet)}</div>`
       : '';
-    html += `<div class="rec err"><div class="k">${m.result.warning}</div><div class="big" data-anim-text="big">${esc(err)}</div>${extra}</div>`;
+    html += `<div class="rec err"><div class="k">${icon('warning')}${m.result.warning}</div><div class="big" data-anim-text="big">${esc(err)}</div>${extra}</div>`;
   }
 
   // comparison bars
@@ -92,7 +93,7 @@ function renderResult(v: View, r: ResultModel): string {
     H > 0 ? H * CHART.deadlineHeadroom : CHART.noDeadlineHours,
     Math.min(Math.max(...finite, CHART.minFiniteHours), CHART.maxFiniteHours),
   );
-  html += `<div class="card"><h2>${m.result.compareTitle}</h2><div class="bars">`;
+  html += `<div class="card"><h2>${icon('chart')}${m.result.compareTitle}</h2><div class="bars">`;
   for (const c of v.covers) {
     const t = plan.singles[c.id]!;
     const pct = Math.min(100, ((Number.isFinite(t) ? t : maxShown) / maxShown) * 100);
@@ -103,7 +104,7 @@ function renderResult(v: View, r: ResultModel): string {
       Number.isFinite(t) &&
       Math.abs(t - H) / H <= v.params.planner.targetTolerance;
     const n = r.calibration[c.id]!.samples;
-    html += `<div class="bar${off ? ' off' : ''}"><div>${coverLabel(m, c)}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c.environment === 'dampRoom' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
+    html += `<div class="bar${off ? ' off' : ''}"><div>${coverIcon(c.id, 'ico')}${coverLabel(m, c)}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c.environment === 'dampRoom' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
         <div class="track"><div class="fill ${good ? 'good' : ''}" data-anim-key="fill-${c.id}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" data-anim-key="target-${c.id}" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
         <div class="t">${num(fmt, `bar-${c.id}`, { kind: 'duration', value: t, suffix: pct >= 100 && Number.isFinite(t) ? '+' : '' })}</div></div>`;
   }
@@ -132,8 +133,6 @@ export function update(v: View, r: ResultModel): void {
 
 /** How long the save button says "saved" before its label returns. */
 const SAVED_MS = 1200;
-const CHECK =
-  '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7"/></svg>';
 let savedTimer: ReturnType<typeof setTimeout> | undefined;
 
 /** "Saved" with a check on the button for a moment, announced through the status region next to it. */
@@ -141,7 +140,7 @@ function showSaved(m: Messages): void {
   const button = byId('savebtn');
   const status = byId('savestatus');
   button.classList.add('done');
-  button.innerHTML = `${CHECK}<span class="lbl">${m.result.saved}</span>`;
+  button.innerHTML = `${icon('saved')}<span class="lbl">${m.result.saved}</span>`;
   status.textContent = m.result.saved;
   clearTimeout(savedTimer);
   savedTimer = setTimeout(() => {

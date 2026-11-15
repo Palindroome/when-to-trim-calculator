@@ -11,6 +11,7 @@ export function markup(m: Messages): string {
   const u = m.units;
   return stepCard(
     2,
+    'climate',
     m.sections.conditions,
     `<div class="grid">
       <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="text" inputmode="decimal" autocomplete="off" value="20"><span>${u.celsius}</span></div></div>

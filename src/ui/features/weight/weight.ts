@@ -6,13 +6,14 @@ import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, esc } from '../../dom';
 import { readPieceInput, readThrownMs, readWeightInputs } from '../../form';
+import { icon } from '../../icons';
 import { reveal } from '../../motion';
 import { coverLabel, type View } from '../../render';
 
 export function markup(m: Messages, covers: readonly CoverDefinition[]): string {
   const f = m.fields;
   return `<section class="card">
-    <h2><span class="n">4</span>${m.sections.weight}</h2>
+    <h2><span class="n">4</span>${icon('scale')}${m.sections.weight}</h2>
     <p class="muted hint">${m.weightHint}</p>
     <div class="grid">
       <div><label for="mnow">${f.massNow}</label><div class="unit"><input id="mnow" type="text" inputmode="decimal" autocomplete="off" placeholder="${f.massNowPlaceholder}"><span>${m.units.grams}</span></div></div>

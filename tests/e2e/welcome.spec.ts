@@ -106,6 +106,9 @@ test.describe('welcome screen', () => {
     );
     await expect(explainer(page)).not.toContainText('tylko w tej przeglądarce');
     await expect(myPieces(page)).toHaveCount(0);
+    // the start button's icon is decorative
+    await expect(newPiece(page)).toHaveAccessibleName('Nowa praca');
+    await expect(newPiece(page).locator('svg[aria-hidden="true"]')).toHaveCount(1);
     // the form behind it is not reachable by keyboard
     await page.keyboard.press('Tab');
     expect(await focused(page)).toBe('welcome-new');

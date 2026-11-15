@@ -10,12 +10,13 @@ import type { StoredPiece } from '../../../storage/pieces';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
 import { readName } from '../../form';
+import { icon } from '../../icons';
 import { enter, exit, scrollBehavior } from '../../motion';
 import { coverLabel, coverPhrase, planText, type View } from '../../render';
 
 export function markup(m: Messages): string {
   return `<section class="card">
-    <h2><span class="n">5</span>${m.sections.pieces}</h2>
+    <h2><span class="n">5</span>${icon('notebook')}${m.sections.pieces}</h2>
     <div id="pieces"></div>
     <div id="calib"></div>
   </section>`;

@@ -3,16 +3,11 @@ import type { CoverDefinition, CoverId } from '../../../domain/covers';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId } from '../../dom';
+import { icon } from '../../icons';
 import { coverLabel } from '../../render';
 
 /** Check (ticked) and cross (unticked) icons of a cover pill; CSS shows the one matching the checkbox. */
-const PILL_ICONS = ['on', 'off']
-  .map(
-    (k) =>
-      `<svg class="ico ${k}" viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">` +
-      `<path d="${k === 'on' ? 'M2.5 7.5l3 3 6-7' : 'M3.5 3.5l7 7M10.5 3.5l-7 7'}"/></svg>`,
-  )
-  .join('');
+const PILL_ICONS = icon('pillOn', 'ico on') + icon('pillOff', 'ico off');
 
 export function markup(m: Messages, covers: readonly CoverDefinition[]): string {
   return `<fieldset class="covers" id="covers">

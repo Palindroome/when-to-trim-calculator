@@ -2,17 +2,11 @@
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { closest } from '../../dom';
+import { icon } from '../../icons';
 
 /** Choices of the theme switch; `system` means no `data-theme` on <html> and no stored value. */
 const THEME_CHOICES = ['system', 'light', 'dark'] as const;
 export type ThemeChoice = (typeof THEME_CHOICES)[number];
-
-const THEME_ICONS: Record<ThemeChoice, string> = {
-  system: '<rect x="2" y="3" width="14" height="10" rx="1"/><path d="M6 16h6M9 13v3"/>',
-  light:
-    '<circle cx="9" cy="9" r="3.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4"/>',
-  dark: '<path d="M15.5 10.5A6.5 6.5 0 1 1 7.5 2.5a5 5 0 0 0 8 8z"/>',
-};
 
 /** `PL | EN` segmented control; one button per registered locale code. */
 function languageSwitch(m: Messages, locales: readonly string[]): string {
@@ -29,7 +23,7 @@ function themeSwitch(m: Messages, current: ThemeChoice): string {
   const buttons = THEME_CHOICES.map(
     (c) =>
       `<button type="button" data-theme-choice="${c}" aria-label="${m.theme[c]}" title="${m.theme[c]}" aria-pressed="${c === current}">` +
-      `<svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${THEME_ICONS[c]}</svg></button>`,
+      `${icon(c)}</button>`,
   );
   return `<div class="seg" role="group" aria-label="${m.theme.label}">${buttons.join('')}</div>`;
 }

@@ -33,6 +33,32 @@ test.describe('page shell', () => {
     ]);
   });
 
+  test('decorative icons on the headings and the result leave accessible names alone', async ({
+    page,
+  }) => {
+    await openApp(page);
+    // the names as computed before the icons were added
+    const names = [
+      '1 Praca',
+      '2 Warunki',
+      '3 Termin',
+      'Ile to potrwa w każdym wariancie',
+      '4 Sprawdź wagą',
+      '5 Moje prace i kalibracja',
+    ];
+    const h2 = page.getByRole('heading', { level: 2 });
+    await expect(h2).toHaveCount(names.length);
+    for (const [i, name] of names.entries()) {
+      await expect(h2.nth(i)).toHaveAccessibleName(name);
+      await expect(h2.nth(i).locator('svg')).toHaveCount(1);
+    }
+    await expect(page.locator('#result .rec .k svg')).toHaveCount(1);
+    await expect(page.locator('#result .bar svg')).toHaveCount(5);
+    // every inline icon on the page is hidden from assistive technology
+    const visibleToAt = page.locator('svg:not([aria-hidden="true"][focusable="false"])');
+    await expect(visibleToAt).toHaveCount(0);
+  });
+
   test('unit suffixes next to numeric inputs', async ({ page }) => {
     await openApp(page);
     await expect(page.locator('.unit span')).toHaveText([
