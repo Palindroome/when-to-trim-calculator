@@ -99,7 +99,7 @@ src/
       weight/         section 4 weight check
       pieces/         section 5: saved pieces, feedback, calibration table
       wizard/         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
-      cards/          after the wizard, sections 1-3 collapse to one-line summaries that open on click
+      cards/          sections 1-3 collapse to one-line summaries that open on click (collapsed after the wizard)
       welcome/        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction
 tests/
   unit/               Vitest unit tests, laid out like src/ (domain, i18n, storage, ui)
