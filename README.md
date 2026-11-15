@@ -100,7 +100,7 @@ src/
       result/         recommendation, comparison bars, alternatives, tips, save button
       weight/         section 4 weight check
       pieces/         section 5: saved pieces, feedback, calibration table
-      explainer/      "Jak to liczy – krok po kroku": the calculation as numbered steps with the live numbers
+      explainer/      "Jak to liczy – krok po kroku": the calculation as numbered steps with the live numbers, each explained on hover, focus or tap (labels in `explainer.labels`)
       wizard/         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
       cards/          sections 1-3 collapse to one-line summaries that open on click (collapsed after the wizard)
       welcome/        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction

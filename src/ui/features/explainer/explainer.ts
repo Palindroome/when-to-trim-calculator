@@ -12,6 +12,9 @@ import { captureSlides, slideNumbers, stagger } from '../../motion';
 import { formatNum } from '../../numbers';
 import { coverLabel, type View } from '../../render';
 
+/** Id of the one tooltip that explains whichever number is hovered, focused or tapped. */
+const TIP_ID = 'explain-tip';
+
 export function markup(m: Messages): string {
   const e = m.explainer;
   return `<section class="card explainer">
@@ -21,11 +24,13 @@ export function markup(m: Messages): string {
       <ol class="steps" role="list" id="explain-steps"></ol>
       ${e.notes.map((n) => `<p class="note">${n}</p>`).join('\n      ')}
     </details>
+    <div class="tip-bubble" role="tooltip" id="${TIP_ID}" hidden></div>
   </section>`;
 }
 
-// Sentences come from the catalog (trusted); labels are escaped where they are passed in, and every
-// number is a sliding-number span (`data-slide`, keyed by its place in the steps).
+type NumId = keyof Messages['explainer']['labels'];
+
+// Sentences come from the catalog (trusted); labels are escaped where they are passed in.
 const step = (key: string, title: string, lines: string[]): string =>
   `<li data-explain="${key}"><h3>${esc(title)}</h3>${lines.join('')}</li>`;
 const text = (s: string): string => `<p>${s}</p>`;
@@ -34,7 +39,7 @@ const rows = (items: string[]): string =>
   `<ul class="rows">${items.map((s) => `<li class="formula">${s}</li>`).join('')}</ul>`;
 /** the step's formula as in the model code, and what its symbols stand for */
 const code = (f: string, symbols?: string): string =>
-  `<p class="desc"><code>${esc(f)}</code>${symbols ? ` <span class="symbols">${esc(symbols)}</span>` : ''}</p>`;
+  `<p class="desc"><code>${f}</code>${symbols ? ` <span class="symbols">${symbols}</span>` : ''}</p>`;
 
 /** The steps for `t`; `calibration` gives the number of rated pieces behind each multiplier. */
 export function renderSteps(
@@ -45,28 +50,34 @@ export function renderSteps(
   const { m, fmt, params: p } = v;
   const e = m.explainer;
   const f = e.formula;
-  // keys of the sliding numbers: a scope per step or row, then the number's position in it
+  // Every number is focusable and described by its label (the tooltip), and slides when it changes. Its
+  // slide key is the scope (a step or a row) plus what the number is, so only a value that really
+  // changed rolls; a repeated number in the same scope gets a running suffix.
   let scope = '';
-  let index = 0;
+  const seen = new Map<string, number>();
   const at = (key: string): void => {
     scope = key;
-    index = 0;
   };
-  const slide = (s: string): string =>
-    `<span class="slide" data-slide="${scope}-${index++}">${s}</span>`;
+  const num = (id: NumId, s: string): string => {
+    const key = `${scope}-${id}`;
+    const i = seen.get(key) ?? 0;
+    seen.set(key, i + 1);
+    return `<span class="num-tip" tabindex="0" data-tip="${esc(e.labels[id])}" aria-describedby="${TIP_ID}"><span class="slide" data-slide="${key}-${i}">${s}</span></span>`;
+  };
   /** at most `digits` decimals, trailing zeros dropped */
   const dec = (x: number, digits: number): string =>
     digits ? fmt.decimal(x, digits).replace(/0+$/, '').replace(/\D$/, '') : fmt.decimal(x, 0);
-  const n = (x: number, digits: number): string => slide(dec(x, digits));
-  const dur = (h: number): string => slide(fmt.duration(h));
+  const n = (id: NumId, x: number, digits: number): string => num(id, dec(x, digits));
+  const dur = (id: NumId, h: number): string => num(id, fmt.duration(h));
   /** g/h: slow covers in humid air get a third decimal instead of rounding to 0 */
-  const gPerHour = (x: number): string => n(x, x < 0.1 ? 3 : 2);
-  const signed = (x: number): string => (x < 0 ? `− ${n(-x, 1)}` : `+ ${n(x, 1)}`);
+  const gPerHour = (id: NumId, x: number): string => n(id, x, x < 0.1 ? 3 : 2);
+  const signed = (id: NumId, x: number): string =>
+    x < 0 ? `− ${n(id, -x, 1)}` : `+ ${n(id, x, 1)}`;
   const label = (id: CoverId): string => esc(coverLabel(m, coverById(v.covers, id)));
   const link = (term: { label: string; href: string }): string =>
     `<a href="${esc(term.href)}" target="_blank" rel="noopener noreferrer">${esc(term.label)}<span class="vh"> ${esc(e.terms.newTab)}</span></a>`;
-  const excludedMark = (row: string, c: CoverTrace): string =>
-    c.excluded ? `${row} · ${esc(m.result.excludedBar)}` : row;
+  const excludedMark = (line: string, c: CoverTrace): string =>
+    c.excluded ? `${line} · ${esc(m.result.excludedBar)}` : line;
   const { input, piece } = t;
   const night = { from: String(p.night.fromHour), to: String(p.night.toHour) };
   const out: string[] = [];
@@ -74,21 +85,29 @@ export function renderSteps(
   // 1. inputs, after the clamps, and the clay body's values
   at('inputs');
   const clamps: string[] = [];
-  if (input.massG < p.piece.minMassG) clamps.push(e.inputs.massClamped(n(p.piece.minMassG, 1)));
-  if (input.wallMm < p.piece.minWallMm) clamps.push(e.inputs.wallClamped(n(p.piece.minWallMm, 1)));
+  if (input.massG < p.piece.minMassG)
+    clamps.push(e.inputs.massClamped(n('minMass', p.piece.minMassG, 1)));
+  if (input.wallMm < p.piece.minWallMm)
+    clamps.push(e.inputs.wallClamped(n('minWall', p.piece.minWallMm, 1)));
   if (input.baseMm === undefined) clamps.push(e.inputs.baseFromWall);
   else if (input.baseMm < p.piece.minBaseMm)
-    clamps.push(e.inputs.baseClamped(n(p.piece.minBaseMm, 1)));
+    clamps.push(e.inputs.baseClamped(n('minBase', p.piece.minBaseMm, 1)));
   out.push(
     step('inputs', e.inputs.title, [
       code(f.inputs, f.inputsSymbols),
-      text(e.inputs.values(n(piece.mass, 1), n(piece.wall, 1), n(piece.base, 1))),
+      text(
+        e.inputs.values(
+          n('mass', piece.mass, 1),
+          n('wall', piece.wall, 1),
+          n('base', piece.base, 1),
+        ),
+      ),
       text(
         e.inputs.material(
           esc(m.options.clay[input.clay]),
-          n(p.clayDensity, 2),
-          n(piece.claySlow, 2),
-          n(piece.clayLossPct, 1),
+          n('density', p.clayDensity, 2),
+          n('claySlow', piece.claySlow, 2),
+          n('clayLoss', piece.clayLossPct, 1),
         ),
       ),
       ...clamps.map(text),
@@ -103,18 +122,18 @@ export function renderSteps(
       code(f.surface, f.surfaceSymbols),
       formula(
         e.surface.sheet(
-          n(piece.mass, 1),
-          n(p.clayDensity, 2),
-          n(piece.wall / 10, 2),
-          n(piece.sideArea, 0),
+          n('mass', piece.mass, 1),
+          n('density', p.clayDensity, 2),
+          n('wallCm', piece.wall / 10, 2),
+          n('sideArea', piece.sideArea, 0),
         ),
       ),
       formula(
         e.surface.area(
-          n(piece.sideArea, 0),
-          n(piece.areaFactor, 2),
+          n('sideArea', piece.sideArea, 0),
+          n('areaFactor', piece.areaFactor, 2),
           esc(m.options.shape[input.shape]),
-          n(piece.area, 4),
+          n('area', piece.area, 4),
         ),
       ),
     ]),
@@ -128,19 +147,19 @@ export function renderSteps(
       code(f.slowness, f.slownessSymbols),
       formula(
         e.slowness.thick(
-          n(piece.base, 1),
-          n(piece.wall, 1),
-          n(p.baseThicknessExponent, 2),
-          n(piece.thick, 2),
+          n('base', piece.base, 1),
+          n('wall', piece.wall, 1),
+          n('thickExponent', p.baseThicknessExponent, 2),
+          n('thick', piece.thick, 2),
         ),
       ),
       formula(
         e.slowness.product(
-          n(piece.shapeSlow, 2),
-          n(piece.claySlow, 2),
-          n(piece.batSlow, 2),
-          n(piece.thick, 2),
-          n(piece.slow, 2),
+          n('shapeSlow', piece.shapeSlow, 2),
+          n('claySlow', piece.claySlow, 2),
+          n('batSlow', piece.batSlow, 2),
+          n('thick', piece.thick, 2),
+          n('slow', piece.slow, 2),
         ),
       ),
     ]),
@@ -154,19 +173,19 @@ export function renderSteps(
       code(f.target, f.targetSymbols),
       formula(
         e.target.loss(
-          n(piece.clayLossPct, 1),
-          signed(piece.wetnessPct),
-          signed(piece.stagePct),
-          n(piece.lossPct, 1),
-          n(t.grams.target, 0),
+          n('clayLoss', piece.clayLossPct, 1),
+          signed('wetness', piece.wetnessPct),
+          signed('stage', piece.stagePct),
+          n('loss', piece.lossPct, 1),
+          n('targetGrams', t.grams.target, 0),
         ),
       ),
       formula(
         e.target.window(
-          n(piece.softPct, 1),
-          n(t.grams.soft, 0),
-          n(piece.hardPct, 1),
-          n(t.grams.hard, 0),
+          n('softPct', piece.softPct, 1),
+          n('softGrams', t.grams.soft, 0),
+          n('hardPct', piece.hardPct, 1),
+          n('hardGrams', t.grams.hard, 0),
         ),
       ),
     ]),
@@ -176,8 +195,14 @@ export function renderSteps(
   const vpd = (key: string, where: string, c: Climate): string => {
     at(key);
     return (
-      e.air.vpd(where, n(c.temp, 1), n(c.rh, 1), n(c.psat, 1), n(c.rhUsed, 1), n(c.vpd, 2)) +
-      (c.vpd === p.minVpd ? e.air.floor(n(p.minVpd, 2)) : '')
+      e.air.vpd(
+        where,
+        n('temp', c.temp, 1),
+        n('rh', c.rh, 1),
+        n('psat', c.psat, 1),
+        n('rhUsed', c.rhUsed, 1),
+        n('vpd', c.vpd, 2),
+      ) + (c.vpd === p.minVpd ? e.air.floor(n('minVpd', p.minVpd, 2)) : '')
     );
   };
   const climates = [vpd('air-start', e.air.start, t.air.start)];
@@ -190,39 +215,61 @@ export function renderSteps(
       text(
         e.air.text(link(e.terms.vpd), link(e.terms.psat), link(e.terms.magnus), link(e.terms.rh)),
       ),
-      code(f.psat(dec(MAGNUS.a, 3), dec(MAGNUS.b, 2), dec(MAGNUS.c, 2))),
-      code(f.vpd, f.airSymbols),
+      code(f.psat(n('magnusA', MAGNUS.a, 3), n('magnusB', MAGNUS.b, 2), n('magnusC', MAGNUS.c, 2))),
+      code(
+        f.vpd,
+        f.airSymbols(
+          n('minVpd', p.minVpd, 2),
+          n('rhMin', p.rhClamp.min, 1),
+          n('rhMax', p.rhClamp.max, 1),
+        ),
+      ),
       rows(climates),
-      text(e.air.airflow(esc(m.options.airflow[t.air.airflow]), n(t.air.airflowFactor, 2))),
+      text(
+        e.air.airflow(
+          esc(m.options.airflow[t.air.airflow]),
+          n('airflowFactor', t.air.airflowFactor, 2),
+        ),
+      ),
     ]),
   );
 
-  // 6. rate per cover, at the throwing time
+  // 6. rate per cover, at the throwing time: first what the cover contributes (its calibration first),
+  // then the rate that uses it
   const rateRows = t.covers.map((c) => {
     at(`rate-${c.cover}`);
     const def = coverById(v.covers, c.cover);
     const vpdUsed = def.environment === 'dampRoom' ? t.air.damp.vpd : t.air.start.vpd;
-    const row =
-      t.physical && c.air !== undefined && c.factor !== undefined
-        ? e.rate.row(
-            label(c.cover),
-            n(p.evaporationCoefficient, 2),
-            n(piece.area, 4),
-            n(vpdUsed, 2),
-            n(c.air, 2),
-            n(c.factor, 2),
-            n(piece.slow, 2),
-            n(c.multiplier, 2),
-            gPerHour(c.rate),
-          )
-        : e.rate.modelRow(label(c.cover), gPerHour(c.rate));
     const samples = calibration[c.cover]?.samples ?? 0;
-    return excludedMark(samples ? `${row} · ${e.rate.calibrated(samples)}` : row, c);
+    const calibrated = samples ? e.rate.calibrated(num('samples', String(samples))) : '';
+    const multiplier = n('multiplier', c.multiplier, 2);
+    const coverLine = (line: string): string =>
+      `<span class="cover-line">${excludedMark(line + calibrated, c)}</span>`;
+    if (t.physical && c.air !== undefined && c.factor !== undefined)
+      return (
+        coverLine(
+          e.rate.cover(label(c.cover), multiplier, n('factor', c.factor, 2), n('air', c.air, 2)),
+        ) +
+        e.rate.row(
+          n('factor', c.factor, 2),
+          n('air', c.air, 2),
+          n('multiplier', c.multiplier, 2),
+          n('k', p.evaporationCoefficient, 2),
+          n('area', piece.area, 4),
+          n('vpd', vpdUsed, 2),
+          n('slow', piece.slow, 2),
+          gPerHour('rate', c.rate),
+        )
+      );
+    return (
+      coverLine(e.rate.modelCover(label(c.cover), multiplier)) +
+      e.rate.modelRow(gPerHour('rate', c.rate))
+    );
   });
   at('rate-night');
   const nightRates = t.covers
     .filter((c) => c.nightRate !== undefined)
-    .map((c) => e.rate.nightRate(label(c.cover), gPerHour(c.nightRate!)));
+    .map((c) => e.rate.nightRate(label(c.cover), gPerHour('nightRate', c.nightRate!)));
   out.push(
     step('rate', e.rate.title, [
       text(t.physical ? e.rate.text : e.rate.modelText),
@@ -236,10 +283,14 @@ export function renderSteps(
 
   // 7. time to the target per cover, the same hours as the comparison bars
   at('time');
-  const timeText = e.time.text(link(e.terms.euler), dur(p.stepHours), n(t.grams.target, 0));
+  const timeText = e.time.text(
+    link(e.terms.euler),
+    dur('stepHours', p.stepHours),
+    n('targetGrams', t.grams.target, 0),
+  );
   const timeRows = t.covers.map((c) => {
     at(`time-${c.cover}`);
-    return excludedMark(e.time.row(label(c.cover), dur(c.hours)), c);
+    return excludedMark(e.time.row(label(c.cover), dur('hours', c.hours)), c);
   });
   out.push(
     step('time', e.time.title, [
@@ -254,13 +305,12 @@ export function renderSteps(
   at('plan');
   const rec = t.plan.recommendation;
   const H = t.plan.deadlineHours;
-  const tol = n(p.planner.targetTolerance * 100, 1);
   const planLines: string[] = [];
   if (rec.status === 'invalidDeadline') {
     planLines.push(text(esc(m.errors.invalidDeadline)));
   } else {
     planLines.push(code(f.plan, f.planSymbols));
-    planLines.push(text(e.plan.deadline(dur(H))));
+    planLines.push(text(e.plan.deadline(dur('deadline', H))));
     const names = (cs: CoverTrace[]): string => cs.map((c) => label(c.cover)).join(', ');
     const excluded = t.covers.filter((c) => c.excluded);
     if (excluded.length) planLines.push(text(e.plan.excluded(names(excluded))));
@@ -274,7 +324,9 @@ export function renderSteps(
     ): void => {
       if (cs.length)
         planLines.push(
-          text(sentence(names(cs), esc(m.options.stage.soft), dur(p.planner.dampMinHours))),
+          text(
+            sentence(names(cs), esc(m.options.stage.soft), dur('dampMin', p.planner.dampMinHours)),
+          ),
         );
     };
     if (t.gateOpen) gate(gated, e.plan.gateOpen);
@@ -288,19 +340,20 @@ export function renderSteps(
         e.plan.gateOnlyChoice,
       );
     }
+    const tol = (): string => n('tolerance', p.planner.targetTolerance * 100, 1);
     if (rec.status === 'tooFast')
-      planLines.push(text(e.plan.tooFast(dur(rec.fastestHours), dur(H))));
+      planLines.push(text(e.plan.tooFast(dur('fastest', rec.fastestHours), dur('deadline', H))));
     else if (rec.status === 'tooSlow')
-      planLines.push(text(e.plan.tooSlow(dur(rec.slowestHours), dur(H))));
+      planLines.push(text(e.plan.tooSlow(dur('slowest', rec.slowestHours), dur('deadline', H))));
     else if (rec.option.kind === 'single')
       planLines.push(
         text(
           e.plan.single(
             label(rec.option.cover),
-            dur(rec.option.hours),
-            dur(H),
-            n((Math.abs(rec.option.hours - H) / H) * 100, 1),
-            tol,
+            dur('optionHours', rec.option.hours),
+            dur('deadline', H),
+            n('off', (Math.abs(rec.option.hours - H) / H) * 100, 1),
+            tol(),
           ),
         ),
       );
@@ -308,9 +361,9 @@ export function renderSteps(
       planLines.push(
         text(
           e.plan.twoPhase(
-            tol,
+            tol(),
             label(rec.option.first),
-            dur(rec.option.switchAfterHours),
+            dur('switchAfter', rec.option.switchAfterHours),
             label(rec.option.then),
             link(e.terms.bisection),
           ),
@@ -322,7 +375,8 @@ export function renderSteps(
   // 9. result, worded exactly as in the recommendation
   if (rec.status !== 'invalidDeadline') {
     at('result');
-    const when = (hours: number): string => slide(fmt.dateTime(t.startMs + hours * MS_PER_HOUR));
+    const when = (id: NumId, hours: number): string =>
+      num(id, fmt.dateTime(t.startMs + hours * MS_PER_HOUR));
     const r = t.result;
     out.push(
       step(
@@ -333,15 +387,17 @@ export function renderSteps(
               code(f.result),
               text(
                 m.result.ready(
-                  when(r.ready),
-                  slide(formatNum(fmt, { kind: 'decimal', value: piece.lossPct, digits: 1 })),
-                  slide(formatNum(fmt, { kind: 'int', value: t.grams.target })),
+                  when('ready', r.ready),
+                  num('loss', formatNum(fmt, { kind: 'decimal', value: piece.lossPct, digits: 1 })),
+                  num('targetGrams', formatNum(fmt, { kind: 'int', value: t.grams.target })),
                 ),
               ),
               text(
                 m.result.window(
-                  when(r.windowStart),
-                  Number.isFinite(r.windowEnd) ? when(r.windowEnd) : m.result.windowOpenEnd,
+                  when('windowStart', r.windowStart),
+                  Number.isFinite(r.windowEnd)
+                    ? when('windowEnd', r.windowEnd)
+                    : m.result.windowOpenEnd,
                 ),
               ),
             ]
@@ -354,7 +410,7 @@ export function renderSteps(
 
 /**
  * Re-renders only the steps, so an open <details> and the scroll position stay as they are; changed
- * numbers slide to their new value.
+ * numbers slide to their new value. An open tooltip closes: its number is gone.
  */
 export function update(
   v: View,
@@ -365,6 +421,7 @@ export function update(
   const before = captureSlides(el);
   el.innerHTML = renderSteps(v, t, calibration);
   slideNumbers(el, before);
+  byId(TIP_ID).hidden = true;
 }
 
 const detailsOf = (root: HTMLElement): HTMLDetailsElement =>
@@ -373,16 +430,82 @@ const detailsOf = (root: HTMLElement): HTMLDetailsElement =>
 /** Whether the section is open, to keep it open across a language switch. */
 export const isOpen = (root: HTMLElement): boolean => detailsOf(root).open;
 
-/** Opens the section without its reveal (after a language switch). */
+/**
+ * Opens the section at once, without its expand transition or reveal (after a language switch), so the
+ * page has its full height straight away and a restored scroll position holds.
+ */
 export function open(root: HTMLElement): void {
-  detailsOf(root).open = true;
+  const details = detailsOf(root);
+  details.classList.add('instant');
+  details.open = true;
+  // lays the open height out now, so removing the class starts no transition; it is back for the
+  // reader's next toggle
+  details.getBoundingClientRect();
+  details.classList.remove('instant');
 }
 
-/** Opening the section by the user (click or keyboard on the summary) reveals its steps one after another. */
+/** Gap between a number and its tooltip, and the tooltip's least distance from the card's edges, px. */
+const TIP_GAP = 6;
+
+/**
+ * Shows `el`'s label in the tooltip above it (below when there is no room), kept inside the card.
+ * The tooltip is the `aria-describedby` of every number, so a screen reader reads the label on focus.
+ */
+function showTip(section: HTMLElement, tip: HTMLElement, el: HTMLElement): void {
+  tip.textContent = el.dataset.tip ?? '';
+  tip.hidden = false;
+  const s = section.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  const w = tip.offsetWidth;
+  const h = tip.offsetHeight;
+  const left = Math.min(
+    Math.max(TIP_GAP, r.left - s.left + r.width / 2 - w / 2),
+    s.width - w - TIP_GAP,
+  );
+  const above = r.top - h - TIP_GAP >= 0;
+  tip.style.left = `${left}px`;
+  tip.style.top = `${above ? r.top - s.top - h - TIP_GAP : r.bottom - s.top + TIP_GAP}px`;
+}
+
+/**
+ * Opening the section by the user (click or keyboard on the summary) reveals its steps one after another.
+ * Numbers explain themselves on mouse hover, keyboard focus and tap; Escape closes the explanation.
+ */
 export function mount(root: HTMLElement, _ctx: AppContext): void {
   const details = detailsOf(root);
+  const section = details.closest<HTMLElement>('.explainer')!;
+  const tip = section.querySelector<HTMLElement>(`#${TIP_ID}`)!;
+  const steps = section.querySelector<HTMLElement>('#explain-steps')!;
   details.querySelector('summary')!.addEventListener('click', () => {
     // the click comes before the toggle: closed now means it is opening
     if (!details.open) stagger(details.querySelectorAll<HTMLElement>('#explain-steps > li'));
+  });
+  const numberAt = (target: EventTarget | null): HTMLElement | null =>
+    target instanceof Element ? target.closest<HTMLElement>('.num-tip') : null;
+  const hide = (): void => {
+    tip.hidden = true;
+  };
+  steps.addEventListener('focusin', (e) => {
+    const el = numberAt(e.target);
+    if (el) showTip(section, tip, el);
+  });
+  steps.addEventListener('focusout', hide);
+  // touch: a tap focuses the number in most browsers; the click covers the rest
+  steps.addEventListener('click', (e) => {
+    const el = numberAt(e.target);
+    if (el) showTip(section, tip, el);
+  });
+  steps.addEventListener('pointerover', (e) => {
+    const el = numberAt(e.target);
+    if (el && e.pointerType === 'mouse') showTip(section, tip, el);
+  });
+  steps.addEventListener('pointerout', (e) => {
+    const el = numberAt(e.target);
+    // still inside the same number, or it has focus: keep it
+    if (!el || e.pointerType !== 'mouse' || numberAt(e.relatedTarget) === el) return;
+    if (document.activeElement !== el) hide();
+  });
+  steps.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hide();
   });
 }

@@ -119,8 +119,21 @@ test.describe('page shell', () => {
     );
     await expect(steps.nth(4).locator('.desc code')).toHaveText([
       'e_s(T) = 6,112 × exp(17,62 × T ÷ (243,12 + T))',
-      'VPD = max(VPD_min, e_s(T) × (1 − RH ÷ 100))',
+      'VPD = max(VPD_min, e_s(T) × (1 − clamp(RH, RH_min, RH_max) ÷ 100))',
     ]);
+    await expect(steps.nth(4).locator('.symbols')).toHaveText(
+      'T – temperatura w °C, RH – wilgotność względna w %, ograniczona do 1–99%; VPD_min = 0,05 hPa',
+    );
+    // step 6: each cover's calibration first, then the formula and the rate that use it
+    await expect(steps.nth(5).locator('.desc code')).toHaveText(
+      'r = f_okrycie × f_ruch ÷ M × k × A × VPD ÷ S',
+    );
+    await expect(steps.nth(5).locator('.rows li .cover-line').first()).toHaveText(
+      'Odkryta: kalibracja × 1, okrycie × 1, ruch powietrza × 1,6',
+    );
+    await expect(steps.nth(5).locator('.rows li').first()).toHaveText(
+      /^Odkryta: kalibracja × 1, okrycie × 1, ruch powietrza × 1,61 × 1,6 ÷ 1 × 5,1 × 0,0702 × 11,66 ÷ 1,28 = 5,24 g\/h$/,
+    );
     for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8])
       await expect(steps.nth(i).locator('.desc code').first()).toBeVisible();
     await expect(steps.nth(1)).toContainText('500 g ÷ 1,9 g/cm³ ÷ 0,6 cm = 439 cm²');
@@ -206,6 +219,91 @@ test.describe('page shell', () => {
     await expect(page.getByRole('button', { name: 'English' })).toBeFocused();
   });
 
+  test('the language switch keeps a scroll position far down the open section', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 700 });
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    // the last step, below where the page would end with the section closed
+    await explainerSteps(page).last().scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+    // a click by script, without scrolling to the header first
+    await page.getByRole('button', { name: 'English' }).evaluate((b: HTMLElement) => b.click());
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    expect(await page.evaluate(() => window.scrollY)).toBe(before);
+  });
+
+  test('every number in the steps explains itself on hover, focus and tap', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const tip = page.locator('#explain-tip');
+    const numbers = page.locator('#explain-steps .num-tip');
+    await expect(tip).toBeHidden();
+    // every number is focusable, described by the tooltip, and has a label
+    const all = await numbers.evaluateAll((els) =>
+      els.map((el) => [
+        el.getAttribute('tabindex'),
+        el.getAttribute('aria-describedby'),
+        el.dataset.tip,
+      ]),
+    );
+    expect(all.length).toBeGreaterThan(50);
+    for (const [tabindex, describedby, label] of all) {
+      expect(tabindex).toBe('0');
+      expect(describedby).toBe('explain-tip');
+      expect(label).toBeTruthy();
+    }
+    await expect(tip).toHaveAttribute('role', 'tooltip');
+    // the density in step 2, by mouse
+    const density = explainerSteps(page).nth(1).locator('.formula .num-tip').nth(1);
+    await expect(density).toHaveText('1,9');
+    await density.hover();
+    await expect(tip).toBeVisible();
+    await expect(tip).toHaveText('gęstość masy ceramicznej');
+    await page.mouse.move(0, 0);
+    await expect(tip).toBeHidden();
+    // by keyboard, closed with Escape
+    await density.focus();
+    await expect(tip).toHaveText('gęstość masy ceramicznej');
+    await expect(density).toHaveAccessibleDescription('gęstość masy ceramicznej');
+    await page.keyboard.press('Escape');
+    await expect(tip).toBeHidden();
+    await page.keyboard.press('Tab');
+    await expect(tip).toBeVisible();
+    // the next number, the wall in centimetres
+    await expect(tip).toHaveText('grubość ścianki w centymetrach');
+    // by tap (a click), in English too
+    await page.getByRole('button', { name: 'English' }).click();
+    await explainerSteps(page).nth(1).locator('.formula .num-tip').nth(1).click();
+    await expect(tip).toHaveText("clay's density");
+  });
+
+  test('phone: a tapped number explains itself inside the card, without a horizontal scroll', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const card = (await page.locator('.explainer').boundingBox())!;
+    const tip = page.locator('#explain-tip');
+    for (const target of [
+      explainerSteps(page).nth(1).locator('.formula .num-tip').first(),
+      explainerSteps(page).nth(5).locator('.rows .num-tip').last(),
+    ]) {
+      await target.click();
+      await expect(tip).toBeVisible();
+      const box = (await tip.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(card.x);
+      expect(box.x + box.width).toBeLessThanOrEqual(card.x + card.width);
+      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    }
+  });
+
   test('technical terms link to Wikipedia in the page language, in a new tab', async ({ page }) => {
     await openApp(page);
     await page.locator('.explainer summary').click();
@@ -222,7 +320,7 @@ test.describe('page shell', () => {
     const pl = await all();
     expect(pl.map(([href]) => href)).toEqual([
       'https://en.wikipedia.org/wiki/Vapour-pressure_deficit',
-      'https://pl.wikipedia.org/wiki/Para_nasycona',
+      'https://pl.wikipedia.org/wiki/Ci%C5%9Bnienie_pary_nasyconej',
       'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
       'https://pl.wikipedia.org/wiki/Wilgotno%C5%9B%C4%87_wzgl%C4%99dna',
       'https://pl.wikipedia.org/wiki/Metoda_Eulera',

@@ -49,7 +49,9 @@ test.describe('covering methods filter', () => {
     await expect(time.nth(2)).toHaveText(/^Mokra przechowalnia: .* · wyłączone$/);
     await expect(time.nth(0)).not.toContainText('wyłączone');
     const rate = page.locator('#explain-steps > li').nth(5).locator('.rows li');
-    await expect(rate.nth(2)).toHaveText(/^Mokra przechowalnia: .* g\/h · wyłączone$/);
+    await expect(rate.nth(2).locator('.cover-line')).toHaveText(
+      /^Mokra przechowalnia: kalibracja × .* · wyłączone$/,
+    );
     await expect(rate.nth(0)).not.toContainText('wyłączone');
     await setDateTime(page, 'Chcę trymować', '2026-03-06T10:00');
     await box(page, 'Mokra przechowalnia').check();

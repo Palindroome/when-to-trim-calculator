@@ -31,6 +31,9 @@ details summary::after {
 details[open] summary::after {
   transform: rotate(-135deg);
 }
+.explainer {
+  position: relative;
+}
 .explainer p {
   margin: 0 0 var(--space-2);
   color: var(--text-muted);
@@ -134,4 +137,34 @@ details[open] summary::after {
 }
 .steps a:hover {
   color: var(--accent-hover);
+}
+/* step 6: what the cover contributes, on its own line above the rate that uses it */
+.steps .cover-line {
+  display: block;
+  font-weight: 600;
+}
+/* every number explains itself on hover, focus or tap: a dotted underline says so */
+.steps .num-tip {
+  text-decoration: underline dotted var(--text-muted);
+  text-underline-offset: 3px;
+  cursor: help;
+  border-radius: var(--radius-sm);
+}
+.steps .num-tip:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: 1px;
+}
+.tip-bubble {
+  position: absolute;
+  z-index: 2;
+  max-width: min(18rem, calc(100% - 2 * var(--space-2)));
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--text);
+  color: var(--surface);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  pointer-events: none;
 }

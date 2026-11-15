@@ -251,6 +251,70 @@ test.describe('with motion', () => {
     expect(await page.locator('#explain-steps').innerHTML()).toBe(settled);
   });
 
+  test('only values that changed slide, also when a minimum-value note appears', async ({
+    page,
+  }) => {
+    await page.locator('.explainer summary').click();
+    await waitForMotionIdle(page);
+    // 1 mm is below the model minimum: a note with the minimum appears in step 1
+    await fill(page, 'Grubość ścianki', '1');
+    const sliding = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('#explain-steps .slide[aria-hidden="true"]')].map(
+        (el) => el.dataset.slide,
+      ),
+    );
+    expect(sliding).toContain('inputs-wall-0');
+    for (const unchanged of [
+      'inputs-mass-0',
+      'inputs-base-0',
+      'inputs-density-0',
+      'inputs-claySlow-0',
+    ])
+      expect(sliding).not.toContain(unchanged);
+    await waitForMotionIdle(page);
+    await expect(explainerStep(page, 0)).toContainText(
+      'Ścianka poniżej minimum modelu: liczę z 2 mm.',
+    );
+  });
+
+  test('the language switch keeps a scroll position far down the open explainer', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 700 });
+    await page.reload();
+    await page.locator('.explainer summary').click();
+    await waitForMotionIdle(page);
+    // the last step, below where the page would end with the section closed
+    await explainerStep(page, 8).scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+    // a click by script, without scrolling to the header first
+    await page.getByRole('button', { name: 'English' }).evaluate((b: HTMLElement) => b.click());
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    await waitForMotionIdle(page);
+    expect(await page.evaluate(() => window.scrollY)).toBe(before);
+    await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
+  });
+
+  test('a sliding number keeps its explanation and is read once', async ({ page }) => {
+    await page.locator('.explainer summary').click();
+    await waitForMotionIdle(page);
+    await fill(page, 'Masa po toczeniu', '1000');
+    const mass = explainerStep(page, 1).locator('.formula .num-tip').first();
+    await mass.focus();
+    await expect(page.locator('#explain-tip')).toHaveText('masa po toczeniu, użyta w obliczeniu');
+    await expect(mass).toHaveAccessibleDescription('masa po toczeniu, użyta w obliczeniu');
+    // mid-slide the digit columns are hidden and one copy of the final number is exposed
+    const exposed = await mass.evaluate((el) =>
+      [...el.childNodes]
+        .filter((n) => !(n instanceof Element && n.getAttribute('aria-hidden') === 'true'))
+        .map((n) => n.textContent)
+        .join(''),
+    );
+    expect(exposed).toBe('1000');
+    await waitForMotionIdle(page);
+    await expect(mass).toHaveText('1000');
+  });
+
   test('the night fields expand and collapse', async ({ page }) => {
     const nightTemp = field(page, 'Temperatura nocą (22–7)');
     await setNight(page, true);
