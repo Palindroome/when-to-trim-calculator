@@ -1,4 +1,5 @@
 // The page: its state (saved pieces, the plan to save, the language), the recalculation and the composition of the features.
+import { explainCalculation } from '../domain/explain';
 import { MS_PER_HOUR } from '../domain/params';
 import { derivePiece } from '../domain/piece';
 import { planDrying } from '../domain/planner';
@@ -14,6 +15,7 @@ import { createSummaryCards, renderSummaries } from './features/cards/cards';
 import * as conditionsSection from './features/conditions/conditions';
 import * as coverFilter from './features/covers/covers';
 import * as datetime from './features/datetime/datetime';
+import * as explainer from './features/explainer/explainer';
 import * as header from './features/header/header';
 import * as pieceSection from './features/piece/piece';
 import * as piecesSection from './features/pieces/pieces';
@@ -43,6 +45,7 @@ const FEATURES = [
   result,
   weight,
   piecesSection,
+  explainer,
 ];
 
 export function startApp(deps: AppDeps): void {
@@ -145,16 +148,18 @@ export function startApp(deps: AppDeps): void {
     }
 
     const tips = tipsFor(rec, piece, dc.conditions, params, covers);
+    const calibration = ctx.perCover();
     result.update(view, {
       piece,
       startMs,
       plan,
       window,
       tips,
-      calibration: ctx.perCover(),
+      calibration,
       canSave: saveable !== null,
       allowed,
     });
+    explainer.update(view, explainCalculation(input, dc, plan), calibration);
     cards.update(
       renderSummaries(view, {
         name: readName(),

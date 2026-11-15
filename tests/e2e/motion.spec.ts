@@ -181,6 +181,32 @@ test.describe('with motion', () => {
     await expect(page.locator('#pieces .empty')).toBeVisible();
   });
 
+  test('opening the explainer reveals its steps one after another, then leaves them as they are', async ({
+    page,
+  }) => {
+    await page.locator('.explainer summary').click();
+    const stepDelays = (): Promise<number[]> =>
+      page.evaluate(() =>
+        document
+          .getAnimations()
+          .filter((a) =>
+            ((a.effect as KeyframeEffect).target as Element | null)?.matches('#explain-steps > li'),
+          )
+          .map((a) => Number(a.effect!.getTiming().delay)),
+      );
+    // the toggle event comes a task after the click
+    await expect.poll(async () => (await stepDelays()).length).toBe(9);
+    const delays = await stepDelays();
+    for (let i = 1; i < delays.length; i++) expect(delays[i]).toBeGreaterThan(delays[i - 1]!);
+    await waitForMotionIdle(page);
+    const settled = await page
+      .locator('#explain-steps > li')
+      .evaluateAll((els) =>
+        els.map((el) => [getComputedStyle(el).opacity, el.getAttribute('style')]),
+      );
+    expect(settled.every(([o, s]) => o === '1' && s === null)).toBe(true);
+  });
+
   test('the night fields expand and collapse', async ({ page }) => {
     const nightTemp = field(page, 'Temperatura nocą (22–7)');
     await setNight(page, true);
@@ -456,6 +482,13 @@ test.describe('with reduced motion', () => {
     await expect(page.locator('#result .num[aria-hidden]')).toHaveCount(0);
     expect(await helperIdleNow(page)).toBe(true);
     await expect(page.locator('.slide-ind')).toHaveCount(0);
+  });
+
+  test('the explainer opens with its steps at once', async ({ page }) => {
+    await page.locator('.explainer summary').click();
+    await expect(page.locator('#explain-steps > li').first()).toBeVisible();
+    expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+    expect(await helperIdleNow(page)).toBe(true);
   });
 
   test('removing a piece removes it at once', async ({ page }) => {

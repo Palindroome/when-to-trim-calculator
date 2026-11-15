@@ -5,6 +5,7 @@ import { stepCard } from './features/cards/cards';
 import * as conditions from './features/conditions/conditions';
 import * as coverFilter from './features/covers/covers';
 import * as datetime from './features/datetime/datetime';
+import * as explainer from './features/explainer/explainer';
 import * as header from './features/header/header';
 import * as piece from './features/piece/piece';
 import * as pieces from './features/pieces/pieces';
@@ -12,19 +13,6 @@ import * as result from './features/result/result';
 import * as weight from './features/weight/weight';
 import * as welcome from './features/welcome/welcome';
 import * as wizard from './features/wizard/wizard';
-import { icon } from './icons';
-
-/** How the calculator works, folded by default. */
-function explainer(m: Messages): string {
-  return `<section class="card">
-    <details>
-      <summary>${icon('info')}${m.explainer.summary}</summary>
-      <ul>
-        ${m.explainer.itemsHtml.map((li) => `<li>${li}</li>`).join('\n        ')}
-      </ul>
-    </details>
-  </section>`;
-}
 
 /** Static page structure (the result, weight check and piece list are filled in by their features). */
 export function renderShell(
@@ -50,6 +38,6 @@ export function renderShell(
     wizard.navMarkup(m),
     weight.markup(m, covers),
     pieces.markup(m),
-    explainer(m),
+    explainer.markup(m),
   ].join('\n  ');
 }

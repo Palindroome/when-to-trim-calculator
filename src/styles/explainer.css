@@ -31,15 +31,86 @@ details summary::after {
 details[open] summary::after {
   transform: rotate(-135deg);
 }
-details ul {
-  margin: var(--space-3) 0 0;
-  padding-left: var(--space-5);
-}
-details p,
-details li {
-  font-size: var(--text-md);
+.explainer p {
+  margin: 0 0 var(--space-2);
   color: var(--text-muted);
 }
-details li {
-  margin: var(--space-2) 0;
+.explainer .intro {
+  margin-top: var(--space-3);
+}
+.explainer .note {
+  font-size: var(--text-sm);
+}
+/* numbered steps: a real <ol> (role="list" keeps the list and its count announced in Safari after
+   list-style: none), the number drawn as a badge from a CSS counter and hidden from screen readers,
+   which already announce the position; a line joins the badges so the steps read as one sequence */
+.steps {
+  --badge: 1.75rem;
+  list-style: none;
+  counter-reset: step;
+  margin: var(--space-4) 0;
+  padding: 0;
+}
+.steps > li {
+  counter-increment: step;
+  position: relative;
+  padding: 0 0 var(--space-5) calc(var(--badge) + var(--space-3));
+  min-width: 0;
+}
+.steps > li::before {
+  content: counter(step);
+  /* biome-ignore lint/suspicious/noDuplicateProperties: the line above is the fallback for browsers without alt text in content */
+  content: counter(step) / "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--badge);
+  height: var(--badge);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.steps > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--badge) / 2 - var(--rule-width) / 2);
+  top: calc(var(--badge) + var(--space-1));
+  bottom: var(--space-1);
+  width: var(--rule-width);
+  background: var(--border);
+}
+.steps h3 {
+  margin: 0 0 var(--space-1);
+  min-height: var(--badge);
+  display: flex;
+  align-items: center;
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+/* formulas wrap anywhere on phones instead of widening the page */
+.steps .formula {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.steps .rows {
+  list-style: none;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+.steps .rows .formula {
+  margin: 0;
 }

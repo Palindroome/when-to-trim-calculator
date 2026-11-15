@@ -286,13 +286,112 @@ export const en: Messages = {
   },
 
   explainer: {
-    summary: 'How it calculates (and what it cannot do yet)',
-    itemsHtml: [
-      '<b>Evaporation</b> depends on how much more water vapour the air can take (vapour pressure deficit: saturation pressure at the given temperature × (1 − humidity)). Airflow and the exposed surface add to it; the surface is worked out from the mass, wall thickness and shape.',
-      '<b>Covering</b> has a factor: loosely bagged ≈ 30% of the open-air rate, fully bagged ≈ 7%, a closed box ≈ 5%. The damp room is calculated from its own temperature and humidity. Because it is small, the calculator only suggests it when the piece must stay very wet (the “attaching handles / soft” target) or when the wait is 4 days or longer.',
-      '<b>Leather-hard</b> is a loss of about 5–7% of the mass since throwing, depending on the clay body, wetness and target. The trimming window is roughly ±1–1.5 percentage points around that value.',
-      '<b>A thick base, porcelain, a plastic bat and a closed form</b> make it take longer. Plaster shortens it.',
-      'All factors are <b>starting assumptions</b>. Every saved piece rated “too wet / just right / too dry” corrects the multiplier for its covering.',
+    summary: 'How it calculates – step by step',
+    intro:
+      'Each step shows the formula and the numbers from your form. When you change an input, the numbers update at once.',
+    inputs: {
+      title: 'Your piece',
+      values: (mass: string, wall: string, base: string): string =>
+        `Mass ${mass} g, wall ${wall} mm, base ${base} mm.`,
+      massClamped: (min: string): string => `Mass below the model minimum: using ${min} g.`,
+      wallClamped: (min: string): string => `Wall below the model minimum: using ${min} mm.`,
+      baseClamped: (min: string): string => `Base below the model minimum: using ${min} mm.`,
+      baseFromWall: 'No base thickness given: using the wall thickness.',
+    },
+    surface: {
+      title: 'Exposed surface',
+      text: 'The clay counts as a flat sheet as thick as the wall; the shape says how much of that surface gives off water.',
+      sheet: (mass: string, density: string, wallCm: string, side: string): string =>
+        `${mass} g ÷ ${density} g/cm³ ÷ ${wallCm} cm = ${side} cm²`,
+      area: (side: string, factor: string, shape: string, area: string): string =>
+        `${side} cm² × ${factor} (${shape}) = ${area} m²`,
+    },
+    slowness: {
+      title: 'Slowness',
+      text: 'The shape, clay body, bat and a thick base slow the drying down. 1 is a smooth stoneware mug on a board.',
+      thick: (base: string, wall: string, exponent: string, thick: string): string =>
+        `thick base: (${base} mm ÷ ${wall} mm)^${exponent} = ${thick} (at least 1)`,
+      product: (shape: string, clay: string, bat: string, thick: string, slow: string): string =>
+        `${shape} (shape) × ${clay} (clay) × ${bat} (bat) × ${thick} (base) = ${slow}`,
+    },
+    target: {
+      title: 'Target and window',
+      text: (stage: string): string =>
+        `How much of the mass has to evaporate for “${stage}”: the value for the clay body plus corrections for wetness and target.`,
+      loss: (clay: string, wetness: string, stage: string, loss: string, grams: string): string =>
+        `${clay}% (clay) ${wetness} (wetness) ${stage} (target) = ${loss}% of the mass, or ${grams} g of water`,
+      window: (soft: string, softG: string, hard: string, hardG: string): string =>
+        `Window: from ${soft}% (${softG} g) to ${hard}% (${hardG} g)`,
+    },
+    air: {
+      title: 'Drying power of the air',
+      text: 'The vapour pressure deficit (VPD) says how much more moisture the air can take: saturation pressure at the given temperature × (1 − humidity).',
+      start: 'Studio at throwing time',
+      night: (from: string, to: string): string => `Studio at night (${from}–${to})`,
+      damp: 'Damp room',
+      vpd: (
+        where: string,
+        temp: string,
+        rh: string,
+        psat: string,
+        rhUsed: string,
+        vpd: string,
+      ): string => `${where}: ${temp} °C, ${rh}% → ${psat} hPa × (1 − ${rhUsed}%) = ${vpd} hPa`,
+      floor: (min: string): string => ` (at least ${min} hPa)`,
+      airflow: (label: string, factor: string): string =>
+        `Airflow “${label}”: × ${factor} for an uncovered piece, its square root under a loose bag, × 1 under a tight cover.`,
+    },
+    rate: {
+      title: 'Drying rate for each option',
+      text: (k: string): string =>
+        `At throwing time: ${k} × surface × VPD × airflow × cover factor ÷ (slowness × calibration multiplier).`,
+      row: (
+        cover: string,
+        k: string,
+        area: string,
+        vpd: string,
+        air: string,
+        factor: string,
+        slow: string,
+        multiplier: string,
+        rate: string,
+      ): string =>
+        `${cover}: ${k} × ${area} × ${vpd} × ${air} × ${factor} ÷ (${slow} × ${multiplier}) = ${rate} g/h`,
+      modelText: 'At throwing time, from the fitted model (not split into factors).',
+      modelRow: (cover: string, rate: string): string => `${cover}: ${rate} g/h`,
+      calibrated: (n: number): string => `multiplier from rated pieces: ${n}`,
+      night: (from: string, to: string, rates: string): string =>
+        `At night (${from}–${to}): ${rates}.`,
+      nightRate: (cover: string, rate: string): string => `${cover} ${rate} g/h`,
+    },
+    time: {
+      title: 'Time to the target',
+      text: (step: string, grams: string): string =>
+        `A simulation in ${step} steps subtracts the evaporated water until ${grams} g are gone. It takes the night into account on the way.`,
+      row: (cover: string, duration: string): string => `${cover}: ${duration}`,
+    },
+    plan: {
+      title: 'Choosing the plan',
+      deadline: (hours: string): string => `The deadline is ${hours} away.`,
+      gateOpen: (covers: string, soft: string, min: string): string =>
+        `${covers}: considered, because the target is “${soft}” or the wait is ${min} or longer.`,
+      gateClosed: (covers: string, soft: string, min: string): string =>
+        `${covers}: left out, because the target is not “${soft}” and the wait is shorter than ${min}.`,
+      single: (cover: string, hours: string, deadline: string, off: string, tol: string): string =>
+        `${cover} meets the deadline: ${hours} against ${deadline}, a difference of ${off}% within ±${tol}%.`,
+      twoPhase: (tol: string, first: string, duration: string, then: string): string =>
+        `No single option meets the deadline within ±${tol}%, so the plan has two phases: ${first} for ${duration}, then ${then}. The switch time is found by repeatedly halving the interval.`,
+      tooFast: (fastest: string, deadline: string): string =>
+        `The fastest option needs ${fastest}, but the deadline is ${deadline} away: the deadline is too early.`,
+      tooSlow: (slowest: string, deadline: string): string =>
+        `Even the slowest option reaches the target in ${slowest}, before the deadline (${deadline}): the deadline is too late.`,
+    },
+    result: {
+      title: 'Result',
+      none: 'No plan meets the deadline, so there is no ready date. See the warning in the recommendation.',
+    },
+    notes: [
+      'All factors are starting assumptions. Every saved piece rated “too wet / just right / too dry” corrects the multiplier for its covering.',
       "Your pieces are saved in this browser on this device and stay after you close it. They're removed only if you clear your browsing data. We don't send them anywhere. In a later version, BLE sensors on the shelf and in the damp room could enter the temperature and humidity.",
     ],
   },

@@ -87,20 +87,89 @@ test.describe('page shell', () => {
     ]);
   });
 
-  test('explainer is collapsed and expands on click', async ({ page }) => {
+  test('explainer is collapsed and expands into numbered steps with the current numbers', async ({
+    page,
+  }) => {
     await openApp(page);
-    const summary = page.getByText('Jak to liczy (i czego jeszcze nie umie)');
-    const body = page.getByText(/^Parowanie zależy od tego/);
-    await expect(body).toBeHidden();
+    const summary = page.getByText('Jak to liczy – krok po kroku');
+    const steps = explainerSteps(page);
+    await expect(steps.first()).toBeHidden();
     await summary.click();
-    await expect(body).toBeVisible();
-    await expect(page.locator('details li')).toHaveCount(6);
-    await expect(page.locator('details li').nth(1)).toContainText(
-      'cały worek ≈ 7%, szczelne pudełko ≈ 5%',
-    );
-    await expect(page.locator('details li').nth(5)).toContainText('czujniki BLE');
+    await expect(steps.first()).toBeVisible();
+    await expect(page.locator('#explain-steps')).toHaveAttribute('role', 'list');
+    await expect(steps.locator('h3')).toHaveText([
+      'Dane pracy',
+      'Odsłonięta powierzchnia',
+      'Spowolnienie',
+      'Cel i okno',
+      'Siła schnięcia powietrza',
+      'Tempo schnięcia w każdym wariancie',
+      'Czas do celu',
+      'Wybór planu',
+      'Wynik',
+    ]);
+    await expect(steps.nth(0)).toContainText('Masa 500 g, ścianka 6 mm, dno 9 mm.');
+    await expect(steps.nth(1)).toContainText('500 g ÷ 1,9 g/cm³ ÷ 0,6 cm = 439 cm²');
+    await expect(steps.nth(3)).toContainText('6% (masa) + 0 (mokrość) + 0 (cel) = 6% masy');
+    await expect(steps.nth(4)).toContainText('W pracowni przy toczeniu: 20 °C, 50%');
+    await expect(steps.nth(5).locator('.rows li')).toHaveCount(5);
+    await expect(steps.nth(7)).toContainText('Do terminu jest 2 d 1 h.');
+    await expect(page.locator('.explainer')).toContainText('czujniki BLE');
+  });
+
+  test('step 7 matches the bars and step 9 the recommendation', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const bars = await page.locator('#result .bar .t').allTextContents();
+    const times = await explainerSteps(page).nth(6).locator('.rows li').allTextContents();
+    expect(times.map((t) => t.replace(/^.*: /, ''))).toEqual(bars.map((b) => b.replace('+', '')));
+    const result = explainerSteps(page).nth(8).locator('p');
+    await expect(result).toHaveText([
+      (await page.locator('#result .rec .sub').textContent())!,
+      (await page.locator('#result .rec .win').textContent())!,
+    ]);
+  });
+
+  test('step 8 names the branch taken', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const plan = explainerSteps(page).nth(7);
+    await setDateTime(page, 'Chcę trymować', '2026-03-04T11:00');
+    await expect(plan).toContainText('termin jest za wcześnie');
+    await setDateTime(page, 'Chcę trymować', '2026-03-01T10:00');
+    await expect(plan).toHaveText(/Termin trymowania musi być po toczeniu\./);
+    await expect(explainerSteps(page)).toHaveCount(8);
+    await setDateTime(page, 'Chcę trymować', '2026-03-12T10:00');
+    await expect(plan).toContainText('Mokra przechowalnia: w grze');
+  });
+
+  test('editing the piece and the conditions updates the steps while the section stays open', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const steps = explainerSteps(page);
+    const rate = await steps.nth(5).locator('.rows li').first().textContent();
+    await fill(page, 'Masa po toczeniu', '1000');
+    await expect(steps.nth(1)).toContainText('1000 g ÷ 1,9 g/cm³ ÷ 0,6 cm = 877 cm²');
+    await expect(steps.nth(3)).toContainText('= 6% masy, czyli 60 g wody');
+    await fill(page, 'Temperatura w pracowni', '25');
+    await expect(steps.nth(4)).toContainText('W pracowni przy toczeniu: 25 °C, 50%');
+    await expect(steps.nth(5).locator('.rows li').first()).not.toHaveText(rate!);
+    await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
+  });
+
+  test('the steps follow the language switch', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    await expect(explainerSteps(page).locator('h3').first()).toHaveText('Your piece');
+    await expect(explainerSteps(page).nth(1)).toContainText('500 g ÷ 1.9 g/cm³ ÷ 0.6 cm = 439 cm²');
   });
 });
+
+const explainerSteps = (page: Page): Locator => page.locator('#explain-steps > li');
 
 test.describe('inputs and defaults', () => {
   test('every field starts with the documented default', async ({ page }) => {

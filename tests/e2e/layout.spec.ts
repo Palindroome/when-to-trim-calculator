@@ -127,6 +127,23 @@ test.describe('layout', () => {
     });
   }
 
+  for (const width of [320, 375, 1280]) {
+    test(`${width}px: the open explainer fits, its steps and formulas inside the card`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openApp(page);
+      await page.locator('.explainer summary').click();
+      await expect(page.locator('#explain-steps > li').last()).toBeVisible();
+      await pageFits(page);
+      const card = (await page.locator('.explainer').boundingBox())!;
+      for (const r of await rects(page.locator('#explain-steps .formula'))) {
+        expect(r.left).toBeGreaterThanOrEqual(card.x);
+        expect(r.right).toBeLessThanOrEqual(card.x + card.width);
+      }
+    });
+  }
+
   for (const width of [320, 340, 360, 375, 414, 480, 1280]) {
     test(`${width}px: the day button shows the whole day, in Polish and English`, async ({
       page,
@@ -175,7 +192,7 @@ test.describe('layout', () => {
       '#result',
       '4Sprawdź wagą',
       '5Moje prace i kalibracja',
-      'Jak to liczy (i czego jeszcze nie umie)',
+      'Jak to liczy – krok po kroku',
     ]);
   });
 

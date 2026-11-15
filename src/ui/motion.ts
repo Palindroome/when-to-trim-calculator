@@ -13,6 +13,8 @@ const DUR = { fast: 120, base: 200 } as const;
 const EASE_OUT = 'cubic-bezier(.2,.8,.2,1)';
 /** how far a fading-in element rises, px */
 const RISE = 5;
+/** delay between items of a staggered reveal, ms */
+const STAGGER = 40;
 /** the spring counts as settled within this fraction of the distance */
 const REST = 0.005;
 
@@ -188,6 +190,23 @@ export function reveal(el: HTMLElement): void {
     ],
     { duration: DUR.base, easing: EASE_OUT },
   );
+}
+
+/** Elements fade in with a small rise one after another, each STAGGER ms after the previous one. */
+export function stagger(els: Iterable<HTMLElement>): void {
+  if (prefersReducedMotion()) return;
+  let i = 0;
+  for (const el of els) {
+    play(
+      el,
+      [
+        { opacity: 0, transform: `translateY(${RISE}px)` },
+        { opacity: 1, transform: 'none' },
+      ],
+      // backwards: a waiting element stays hidden until its turn
+      { duration: DUR.base, easing: EASE_OUT, delay: i++ * STAGGER, fill: 'backwards' },
+    );
+  }
 }
 
 /** A new element arrives: fade, rise and a slight scale (spring). */
