@@ -34,14 +34,19 @@ test('controls: 16px text, 44px primary controls, buttons at least 24×24', asyn
     expect(c.font, c.id).toBeGreaterThanOrEqual(16);
     if (!c.sw) expect(c.h, c.id).toBeGreaterThanOrEqual(44);
   }
-  const buttons = await page
-    .locator('button:visible')
-    .evaluateAll((els) => els.map((el) => ({ text: el.textContent, cls: el.className, ...el.getBoundingClientRect().toJSON() })));
+  const buttons = await page.locator('button:visible').evaluateAll((els) =>
+    els.map((el) => ({
+      text: el.textContent,
+      cls: el.className,
+      ...el.getBoundingClientRect().toJSON(),
+    })),
+  );
   expect(buttons.some((b) => b.cls.includes('ghost'))).toBe(true);
   for (const b of buttons) {
     expect(b.width, b.text!).toBeGreaterThanOrEqual(24);
     expect(b.height, b.text!).toBeGreaterThanOrEqual(24);
-    if (b.cls.includes('main') || b.cls.includes('chip')) expect(b.height, b.text!).toBeGreaterThanOrEqual(44);
+    if (b.cls.includes('main') || b.cls.includes('chip'))
+      expect(b.height, b.text!).toBeGreaterThanOrEqual(44);
   }
 });
 
@@ -62,7 +67,12 @@ test('every radius comes from the 4/6/10px scale, no pills', async ({ page }) =>
   await page.locator('#night').check();
   const radii = await page.evaluate(() => {
     const found = new Set<string>();
-    const corners = ['borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius'] as const;
+    const corners = [
+      'borderTopLeftRadius',
+      'borderTopRightRadius',
+      'borderBottomLeftRadius',
+      'borderBottomRightRadius',
+    ] as const;
     for (const el of document.querySelectorAll('*')) {
       for (const pseudo of [null, '::before', '::after']) {
         const s = getComputedStyle(el, pseudo);
@@ -86,7 +96,9 @@ test('Inter is self-hosted: no third-party font request, the font loads', async 
     await document.fonts.ready;
     return {
       check: document.fonts.check('16px Inter'),
-      face: [...document.fonts].some((f) => f.family.replace(/"/g, '') === 'Inter' && f.status === 'loaded'),
+      face: [...document.fonts].some(
+        (f) => f.family.replace(/"/g, '') === 'Inter' && f.status === 'loaded',
+      ),
       family: getComputedStyle(document.body).fontFamily,
     };
   });
@@ -118,5 +130,6 @@ test('colour tokens meet WCAG contrast', async ({ page }) => {
     ['--ring', '--surface', 3],
     ['--ring', '--bg', 3],
   ];
-  for (const [fg, bg, min] of pairs) expect(await tokenContrast(page, fg, bg), `${fg} on ${bg}`).toBeGreaterThanOrEqual(min);
+  for (const [fg, bg, min] of pairs)
+    expect(await tokenContrast(page, fg, bg), `${fg} on ${bg}`).toBeGreaterThanOrEqual(min);
 });

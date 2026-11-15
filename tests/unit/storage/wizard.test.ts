@@ -3,7 +3,11 @@ import { LocalStorageWizardStore, WIZARD_KEY } from '../../../src/storage/wizard
 
 const memory = (init: Record<string, string> = {}) => {
   const data = new Map(Object.entries(init));
-  return { data, getItem: (k: string) => data.get(k) ?? null, setItem: (k: string, v: string) => void data.set(k, v) };
+  return {
+    data,
+    getItem: (k: string) => data.get(k) ?? null,
+    setItem: (k: string, v: string) => void data.set(k, v),
+  };
 };
 
 describe('LocalStorageWizardStore', () => {

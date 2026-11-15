@@ -1,11 +1,21 @@
 // English UI and the PL | EN switch.
 import { expect, type Page, test } from '@playwright/test';
-import { choose, expectDateTime, fill, openApp, STORAGE_KEY, setDateTime, setNight, snapshot } from './helpers';
+import {
+  choose,
+  expectDateTime,
+  fill,
+  openApp,
+  STORAGE_KEY,
+  setDateTime,
+  setNight,
+  snapshot,
+} from './helpers';
 
 const LANG_KEY = 'kiedy-trymowac-lang';
 const SAVE_EN = 'Save this piece with its plan';
 
-const langButton = (page: Page, name: 'Polski' | 'English') => page.getByRole('button', { name, exact: true });
+const langButton = (page: Page, name: 'Polski' | 'English') =>
+  page.getByRole('button', { name, exact: true });
 const toEnglish = async (page: Page): Promise<void> => {
   await langButton(page, 'English').click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
@@ -31,7 +41,8 @@ const DEFAULTS_EN = {
     '71.4286% | target 26.7273%',
     '100% | target 26.7273%',
   ],
-  legend: 'The vertical line is your deadline (2 d 1 h). The number next to a name is how many pieces have calibrated that option.',
+  legend:
+    'The vertical line is your deadline (2 d 1 h). The number next to a name is how many pieces have calibrated that option.',
   alts: [
     'Leave uncovered for 4 h (until Wed 4 Mar 13:15), then put in a closed box.',
     'Cover loosely with a bag (base or rim exposed) for 19 h (until Thu 5 Mar 03:30), then wrap fully in a bag.',
@@ -57,7 +68,13 @@ test.describe('language switch', () => {
       '4Check by weight',
       '5My pieces and calibration',
     ]);
-    await expect(page.locator('#quick .chip')).toHaveText(['tomorrow', 'in 2 days', 'in 3 days', 'in 5 days', 'in a week']);
+    await expect(page.locator('#quick .chip')).toHaveText([
+      'tomorrow',
+      'in 2 days',
+      'in 3 days',
+      'in 5 days',
+      'in a week',
+    ]);
     await expect(page.locator('#pieces')).toContainText('No saved pieces yet.');
     expect(await snapshot(page, SAVE_EN)).toEqual(DEFAULTS_EN);
     // no Polish letters left anywhere in the rendered text
@@ -69,7 +86,9 @@ test.describe('language switch', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Kiedy trymować?');
   });
 
-  test('typed values and the quick date survive a switch; the numbers do not change', async ({ page }) => {
+  test('typed values and the quick date survive a switch; the numbers do not change', async ({
+    page,
+  }) => {
     await openApp(page);
     await fill(page, 'Nazwa (opcjonalnie)', 'kubki');
     await fill(page, 'Masa po toczeniu', '720,5');
@@ -108,7 +127,9 @@ test.describe('language switch', () => {
     expect(await page.locator('#wout').innerText()).toBe(weightPl);
   });
 
-  test('the thrown preset, a calendar-picked day and the cover selection survive a switch together', async ({ page }) => {
+  test('the thrown preset, a calendar-picked day and the cover selection survive a switch together', async ({
+    page,
+  }) => {
     await openApp(page);
     await page.locator('#thrown-quick').getByRole('button', { name: 'wczoraj wieczorem' }).click();
     await setDateTime(page, 'Chcę trymować', '2026-04-20T7.05');
@@ -117,27 +138,43 @@ test.describe('language switch', () => {
     await expect(page.getByRole('checkbox', { name: 'Closed box', exact: true })).not.toBeChecked();
     await expect(page.getByRole('checkbox', { name: 'Uncovered', exact: true })).toBeChecked();
     await expectDateTime(page, 'Wytoczona', '2026-03-03T19:00');
-    await expect(page.locator('#thrown-quick .chip[aria-pressed="true"]')).toHaveText(['last evening']);
+    await expect(page.locator('#thrown-quick .chip[aria-pressed="true"]')).toHaveText([
+      'last evening',
+    ]);
     await expectDateTime(page, 'Chcę trymować', '2026-04-20T07:05');
     await expect(page.locator('#when-day-text')).toHaveText('Mon 20 Apr');
     await expect(page.locator('#quick .chip.on')).toHaveCount(0);
   });
 
-  test('English pickers: labels, day names, an English calendar and a 24 h clock', async ({ page }) => {
+  test('English pickers: labels, day names, an English calendar and a 24 h clock', async ({
+    page,
+  }) => {
     await openApp(page);
     await toEnglish(page);
-    await expect(page.getByRole('button', { name: 'Thrown Day today · Wed 4 Mar', exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Thrown Day today · Wed 4 Mar', exact: true }),
+    ).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'Trim at Time' })).toHaveValue('10:00');
-    await expect(page.getByRole('textbox', { name: 'Trim at Time' })).toHaveAttribute('placeholder', 'hh:mm');
+    await expect(page.getByRole('textbox', { name: 'Trim at Time' })).toHaveAttribute(
+      'placeholder',
+      'hh:mm',
+    );
     await expect(page.locator('#when-day-text')).toHaveText('Fri 6 Mar');
-    await expect(page.locator('#thrown-quick .chip')).toHaveText(['now', 'an hour ago', 'this morning', 'last evening']);
+    await expect(page.locator('#thrown-quick .chip')).toHaveText([
+      'now',
+      'an hour ago',
+      'this morning',
+      'last evening',
+    ]);
     // the calendar follows the page language, and switches back with it
     await page.locator('#when-day-btn').click();
     const dialog = page.locator('#when-cal');
     await expect(dialog.locator('[slot="heading"]')).toContainText('March 2026');
     await expect(dialog.locator('calendar-month th .vh').first()).toHaveText('Monday');
     await expect(dialog.getByRole('button', { name: 'Next month' })).toBeVisible();
-    await expect(dialog.locator('calendar-month button[part~="day"]', { hasText: /^6$/ })).toHaveAccessibleName('March 6');
+    await expect(
+      dialog.locator('calendar-month button[part~="day"]', { hasText: /^6$/ }),
+    ).toHaveAccessibleName('March 6');
     await page.keyboard.press('Escape');
     await langButton(page, 'Polski').click();
     await page.locator('#when-day-btn').click();
@@ -148,7 +185,9 @@ test.describe('language switch', () => {
     const section = page.locator('main > section').nth(2);
     const text =
       (await section.innerText()) +
-      (await section.locator('select, input').evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value).join(' ')));
+      (await section
+        .locator('select, input')
+        .evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value).join(' ')));
     expect(text).not.toMatch(/\b(AM|PM)\b/i);
     await expect(page.locator('#thrown-time')).toHaveValue('19:00');
   });
@@ -188,10 +227,17 @@ test.describe('language switch', () => {
       'Leave uncovered for 4 h (until Wed 4 Mar 12:30), then wrap fully in a bag.Thrown Wed 4 Mar 09:00 · forecast Fri 6 Mar 09:59',
     ]);
     await expect(pieces.nth(1).locator('.badge')).toHaveText('in 2 d 1 h');
-    await expect(pieces.nth(1).getByRole('button')).toHaveText(['too wet', 'just right', 'too dry', 'delete']);
+    await expect(pieces.nth(1).getByRole('button')).toHaveText([
+      'too wet',
+      'just right',
+      'too dry',
+      'delete',
+    ]);
     // the stored label stays in the language it was saved in
     const data = JSON.parse((await storedRaw(page, STORAGE_KEY)) ?? 'null');
-    expect(data.pieces[1].label).toBe('Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.');
+    expect(data.pieces[1].label).toBe(
+      'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.',
+    );
   });
 
   test('feedback and calibration keep working in English', async ({ page }) => {
@@ -202,9 +248,15 @@ test.describe('language switch', () => {
     await page.getByRole('button', { name: 'just right' }).click();
     await expect(page.locator('#pieces .badge')).toHaveText('just right · after 2 d 2 h');
     await expect(page.locator('#pieces b')).toHaveText('Piece 1');
-    await expect(page.locator('#calib tr')).toHaveText(['OptionTime multiplierPieces', 'Fully bagged× 1.011']);
+    await expect(page.locator('#calib tr')).toHaveText([
+      'OptionTime multiplierPieces',
+      'Fully bagged× 1.011',
+    ]);
     await langButton(page, 'Polski').click();
-    await expect(page.locator('#calib tr')).toHaveText(['WariantMnożnik czasuPrace', 'Cały worek× 1,011']);
+    await expect(page.locator('#calib tr')).toHaveText([
+      'WariantMnożnik czasuPrace',
+      'Cały worek× 1,011',
+    ]);
   });
 
   test('keyboard operable, with pressed state and accessible names', async ({ page }) => {
@@ -236,7 +288,9 @@ test.describe('language switch', () => {
     [375, 812],
     [1280, 900],
   ] as const) {
-    test(`${width}px: the switch is at the top, large enough, and nothing overflows`, async ({ page }) => {
+    test(`${width}px: the switch is at the top, large enough, and nothing overflows`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height });
       await openApp(page);
       for (const lang of ['pl', 'en']) {
@@ -301,7 +355,9 @@ test.describe('initial language', () => {
       };
       await openApp(page, { storage: JSON.stringify(data) });
       await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
-      await expect(page.locator('#pieces .meta')).toContainText('Włóż do zamkniętego pudełka od razu.');
+      await expect(page.locator('#pieces .meta')).toContainText(
+        'Włóż do zamkniętego pudełka od razu.',
+      );
       expect(await storedRaw(page, LANG_KEY)).toBeNull();
     });
 

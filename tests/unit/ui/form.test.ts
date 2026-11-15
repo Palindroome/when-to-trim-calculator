@@ -3,7 +3,15 @@ import { DEFAULT_PARAMS } from '../../../src/domain/params';
 import { createFormatter } from '../../../src/i18n';
 import { en } from '../../../src/i18n/en';
 import { pl } from '../../../src/i18n/pl';
-import { combineLocalDateTime, dayLabel, normalizeTime, parseNumber, readAllowedCovers, toDayKey, toTime } from '../../../src/ui/form';
+import {
+  combineLocalDateTime,
+  dayLabel,
+  normalizeTime,
+  parseNumber,
+  readAllowedCovers,
+  toDayKey,
+  toTime,
+} from '../../../src/ui/form';
 
 describe('parseNumber', () => {
   it.each([
@@ -47,7 +55,22 @@ describe('normalizeTime', () => {
   ])('%j -> %s', (raw, time) => {
     expect(normalizeTime(raw)).toBe(time);
   });
-  it.each(['', ' ', '24:00', '24', '9:60', '960', 'abc', '9:', ':17', '9:5', '12345', '-1', '9 17', '9pm'])('%j is invalid', (raw) => {
+  it.each([
+    '',
+    ' ',
+    '24:00',
+    '24',
+    '9:60',
+    '960',
+    'abc',
+    '9:',
+    ':17',
+    '9:5',
+    '12345',
+    '-1',
+    '9 17',
+    '9pm',
+  ])('%j is invalid', (raw) => {
     expect(normalizeTime(raw)).toBeNull();
   });
 });
@@ -58,7 +81,8 @@ describe('combineLocalDateTime', () => {
     expect(combineLocalDateTime('2026-03-04', '09:00')).toBe(new Date(2026, 2, 4, 9, 0).getTime());
   });
   it('is NaN for an invalid time or an empty day', () => {
-    for (const t of ['', '24:00', '9:60', 'abc']) expect(combineLocalDateTime('2026-03-04', t)).toBeNaN();
+    for (const t of ['', '24:00', '9:60', 'abc'])
+      expect(combineLocalDateTime('2026-03-04', t)).toBeNaN();
     expect(combineLocalDateTime('', '09:00')).toBeNaN();
   });
   it('treats DST change days like the former datetime-local value', () => {
@@ -100,7 +124,9 @@ describe('dayLabel', () => {
     const lastOfMarch = new Date(2026, 2, 31, 23, 30).getTime();
     expect(dayLabel(pl, fmt, '2026-04-01', lastOfMarch)).toBe('jutro · śr 1.04');
     // Europe/Warsaw moves to summer time on 29 March 2026
-    expect(dayLabel(pl, fmt, '2026-03-28', new Date(2026, 2, 29, 0, 30).getTime())).toBe('wczoraj · sob 28.03');
+    expect(dayLabel(pl, fmt, '2026-03-28', new Date(2026, 2, 29, 0, 30).getTime())).toBe(
+      'wczoraj · sob 28.03',
+    );
     expect(dayLabel(pl, fmt, '', now)).toBe('');
   });
 });
@@ -117,7 +143,9 @@ describe('readAllowedCovers', () => {
       { cover: 'partial', checked: true },
       { cover: 'damp', checked: false },
     ].map(({ cover, checked }) => ({ checked, dataset: { cover } }));
-    vi.stubGlobal('document', { querySelectorAll: (sel: string) => (sel === 'input[data-cover]' ? boxes : []) });
+    vi.stubGlobal('document', {
+      querySelectorAll: (sel: string) => (sel === 'input[data-cover]' ? boxes : []),
+    });
     expect(readAllowedCovers(DEFAULT_PARAMS.covers)).toEqual(['partial', 'full', 'box']);
   });
 });

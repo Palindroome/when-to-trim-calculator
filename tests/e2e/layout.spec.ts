@@ -18,20 +18,27 @@ test.describe('layout', () => {
       // at the end of <main> the whole result is inside the window
       await page.evaluate(() => document.querySelector('main')!.scrollIntoView({ block: 'end' }));
       expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
-      const atMainEnd = await page.locator('#result').evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
+      const atMainEnd = await page
+        .locator('#result')
+        .evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
       expect(atMainEnd.top).toBeGreaterThanOrEqual(0);
       expect(atMainEnd.bottom).toBeLessThanOrEqual(900);
 
       // after scrolling to "5 Moje prace", and at the very end of the page, the result stays above the site
       // footer and inside the window, moved up by no more than the part of the footer that is in view
       for (const scroll of [
-        () => document.getElementById('pieces')!.closest('section')!.scrollIntoView({ block: 'start' }),
+        () =>
+          document.getElementById('pieces')!.closest('section')!.scrollIntoView({ block: 'start' }),
         () => window.scrollTo(0, document.documentElement.scrollHeight),
       ]) {
         await page.evaluate(scroll);
         expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
-        const r = await page.locator('#result').evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
-        const footerTop = await page.locator('footer').evaluate((el) => el.getBoundingClientRect().top);
+        const r = await page
+          .locator('#result')
+          .evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
+        const footerTop = await page
+          .locator('footer')
+          .evaluate((el) => el.getBoundingClientRect().top);
         expect(r.top).toBeGreaterThanOrEqual(Math.min(0, footerTop - 900));
         expect(r.bottom).toBeLessThanOrEqual(Math.min(900, footerTop));
       }
@@ -60,7 +67,11 @@ test.describe('layout', () => {
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
     return clientWidth;
   };
-  const expectInside = async (boxes: DOMRect[], clientWidth: number, clientHeight = Infinity): Promise<void> => {
+  const expectInside = async (
+    boxes: DOMRect[],
+    clientWidth: number,
+    clientHeight = Infinity,
+  ): Promise<void> => {
     for (const box of boxes) {
       expect(box.x).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
@@ -68,7 +79,8 @@ test.describe('layout', () => {
       expect(box.height).toBeGreaterThanOrEqual(44);
     }
   };
-  const rects = (l: Locator): Promise<DOMRect[]> => l.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
+  const rects = (l: Locator): Promise<DOMRect[]> =>
+    l.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
 
   for (const [width, height] of [
     [320, 640],
@@ -77,16 +89,22 @@ test.describe('layout', () => {
     [480, 900],
     [1280, 900],
   ] as const) {
-    test(`${width}px: no horizontal scroll, date-time controls and the open calendar fully visible, 44px targets`, async ({ page }) => {
+    test(`${width}px: no horizontal scroll, date-time controls and the open calendar fully visible, 44px targets`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height });
       await openApp(page);
       const clientWidth = await pageFits(page);
-      const controls = page.locator('.dt-row button, .dt-row input:not([type="hidden"]), .chips button');
+      const controls = page.locator(
+        '.dt-row button, .dt-row input:not([type="hidden"]), .chips button',
+      );
       expect(await controls.count()).toBe(2 * 2 + 4 + 5);
       await expectInside(await rects(controls), clientWidth);
       // the time field shows the whole HH:MM
       for (const id of ['#thrown-time', '#when-time']) {
-        expect(await page.locator(id).evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+        expect(await page.locator(id).evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(
+          true,
+        );
       }
       for (const id of ['thrown', 'when']) {
         await page.locator(`#${id}-day-btn`).click();
@@ -110,7 +128,9 @@ test.describe('layout', () => {
   }
 
   for (const width of [320, 340, 360, 375, 414, 480, 1280]) {
-    test(`${width}px: the day button shows the whole day, in Polish and English`, async ({ page }) => {
+    test(`${width}px: the day button shows the whole day, in Polish and English`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height: 900 });
       // the longest labels: a relative word, a two-digit day and a wide month, e.g. "yesterday · Mon 24 May"
       await openApp(page, { now: '2027-05-25T09:00:00+02:00' });
@@ -124,7 +144,10 @@ test.describe('layout', () => {
         await page.getByRole('button', { name: lang, exact: true }).click();
         for (const id of ['#thrown-day-text', '#when-day-text']) {
           await expect(page.locator(id)).toHaveText(label);
-          expect(await page.locator(id).evaluate((el) => el.scrollWidth <= el.clientWidth), `${id} ${label}`).toBe(true);
+          expect(
+            await page.locator(id).evaluate((el) => el.scrollWidth <= el.clientWidth),
+            `${id} ${label}`,
+          ).toBe(true);
         }
       }
     });
@@ -135,7 +158,15 @@ test.describe('layout', () => {
     const order = await page
       .locator('main > section')
       .evaluateAll((els) =>
-        els.map((e) => (e.id ? `#${e.id}` : (e.querySelector('h2')?.textContent ?? e.querySelector('summary')?.textContent ?? '').trim())),
+        els.map((e) =>
+          e.id
+            ? `#${e.id}`
+            : (
+                e.querySelector('h2')?.textContent ??
+                e.querySelector('summary')?.textContent ??
+                ''
+              ).trim(),
+        ),
       );
     expect(order).toEqual([
       '1Praca',
@@ -168,6 +199,8 @@ test.describe('layout', () => {
     await openApp(page);
     await page.locator('#quick').getByRole('button', { name: 'jutro' }).click();
     await expect(page.locator('.bar .fill.good')).toHaveCount(1);
-    await expect(page.locator('.bar').filter({ has: page.locator('.fill.good') })).toContainText('Worek częściowo');
+    await expect(page.locator('.bar').filter({ has: page.locator('.fill.good') })).toContainText(
+      'Worek częściowo',
+    );
   });
 });

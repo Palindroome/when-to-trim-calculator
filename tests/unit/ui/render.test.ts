@@ -8,7 +8,12 @@ import { renderSummaries, type SummaryInput } from '../../../src/ui/features/car
 import { renderPieceList } from '../../../src/ui/features/pieces/pieces';
 import type { View } from '../../../src/ui/render';
 
-const view = (m: Messages): View => ({ m, params: DEFAULT_PARAMS, fmt: createFormatter(m, 30), covers: DEFAULT_PARAMS.covers });
+const view = (m: Messages): View => ({
+  m,
+  params: DEFAULT_PARAMS,
+  fmt: createFormatter(m, 30),
+  covers: DEFAULT_PARAMS.covers,
+});
 const start = new Date(2026, 2, 4, 9, 0).getTime();
 
 const piece = (over: Partial<StoredPiece>): StoredPiece => ({
@@ -36,7 +41,10 @@ const planLine = (v: View, p: StoredPiece): string => {
 
 describe('renderPieceList plan sentence', () => {
   it('re-renders a single-cover plan in the current language', () => {
-    const p = piece({ plan: [{ w: 'box', h: null }], label: 'Włóż do zamkniętego pudełka od razu.' });
+    const p = piece({
+      plan: [{ w: 'box', h: null }],
+      label: 'Włóż do zamkniętego pudełka od razu.',
+    });
     expect(planLine(view(en), p)).toBe('Put in a closed box straight away.');
     expect(planLine(view(pl), p)).toBe('Włóż do zamkniętego pudełka od razu.');
   });
@@ -49,7 +57,9 @@ describe('renderPieceList plan sentence', () => {
       ],
       label: 'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń całą w worek.',
     });
-    expect(planLine(view(en), p)).toBe('Leave uncovered for 4 h (until Wed 4 Mar 12:30), then wrap fully in a bag.');
+    expect(planLine(view(en), p)).toBe(
+      'Leave uncovered for 4 h (until Wed 4 Mar 12:30), then wrap fully in a bag.',
+    );
     // Polish output equals the label the current app stores for this piece
     expect(planLine(view(pl), p)).toBe(p.label);
   });
@@ -90,8 +100,26 @@ describe('renderPieceList plan sentence', () => {
 describe('renderSummaries', () => {
   const input: SummaryInput = {
     name: '',
-    piece: { massG: 500, shape: 'cyl', wallMm: 6, baseMm: 9, clay: 'stone', bat: 'wood', wetness: 'normal', stage: 'trim' },
-    conditions: { temp: 20, rh: 50, airflow: 'light', night: false, nightTemp: 15, nightRh: 60, dampTemp: 15, dampRh: 88 },
+    piece: {
+      massG: 500,
+      shape: 'cyl',
+      wallMm: 6,
+      baseMm: 9,
+      clay: 'stone',
+      bat: 'wood',
+      wetness: 'normal',
+      stage: 'trim',
+    },
+    conditions: {
+      temp: 20,
+      rh: 50,
+      airflow: 'light',
+      night: false,
+      nightTemp: 15,
+      nightRh: 60,
+      dampTemp: 15,
+      dampRh: 88,
+    },
     thrownMs: start,
     whenMs: new Date(2026, 2, 6, 10, 0).getTime(),
   };
@@ -112,12 +140,16 @@ describe('renderSummaries', () => {
       conditions: { ...input.conditions, night: true },
       whenMs: NaN,
     });
-    expect(piece).toBe('kubki · Kubek / cylinder · 500 g · ścianka 6,5 mm, dno 6,5 mm · Kamionka gładka');
+    expect(piece).toBe(
+      'kubki · Kubek / cylinder · 500 g · ścianka 6,5 mm, dno 6,5 mm · Kamionka gładka',
+    );
     expect(conditions).toBe('20 °C, 50% · Lekki ruch (ludzie, wentylacja) · noc 15 °C, 60%');
     expect(schedule).toBe('Wytoczona śr 4.03 09:00 · trymowanie –');
   });
 
   it('follows the language', () => {
-    expect(renderSummaries(view(en), input)[2]).toBe('Thrown Wed 4 Mar 09:00 · trim Fri 6 Mar 10:00');
+    expect(renderSummaries(view(en), input)[2]).toBe(
+      'Thrown Wed 4 Mar 09:00 · trim Fri 6 Mar 10:00',
+    );
   });
 });

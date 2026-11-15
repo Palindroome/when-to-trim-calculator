@@ -11,7 +11,13 @@ export const psat = (tempC: number): number => 6.112 * Math.exp((17.62 * tempC) 
  * interface and be passed to the simulator/planner instead.
  */
 export interface RateModel {
-  rate(cover: CoverDefinition, timeMs: number, piece: Piece, conditions: Conditions, multipliers: CoverMultipliers): number;
+  rate(
+    cover: CoverDefinition,
+    timeMs: number,
+    piece: Piece,
+    conditions: Conditions,
+    multipliers: CoverMultipliers,
+  ): number;
 }
 
 /** Evaporation driven by the vapour-pressure deficit, airflow and exposed area. */
@@ -31,11 +37,15 @@ export function physicalRateModel(p: ModelParams): RateModel {
         temp = isNight ? env.nightTemp : env.temp;
         rh = isNight ? env.nightRh : env.rh;
         const airflow = p.airflowFactor[env.airflow];
-        air = cover.airflow === 'full' ? airflow : cover.airflow === 'damped' ? Math.sqrt(airflow) : 1;
+        air =
+          cover.airflow === 'full' ? airflow : cover.airflow === 'damped' ? Math.sqrt(airflow) : 1;
       }
       const clampedRh = Math.min(p.rhClamp.max, Math.max(p.rhClamp.min, rh));
       const vpd = Math.max(p.minVpd, psat(temp) * (1 - clampedRh / 100));
-      return (p.evaporationCoefficient * piece.area * vpd * air * cover.factor) / (piece.slow * (multipliers[cover.id] ?? 1));
+      return (
+        (p.evaporationCoefficient * piece.area * vpd * air * cover.factor) /
+        (piece.slow * (multipliers[cover.id] ?? 1))
+      );
     },
   };
 }

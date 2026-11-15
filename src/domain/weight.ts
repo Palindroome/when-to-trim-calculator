@@ -6,7 +6,9 @@ export type WeightAssessment =
   | {
       state: 'wet';
       lossPct: number;
-      estimate: { kind: 'observedRate'; gramsPerHour: number; remainingHours: number } | { kind: 'model'; remainingHours: number };
+      estimate:
+        | { kind: 'observedRate'; gramsPerHour: number; remainingHours: number }
+        | { kind: 'model'; remainingHours: number };
     }
   | { state: 'ok'; lossPct: number }
   | { state: 'dry'; lossPct: number };
@@ -38,7 +40,11 @@ export function assessWeight(input: WeightCheckInput, ctx: DryingContext): Weigh
     const need = (piece.mass * piece.lossPct) / 100 - lostG;
     if (elapsed > params.weightCheck.minObservedHours && lostG > 0) {
       const gramsPerHour = lostG / elapsed;
-      return { state: 'wet', lossPct, estimate: { kind: 'observedRate', gramsPerHour, remainingHours: need / gramsPerHour } };
+      return {
+        state: 'wet',
+        lossPct,
+        estimate: { kind: 'observedRate', gramsPerHour, remainingHours: need / gramsPerHour },
+      };
     }
     const remainingHours = hoursToLoss(
       [{ cover: input.cover, hours: Infinity }],

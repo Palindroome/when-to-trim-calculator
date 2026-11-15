@@ -29,7 +29,10 @@ export interface Calibrator {
   learn(sample: CalibrationSample): void;
 }
 
-export type CalibratorFactory = (samples: readonly CalibrationSample[], params: ModelParams) => Calibrator;
+export type CalibratorFactory = (
+  samples: readonly CalibrationSample[],
+  params: ModelParams,
+) => Calibrator;
 
 /** Geometric mean of the samples, shrunk towards 1 while there are few of them. */
 export const geometricMeanCalibrator: CalibratorFactory = (initial, params) => {
@@ -71,7 +74,12 @@ export interface FeedbackOutcome {
 }
 
 /** Returns `null` when the feedback comes too early to be meaningful. */
-export function feedbackToSample(rec: PredictionRecord, kind: FeedbackKind, nowMs: number, params: ModelParams): FeedbackOutcome | null {
+export function feedbackToSample(
+  rec: PredictionRecord,
+  kind: FeedbackKind,
+  nowMs: number,
+  params: ModelParams,
+): FeedbackOutcome | null {
   const actualHours = (nowMs - rec.startMs) / MS_PER_HOUR;
   if (actualHours <= params.calibration.minFeedbackHours) return null;
   const adj = params.calibration.feedbackAdjust[kind];

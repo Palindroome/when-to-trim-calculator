@@ -42,7 +42,8 @@ export const en: Messages = {
 
   wizard: {
     label: 'Step-by-step guide',
-    progress: (step: number, total: number, title: string): string => `Step ${step} of ${total}: ${title}`,
+    progress: (step: number, total: number, title: string): string =>
+      `Step ${step} of ${total}: ${title}`,
     next: 'Next',
     back: 'Back',
     finish: 'Show the result',
@@ -75,10 +76,26 @@ export const en: Messages = {
     collapse: 'Collapse',
     editLabel: (section: string): string => `Edit: ${section}`,
     collapseLabel: (section: string): string => `Collapse: ${section}`,
-    piece: (name: string, shape: string, mass: string, wall: string, base: string, clay: string): string =>
-      [name, shape, `${mass} g`, `walls ${wall} mm, base ${base} mm`, clay].filter(Boolean).join(' · '),
-    conditions: (temp: string, rh: string, airflow: string, night?: { temp: string; rh: string }): string =>
-      [`${temp} °C, ${rh}%`, airflow, night && `night ${night.temp} °C, ${night.rh}%`].filter(Boolean).join(' · '),
+    piece: (
+      name: string,
+      shape: string,
+      mass: string,
+      wall: string,
+      base: string,
+      clay: string,
+    ): string =>
+      [name, shape, `${mass} g`, `walls ${wall} mm, base ${base} mm`, clay]
+        .filter(Boolean)
+        .join(' · '),
+    conditions: (
+      temp: string,
+      rh: string,
+      airflow: string,
+      night?: { temp: string; rh: string },
+    ): string =>
+      [`${temp} °C, ${rh}%`, airflow, night && `night ${night.temp} °C, ${night.rh}%`]
+        .filter(Boolean)
+        .join(' · '),
     schedule: (thrown: string, when: string): string => `Thrown ${thrown} · trim ${when}`,
   },
 
@@ -146,7 +163,8 @@ export const en: Messages = {
     },
   },
 
-  quickDate: (days: number): string => (days === 1 ? 'tomorrow' : days === 7 ? 'in a week' : `in ${days} days`),
+  quickDate: (days: number): string =>
+    days === 1 ? 'tomorrow' : days === 7 ? 'in a week' : `in ${days} days`,
 
   dateTime: {
     day: 'Day',
@@ -180,7 +198,8 @@ export const en: Messages = {
     },
     phrase: coverPhrase,
     filterTitle: 'Covering methods I can use',
-    filterHint: "Untick what you can't or don't want to use this time. It applies only to this piece and its saved plan.",
+    filterHint:
+      "Untick what you can't or don't want to use this time. It applies only to this piece and its saved plan.",
     filterLastOne: 'Keep at least one method ticked.',
   },
 
@@ -225,15 +244,19 @@ export const en: Messages = {
       'The air is dry or there is a draught. The rim and handles will dry much faster than the base, so wrap them with a strip of plastic or turn the piece upside down once the rim stiffens.',
     thickBase:
       'Thick base or closed form: before trimming, check the base itself by weight or by touch. The walls are usually ready earlier.',
-    mould: 'More than 6 days in the damp: check every 2–3 days for mould, especially on a wooden board.',
+    mould:
+      'More than 6 days in the damp: check every 2–3 days for mould, especially on a wooden board.',
   },
 
   weight: {
-    tooSoft: (loss: string, estimate: string): string => `Loss ${loss}%: still too soft.${estimate}`,
+    tooSoft: (loss: string, estimate: string): string =>
+      `Loss ${loss}%: still too soft.${estimate}`,
     observedRate: (gramsPerHour: string, remaining: string): string =>
       ` At the current rate (${gramsPerHour} g/h) about ${remaining} to go.`,
-    modelEstimate: (remaining: string): string => ` With this covering it needs about ${remaining} more.`,
-    inWindow: (loss: string): string => `Loss ${loss}%: it is in the trimming window. If you trim later, wrap it in a bag.`,
+    modelEstimate: (remaining: string): string =>
+      ` With this covering it needs about ${remaining} more.`,
+    inWindow: (loss: string): string =>
+      `Loss ${loss}%: it is in the trimming window. If you trim later, wrap it in a bag.`,
     tooHard: (loss: string): string =>
       `Loss ${loss}%: probably already too firm for smooth trimming. Try wrapping it with a damp sponge for a few hours.`,
   },
@@ -257,7 +280,8 @@ export const en: Messages = {
     multiplier: 'Time multiplier',
     count: 'Pieces',
     value: (m: string): string => `× ${m}`,
-    noteHtml: 'A multiplier &gt; 1 means this option dries more slowly in your studio than the model assumes.',
+    noteHtml:
+      'A multiplier &gt; 1 means this option dries more slowly in your studio than the model assumes.',
   },
 
   explainer: {
@@ -289,7 +313,20 @@ export const en: Messages = {
   /** Inputs for the locale-aware formatter (../i18n/format.ts). */
   format: {
     weekdaysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    monthsShort: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
     decimalSeparator: '.',
     minutes: (n: number): string => `${n} min`,
     hours: (n: number): string => `${n} h`,
@@ -297,9 +334,16 @@ export const en: Messages = {
     daysHours: (d: number, h: number): string => `${d} d ${h} h`,
     beyondHorizon: (days: number): string => `> ${days} days`,
     /** e.g. "Wed 4 Mar" */
-    date: (weekday: string, day: number, _month: string, monthShort: string): string => `${weekday} ${day} ${monthShort}`,
+    date: (weekday: string, day: number, _month: string, monthShort: string): string =>
+      `${weekday} ${day} ${monthShort}`,
     /** e.g. "Wed 4 Mar 10:00" */
-    dateTime: (weekday: string, day: number, _month: string, hh: string, mm: string, monthShort: string): string =>
-      `${weekday} ${day} ${monthShort} ${hh}:${mm}`,
+    dateTime: (
+      weekday: string,
+      day: number,
+      _month: string,
+      hh: string,
+      mm: string,
+      monthShort: string,
+    ): string => `${weekday} ${day} ${monthShort} ${hh}:${mm}`,
   },
 };

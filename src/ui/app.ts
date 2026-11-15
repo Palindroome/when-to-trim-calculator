@@ -32,7 +32,16 @@ export type { AppDeps } from './context';
 const DEFAULT_IDLE_RESET_MS = 60 * 60 * 1000;
 
 /** Features with wiring, mounted on every freshly rendered shell. */
-const FEATURES = [header, pieceSection, conditionsSection, datetime, coverFilter, result, weight, piecesSection];
+const FEATURES = [
+  header,
+  pieceSection,
+  conditionsSection,
+  datetime,
+  coverFilter,
+  result,
+  weight,
+  piecesSection,
+];
 
 export function startApp(deps: AppDeps): void {
   const { root, params, repository, conditions, rateModel } = deps;
@@ -109,7 +118,10 @@ export function startApp(deps: AppDeps): void {
 
     let window: { start: number; end: number } | undefined;
     if (rec.status === 'onTarget') {
-      const [ws, we] = simulate(rec.option.plan, dc, [piece.softPct, piece.hardPct]) as [number, number];
+      const [ws, we] = simulate(rec.option.plan, dc, [piece.softPct, piece.hardPct]) as [
+        number,
+        number,
+      ];
       window = { start: ws, end: we };
       saveable = { piece, startMs, option: rec.option, ws, we };
     } else if (rec.status === 'invalidDeadline') {
@@ -119,8 +131,25 @@ export function startApp(deps: AppDeps): void {
     }
 
     const tips = tipsFor(rec, piece, dc.conditions, params, covers);
-    result.update(view, { piece, startMs, plan, window, tips, calibration: ctx.perCover(), canSave: saveable !== null, allowed });
-    cards.update(renderSummaries(view, { name: readName(), piece: input, conditions: dc.conditions, thrownMs: startMs, whenMs }));
+    result.update(view, {
+      piece,
+      startMs,
+      plan,
+      window,
+      tips,
+      calibration: ctx.perCover(),
+      canSave: saveable !== null,
+      allowed,
+    });
+    cards.update(
+      renderSummaries(view, {
+        name: readName(),
+        piece: input,
+        conditions: dc.conditions,
+        thrownMs: startMs,
+        whenMs,
+      }),
+    );
     weight.update(ctx);
   }
 

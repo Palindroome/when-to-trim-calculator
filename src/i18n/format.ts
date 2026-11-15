@@ -38,7 +38,12 @@ export function createFormatter(m: Messages, horizonDays: number): Formatter {
     },
     date(ms) {
       const d = new Date(ms);
-      return f.date(String(f.weekdaysShort[d.getDay()]), d.getDate(), pad(d.getMonth() + 1), String(f.monthsShort[d.getMonth()]));
+      return f.date(
+        String(f.weekdaysShort[d.getDay()]),
+        d.getDate(),
+        pad(d.getMonth() + 1),
+        String(f.monthsShort[d.getMonth()]),
+      );
     },
     decimal(x, digits) {
       return x.toFixed(digits).replace('.', f.decimalSeparator);

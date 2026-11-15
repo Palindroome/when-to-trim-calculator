@@ -4,14 +4,17 @@ import { readFileSync } from 'node:fs';
 import { expect, type Page, test } from '@playwright/test';
 import { fill, openApp, type Snapshot, STORAGE_KEY, snapshot, WIZARD_KEY } from './helpers';
 
-const GOLDEN = JSON.parse(readFileSync(new URL('./golden.json', import.meta.url), 'utf-8')) as Record<string, Snapshot>;
+const GOLDEN = JSON.parse(
+  readFileSync(new URL('./golden.json', import.meta.url), 'utf-8'),
+) as Record<string, Snapshot>;
 
 const progress = (page: Page) => page.locator('#wizard-progress');
 const next = (page: Page) => page.getByRole('button', { name: 'Dalej' });
 const back = (page: Page) => page.getByRole('button', { name: 'Wstecz' });
 const finish = (page: Page) => page.getByRole('button', { name: 'Pokaż wynik' });
 const skip = (page: Page) => page.getByRole('button', { name: 'Pomiń – pokaż cały formularz' });
-const newPiece = (page: Page) => page.locator('.wizard-bar').getByRole('button', { name: 'Nowa praca' });
+const newPiece = (page: Page) =>
+  page.locator('.wizard-bar').getByRole('button', { name: 'Nowa praca' });
 const toggle = (page: Page, n: number) =>
   page
     .locator('main > section[data-step]')
@@ -27,7 +30,15 @@ const visibleSections = (page: Page) =>
   page
     .locator('main > section:visible')
     .evaluateAll((els) =>
-      els.map((e) => (e.id ? `#${e.id}` : (e.querySelector('h2')?.textContent ?? e.querySelector('summary')?.textContent ?? '').trim())),
+      els.map((e) =>
+        e.id
+          ? `#${e.id}`
+          : (
+              e.querySelector('h2')?.textContent ??
+              e.querySelector('summary')?.textContent ??
+              ''
+            ).trim(),
+      ),
     );
 const focused = (page: Page) =>
   page.evaluate(() => {
@@ -51,7 +62,9 @@ async function walkThrough(page: Page): Promise<void> {
 }
 
 test.describe('wizard', () => {
-  test('first visit starts at step 1 with only that section, progress announced politely', async ({ page }) => {
+  test('first visit starts at step 1 with only that section, progress announced politely', async ({
+    page,
+  }) => {
     await openApp(page, { wizard: true });
     expect(await visibleSections(page)).toEqual(['1Praca']);
     await expect(progress(page)).toHaveText('Krok 1 z 3: Praca');
@@ -64,7 +77,9 @@ test.describe('wizard', () => {
     await expect(summary(page, 1)).toBeHidden();
   });
 
-  test('Dalej / Wstecz walk the three steps by keyboard, focus moves to each step heading', async ({ page }) => {
+  test('Dalej / Wstecz walk the three steps by keyboard, focus moves to each step heading', async ({
+    page,
+  }) => {
     await openApp(page, { wizard: true });
     for (const [section, text] of [
       ['2Warunki', 'Krok 2 z 3: Warunki'],
@@ -84,13 +99,17 @@ test.describe('wizard', () => {
     expect(await focused(page)).toBe('2Warunki');
   });
 
-  test('after step 3 the whole page shows, with sections 1–3 as collapsed summary cards', async ({ page }) => {
+  test('after step 3 the whole page shows, with sections 1–3 as collapsed summary cards', async ({
+    page,
+  }) => {
     await openApp(page, { wizard: true });
     await walkThrough(page);
     expect(await visibleSections(page)).toEqual(ALL);
     expect(await focused(page)).toBe('#result');
     expect(await snapshot(page)).toEqual(GOLDEN.defaults);
-    await expect(summary(page, 1)).toHaveText('Kubek / cylinder · 500 g · ścianka 6 mm, dno 9 mm · Kamionka gładka');
+    await expect(summary(page, 1)).toHaveText(
+      'Kubek / cylinder · 500 g · ścianka 6 mm, dno 9 mm · Kamionka gładka',
+    );
     await expect(summary(page, 2)).toHaveText('20 °C, 50% · Lekki ruch (ludzie, wentylacja)');
     await expect(summary(page, 3)).toHaveText('Wytoczona śr 4.03 09:00 · trymowanie pt 6.03 10:00');
     for (const n of [1, 2, 3]) {
@@ -137,7 +156,9 @@ test.describe('wizard', () => {
     await expect(progress(page)).toBeHidden();
   });
 
-  test('the wizard can be re-opened from the full form through the welcome screen', async ({ page }) => {
+  test('the wizard can be re-opened from the full form through the welcome screen', async ({
+    page,
+  }) => {
     await openApp(page);
     expect(await visibleSections(page)).toEqual(ALL);
     await newPiece(page).click();
@@ -151,7 +172,9 @@ test.describe('wizard', () => {
 });
 
 test.describe('summary cards', () => {
-  test('clicking a card opens its fields; edits update the result live and the summary after collapsing', async ({ page }) => {
+  test('clicking a card opens its fields; edits update the result live and the summary after collapsing', async ({
+    page,
+  }) => {
     await openApp(page, { wizard: true });
     await walkThrough(page);
     // anywhere on the collapsed card (here: its summary line) opens it
@@ -171,7 +194,9 @@ test.describe('summary cards', () => {
     await expect(summary(page, 1)).toContainText('2000 g');
   });
 
-  test('a card opens and closes from the keyboard and keeps focus on its toggle', async ({ page }) => {
+  test('a card opens and closes from the keyboard and keeps focus on its toggle', async ({
+    page,
+  }) => {
     await openApp(page, { wizard: true });
     await walkThrough(page);
     await toggle(page, 3).focus();
@@ -206,7 +231,9 @@ test.describe('summary cards', () => {
 });
 
 for (const width of [320, 375, 1280]) {
-  test(`${width}px: wizard steps and summary cards fit without horizontal scroll`, async ({ page }) => {
+  test(`${width}px: wizard steps and summary cards fit without horizontal scroll`, async ({
+    page,
+  }) => {
     await page.setViewportSize({ width, height: 800 });
     await openApp(page, { wizard: true });
     const noScroll = async (): Promise<void> => {

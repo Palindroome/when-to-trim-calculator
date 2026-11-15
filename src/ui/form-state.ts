@@ -15,7 +15,9 @@ export interface FormState {
 
 export function captureForm(root: HTMLElement, covers: readonly CoverDefinition[]): FormState {
   return {
-    fields: [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input[id],select')].map((e) => ({
+    fields: [
+      ...root.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input[id],select'),
+    ].map((e) => ({
       id: e.id,
       value: e.value,
       checked: e instanceof HTMLInputElement && e.checked,

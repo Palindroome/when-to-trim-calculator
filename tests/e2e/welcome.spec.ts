@@ -18,7 +18,8 @@ const PRIVACY_EN =
 const explainer = (page: Page) => page.locator('main > section:has(details)');
 const rows = (page: Page) => page.locator('#welcome-list > li');
 const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
-const focused = (page: Page) => page.evaluate(() => document.activeElement?.id || document.activeElement?.textContent?.trim());
+const focused = (page: Page) =>
+  page.evaluate(() => document.activeElement?.id || document.activeElement?.textContent?.trim());
 
 const PIECE = {
   id: 'abc',
@@ -41,14 +42,20 @@ const THREE = JSON.stringify({
   pieces: [
     PIECE,
     { ...PIECE, id: 'def', name: 'talerze', predH: 10 },
-    { ...PIECE, id: 'ghi', name: 'kubki', fb: { kind: 'ok', actualH: 20, sample: 1, at: Date.parse('2026-03-04T08:00:00+01:00') } },
+    {
+      ...PIECE,
+      id: 'ghi',
+      name: 'kubki',
+      fb: { kind: 'ok', actualH: 20, sample: 1, at: Date.parse('2026-03-04T08:00:00+01:00') },
+    },
   ],
 });
 
 async function expectCollapsedPage(page: Page): Promise<void> {
   await expect(screen(page)).toBeHidden();
   await expect(page.locator('main > section[data-step]')).toHaveCount(3);
-  for (const card of await page.locator('main > section[data-step]').all()) await expect(card).toHaveClass(/\bcollapsed\b/);
+  for (const card of await page.locator('main > section[data-step]').all())
+    await expect(card).toHaveClass(/\bcollapsed\b/);
   await expect(page.locator('#mass')).toBeHidden();
   await expect(page.locator('main > section[data-step] .summary').first()).toBeVisible();
 }
@@ -80,7 +87,9 @@ async function expectNoWelcome(page: Page): Promise<void> {
 }
 
 test.describe('welcome screen', () => {
-  test('first visit: explanation, three steps, privacy line; only the masthead around it', async ({ page }) => {
+  test('first visit: explanation, three steps, privacy line; only the masthead around it', async ({
+    page,
+  }) => {
     await openApp(page, { wizard: true, welcome: true });
     await expectWelcome(page);
     await expect(screen(page).locator('p').first()).toHaveText(
@@ -92,7 +101,9 @@ test.describe('welcome screen', () => {
     await expect(screen(page).locator('ol > li')).toHaveCount(3);
     await expect(screen(page)).toContainText(PRIVACY_PL);
     await expect(screen(page)).not.toContainText('tylko w tej przeglądarce');
-    await expect(explainer(page)).toContainText(`${PRIVACY_PL} W kolejnej wersji temperaturę i wilgotność mogą wpisywać czujniki BLE`);
+    await expect(explainer(page)).toContainText(
+      `${PRIVACY_PL} W kolejnej wersji temperaturę i wilgotność mogą wpisywać czujniki BLE`,
+    );
     await expect(explainer(page)).not.toContainText('tylko w tej przeglądarce');
     await expect(myPieces(page)).toHaveCount(0);
     // the form behind it is not reachable by keyboard
@@ -100,7 +111,12 @@ test.describe('welcome screen', () => {
     expect(await focused(page)).toBe('welcome-new');
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press('Tab');
-      expect(await page.evaluate(() => document.activeElement?.closest('main > :not(.masthead):not(.welcome-screen)') ?? null)).toBeNull();
+      expect(
+        await page.evaluate(
+          () =>
+            document.activeElement?.closest('main > :not(.masthead):not(.welcome-screen)') ?? null,
+        ),
+      ).toBeNull();
     }
   });
 
@@ -137,7 +153,9 @@ test.describe('welcome screen', () => {
     expect(await stored(page, STORAGE_KEY)).toBe(DATA);
   });
 
-  test('"Moje prace (N)" is a disclosure listing each piece with its highlights', async ({ page }) => {
+  test('"Moje prace (N)" is a disclosure listing each piece with its highlights', async ({
+    page,
+  }) => {
     await openApp(page, { welcome: true, storage: THREE });
     const button = myPieces(page);
     await expect(button).toHaveText('Moje prace (3)');
@@ -150,8 +168,13 @@ test.describe('welcome screen', () => {
     await expect(rows(page)).toHaveCount(3);
     await expect(rows(page).locator('b')).toHaveText(['miski', 'talerze', 'kubki']);
     // thrown, forecast and state, worded as in section 5
-    for (const row of await rows(page).all()) await expect(row.locator('.meta')).toHaveText(/^Toczona .+ · prognoza .+$/);
-    await expect(rows(page).locator('.badge')).toHaveText([/^za /, 'powinna być gotowa', /^w sam raz · po /]);
+    for (const row of await rows(page).all())
+      await expect(row.locator('.meta')).toHaveText(/^Toczona .+ · prognoza .+$/);
+    await expect(rows(page).locator('.badge')).toHaveText([
+      /^za /,
+      'powinna być gotowa',
+      /^w sam raz · po /,
+    ]);
     const listed = await rows(page).locator('.badge').allTextContents();
     await page.getByRole('button', { name: 'Szczegóły: kubki' }).click();
     await expect(page.locator('#pieces .piece .badge')).toHaveText(listed);
@@ -181,10 +204,14 @@ test.describe('welcome screen', () => {
     await expect(page.locator('#pieces .piece[data-piece="def"]')).toBeFocused();
   });
 
-  test('the bar holds only "Nowa praca", on the left, outside and inside the wizard', async ({ page }) => {
+  test('the bar holds only "Nowa praca", on the left, outside and inside the wizard', async ({
+    page,
+  }) => {
     await openApp(page);
     await expect(page.locator('#wizard-open')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Przeprowadź mnie krok po kroku' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Przeprowadź mnie krok po kroku' })).toHaveCount(
+      0,
+    );
     await expect(bar(page).getByRole('button')).toHaveCount(1);
     const expectFirstOnLeft = async (): Promise<void> => {
       await expect(bar(page).locator('button:visible').first()).toHaveText('Nowa praca');
@@ -197,12 +224,19 @@ test.describe('welcome screen', () => {
     await newPiece(page).click();
     // inside the wizard: progress text and "Pomiń" unchanged, "Nowa praca" still first
     await expect(page.locator('#wizard-progress')).toHaveText('Krok 1 z 3: Praca');
-    await expect(bar(page).getByRole('button', { name: 'Pomiń – pokaż cały formularz' })).toBeVisible();
-    await expect(bar(page).getByRole('button')).toHaveText(['Nowa praca', 'Pomiń – pokaż cały formularz']);
+    await expect(
+      bar(page).getByRole('button', { name: 'Pomiń – pokaż cały formularz' }),
+    ).toBeVisible();
+    await expect(bar(page).getByRole('button')).toHaveText([
+      'Nowa praca',
+      'Pomiń – pokaż cały formularz',
+    ]);
     await expectFirstOnLeft();
   });
 
-  test('"Nowa praca" on the working page shows the welcome screen again, from the form and from the wizard', async ({ page }) => {
+  test('"Nowa praca" on the working page shows the welcome screen again, from the form and from the wizard', async ({
+    page,
+  }) => {
     await openApp(page, { storage: DATA });
     await expectNoWelcome(page);
     await backToWelcome(page).click();
@@ -222,7 +256,9 @@ test.describe('welcome screen', () => {
     await expect(page.locator('#welcome-list')).toBeHidden();
   });
 
-  test('interacting records the time under its own key; the pieces store stays byte-identical', async ({ page }) => {
+  test('interacting records the time under its own key; the pieces store stays byte-identical', async ({
+    page,
+  }) => {
     await openApp(page, { welcome: true, storage: DATA });
     expect(await stored(page, ACTIVITY_KEY)).toBeNull();
     await newPiece(page).click();
@@ -233,7 +269,9 @@ test.describe('welcome screen', () => {
     expect(await stored(page, STORAGE_KEY)).toBe(DATA);
   });
 
-  test('returning to a tab after more than an hour shows it again; sooner it does not', async ({ page }) => {
+  test('returning to a tab after more than an hour shows it again; sooner it does not', async ({
+    page,
+  }) => {
     await openApp(page);
     await page.locator('#mass').fill('700');
     const returnToTab = async (min: number): Promise<void> => {
@@ -279,7 +317,10 @@ test.describe('welcome screen', () => {
     await expect(rows(page).locator('.meta')).toHaveText(/^Thrown .+ · forecast .+$/);
     await page.getByRole('button', { name: 'New piece' }).click();
     await expect(page.locator('#wizard-progress')).toHaveText('Step 1 of 3: Piece');
-    await expect(page.locator('.wizard-bar').getByRole('button')).toHaveText(['New piece', 'Skip – show the full form']);
+    await expect(page.locator('.wizard-bar').getByRole('button')).toHaveText([
+      'New piece',
+      'Skip – show the full form',
+    ]);
     await page.locator('.wizard-bar').getByRole('button', { name: 'New piece' }).click();
     await expect(page.getByRole('heading', { name: 'Plan your piece’s drying' })).toBeFocused();
   });
@@ -294,7 +335,9 @@ const noOverflow = async (page: Page): Promise<void> => {
 };
 
 for (const width of [320, 375, 1280]) {
-  test(`${width}px: the welcome screen and its pieces list fit without horizontal scroll`, async ({ page }) => {
+  test(`${width}px: the welcome screen and its pieces list fit without horizontal scroll`, async ({
+    page,
+  }) => {
     await page.setViewportSize({ width, height: 800 });
     await openApp(page, { welcome: true, storage: THREE });
     await expect(screen(page)).toBeVisible();

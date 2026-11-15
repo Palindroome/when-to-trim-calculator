@@ -52,7 +52,10 @@ export function update(ctx: AppContext): void {
   }
   const piece = derivePiece(readPieceInput(), ctx.view.params);
   const t = ctx.now();
-  out.innerHTML = renderWeight(ctx.view, assessWeight({ ...w, nowMs: t }, ctx.context(piece, readThrownMs(t))));
+  out.innerHTML = renderWeight(
+    ctx.view,
+    assessWeight({ ...w, nowMs: t }, ctx.context(piece, readThrownMs(t))),
+  );
 }
 
 export function mount(root: HTMLElement, ctx: AppContext): void {

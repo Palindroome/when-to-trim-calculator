@@ -7,7 +7,8 @@ const DEFAULT_PLAN = 'Zostaw odkrytą na 4 h (do śr 4.03 12:30), potem zawiń c
 
 const pieces = (page: Page) => page.locator('#pieces .piece');
 const saveBtn = (page: Page) => page.getByRole('button', { name: 'Zapisz tę pracę z planem' });
-const stored = (page: Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), STORAGE_KEY);
+const stored = (page: Page) =>
+  page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), STORAGE_KEY);
 
 async function at(page: Page, iso: string) {
   await page.clock.setFixedTime(new Date(iso));
@@ -29,7 +30,9 @@ test.describe('saved pieces', () => {
     const p = pieces(page).first();
     await expect(p.locator('b')).toHaveText('kubki z czwartku');
     await expect(p.locator('.badge')).toHaveText('za 2 d 1 h');
-    await expect(p.locator('.meta')).toHaveText(`${DEFAULT_PLAN}Toczona śr 4.03 09:00 · prognoza pt 6.03 09:59`);
+    await expect(p.locator('.meta')).toHaveText(
+      `${DEFAULT_PLAN}Toczona śr 4.03 09:00 · prognoza pt 6.03 09:59`,
+    );
     await expect(p.getByRole('button')).toHaveText(['za mokra', 'w sam raz', 'za sucha', 'usuń']);
     await expect(p.getByText('Trymuję teraz i jest:')).toBeVisible();
 
@@ -55,7 +58,21 @@ test.describe('saved pieces', () => {
     expect(s.ws).toBeCloseTo(27.162629, 4);
     expect(s.we).toBeCloseTo(81.726087, 4);
     expect(Object.keys(s).sort()).toEqual(
-      ['id', 'name', 'start', 'mass', 'lossPct', 'plan', 'label', 'dom', 'predH', 'calUsed', 'ws', 'we', 'fb'].sort(),
+      [
+        'id',
+        'name',
+        'start',
+        'mass',
+        'lossPct',
+        'plan',
+        'label',
+        'dom',
+        'predH',
+        'calUsed',
+        'ws',
+        'we',
+        'fb',
+      ].sort(),
     );
   });
 
@@ -66,7 +83,9 @@ test.describe('saved pieces', () => {
     await page.getByRole('button', { name: 'jutro' }).click();
     await saveBtn(page).click();
     await expect(pieces(page).locator('b')).toHaveText(['Praca 2', 'Praca 1']);
-    await expect(pieces(page).first().locator('.meta')).toContainText('Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.');
+    await expect(pieces(page).first().locator('.meta')).toContainText(
+      'Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.',
+    );
     // single-wrap plan: stored with h:null and dominant = that wrap
     const data = await stored(page);
     expect(data.pieces[0].plan).toEqual([{ w: 'partial', h: null }]);
@@ -114,7 +133,10 @@ test.describe('saved pieces', () => {
       await expect(p.locator('.badge')).toHaveClass('badge ok');
       await expect(p.getByRole('button')).toHaveText(['usuń']);
       await expect(p.getByText('Trymuję teraz i jest:')).toHaveCount(0);
-      await expect(page.locator('#calib tr')).toHaveText(['WariantMnożnik czasuPrace', `Cały worek${mult}1`]);
+      await expect(page.locator('#calib tr')).toHaveText([
+        'WariantMnożnik czasuPrace',
+        `Cały worek${mult}1`,
+      ]);
       await expect(page.locator('#calib p')).toHaveText(
         'Mnożnik > 1 oznacza, że w Twojej pracowni ten wariant schnie wolniej, niż zakłada model.',
       );
@@ -153,7 +175,8 @@ test.describe('saved pieces', () => {
         '71.9171% | target 26.7273%',
         '100% | target 26.7273%',
       ],
-      legend: 'Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.',
+      legend:
+        'Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.',
       alts: [
         'Zostaw odkrytą na 4 h (do śr 4.03 13:15), potem włóż do zamkniętego pudełka.',
         'Przykryj luźno workiem (dno lub brzeg odsłonięte) na 19 h (do czw 5.03 03:30), potem zawiń całą w worek.',
@@ -164,7 +187,9 @@ test.describe('saved pieces', () => {
     });
   });
 
-  test('several rated pieces: geometric mean shrunk towards 1, one row per wrap', async ({ page }) => {
+  test('several rated pieces: geometric mean shrunk towards 1, one row per wrap', async ({
+    page,
+  }) => {
     await openApp(page);
     await saveBtn(page).click(); // full-dominant, predicted ~49 h
     await at(page, '2026-03-04T09:00:01+01:00');
@@ -197,12 +222,16 @@ test.describe('saved pieces', () => {
     expect(await stored(page)).toEqual({ pieces: [] });
   });
 
-  test('a piece can be saved from the "too fast" warning (plan without a window)', async ({ page }) => {
+  test('a piece can be saved from the "too fast" warning (plan without a window)', async ({
+    page,
+  }) => {
     await openApp(page);
     await setDateTime(page, 'Chcę trymować', '2026-03-04T11:00');
     await expect(page.locator('.rec .k')).toHaveText('Uwaga');
     await saveBtn(page).click();
-    await expect(pieces(page).locator('.meta')).toHaveText('Zostaw odkrytą od razu.Toczona śr 4.03 09:00 · prognoza śr 4.03 14:43');
+    await expect(pieces(page).locator('.meta')).toHaveText(
+      'Zostaw odkrytą od razu.Toczona śr 4.03 09:00 · prognoza śr 4.03 14:43',
+    );
     const s = (await stored(page)).pieces[0];
     expect(s.plan).toEqual([{ w: 'open', h: null }]);
     expect(s.dom).toBe('open');
@@ -214,7 +243,9 @@ test.describe('saved pieces', () => {
     await openApp(page);
     await setDateTime(page, 'Chcę trymować', '2026-03-24T10:00');
     await saveBtn(page).click();
-    await expect(pieces(page).locator('.meta')).toContainText('Włóż do zamkniętego pudełka od razu.');
+    await expect(pieces(page).locator('.meta')).toContainText(
+      'Włóż do zamkniętego pudełka od razu.',
+    );
     expect((await stored(page)).pieces[0].dom).toBe('box');
   });
 
@@ -287,7 +318,10 @@ test.describe('storage robustness', () => {
     };
     await openApp(page, { storage: JSON.stringify(data) });
     await expect(pieces(page).locator('b')).toHaveText(['miski', 'talerze']);
-    await expect(pieces(page).locator('.badge')).toHaveText(['była za mokra · po 3 d 8 h', 'za 5 d 11 h']);
+    await expect(pieces(page).locator('.badge')).toHaveText([
+      'była za mokra · po 3 d 8 h',
+      'za 5 d 11 h',
+    ]);
     await expect(pieces(page).nth(1).locator('.meta')).toHaveText(
       'Włóż do zamkniętego pudełka od razu.Toczona nd 1.03 12:00 · prognoza pn 9.03 20:00',
     );

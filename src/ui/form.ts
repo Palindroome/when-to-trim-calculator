@@ -1,6 +1,15 @@
 import type { ConditionsSource } from '../domain/conditions';
 import type { CoverDefinition, CoverId } from '../domain/covers';
-import type { AirflowId, BatId, ClayId, Conditions, PieceInput, ShapeId, StageId, WetnessId } from '../domain/types';
+import type {
+  AirflowId,
+  BatId,
+  ClayId,
+  Conditions,
+  PieceInput,
+  ShapeId,
+  StageId,
+  WetnessId,
+} from '../domain/types';
 import type { Formatter, Messages } from '../i18n';
 import { byId } from './dom';
 
@@ -13,7 +22,8 @@ export function parseNumber(raw: string, fallback: number): number {
 const pad = (n: number): string => String(n).padStart(2, '0');
 
 /** Local calendar day as `YYYY-MM-DD`: the stored day of a picker and the calendar's value. */
-export const toDayKey = (d: Date): string => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+export const toDayKey = (d: Date): string =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 /** Local time as 24 h `HH:MM`. */
 export const toTime = (d: Date): string => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -37,12 +47,17 @@ export function combineLocalDateTime(dayKey: string, time: string): number {
 export function dayLabel(m: Messages, fmt: Formatter, dayKey: string, nowMs: number): string {
   const day = new Date(`${dayKey}T12:00`);
   if (Number.isNaN(day.getTime())) return '';
-  const relative: Record<number, string> = { [-1]: m.dateTime.yesterday, 0: m.dateTime.today, 1: m.dateTime.tomorrow };
+  const relative: Record<number, string> = {
+    [-1]: m.dateTime.yesterday,
+    0: m.dateTime.today,
+    1: m.dateTime.tomorrow,
+  };
   for (const offset of [-1, 0, 1]) {
     const d = new Date(nowMs);
     d.setHours(12, 0, 0, 0); // midday: adding a day never lands in a neighbouring day on DST changes
     d.setDate(d.getDate() + offset);
-    if (toDayKey(d) === dayKey) return m.dateTime.relativeDay(relative[offset]!, fmt.date(day.getTime()));
+    if (toDayKey(d) === dayKey)
+      return m.dateTime.relativeDay(relative[offset]!, fmt.date(day.getTime()));
   }
   return fmt.date(day.getTime());
 }
@@ -84,7 +99,8 @@ export const formConditionsSource: ConditionsSource = {
 /** The two day + time pickers in section 3: the day key is kept in `<id>-day`, the typed time in `<id>-time`. */
 export type DateTimeId = 'thrown' | 'when';
 
-const readDateTime = (id: DateTimeId): number => combineLocalDateTime(value(`${id}-day`), value(`${id}-time`));
+const readDateTime = (id: DateTimeId): number =>
+  combineLocalDateTime(value(`${id}-day`), value(`${id}-time`));
 
 /** Throwing time; an empty/invalid field means "now". */
 export const readThrownMs = (nowMs: number): number => readDateTime('thrown') || nowMs;
@@ -97,13 +113,19 @@ export const readName = (): string => value('name').trim();
 /** Covers ticked in "Sposoby okrycia, których mogę użyć", in catalog order. */
 export function readAllowedCovers(covers: readonly CoverDefinition[]): CoverId[] {
   const checked = new Set(
-    [...document.querySelectorAll<HTMLInputElement>('input[data-cover]')].filter((e) => e.checked).map((e) => e.dataset.cover),
+    [...document.querySelectorAll<HTMLInputElement>('input[data-cover]')]
+      .filter((e) => e.checked)
+      .map((e) => e.dataset.cover),
   );
   return covers.map((c) => c.id).filter((c) => checked.has(c));
 }
 
 /** Mass check inputs; thrown mass falls back to 0 (not 500) here, so an empty field hides the check. */
-export const readWeightInputs = (): { thrownMassG: number; currentMassG: number; cover: CoverId } => ({
+export const readWeightInputs = (): {
+  thrownMassG: number;
+  currentMassG: number;
+  cover: CoverId;
+} => ({
   thrownMassG: num('mass', 0),
   currentMassG: num('mnow', NaN),
   cover: value('wnow') as CoverId,

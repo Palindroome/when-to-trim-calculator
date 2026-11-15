@@ -33,14 +33,24 @@ export function renderSummaries(v: View, s: SummaryInput): [string, string, stri
   const n = (x: number): string => fmt.decimal(x, Number.isInteger(x) ? 0 : 1);
   const { piece: p, conditions: c } = s;
   return [
-    m.summary.piece(s.name, m.options.shape[p.shape], n(p.massG), n(p.wallMm), n(p.baseMm ?? p.wallMm), m.options.clay[p.clay]),
+    m.summary.piece(
+      s.name,
+      m.options.shape[p.shape],
+      n(p.massG),
+      n(p.wallMm),
+      n(p.baseMm ?? p.wallMm),
+      m.options.clay[p.clay],
+    ),
     m.summary.conditions(
       n(c.temp),
       n(c.rh),
       m.options.airflow[c.airflow],
       c.night ? { temp: n(c.nightTemp), rh: n(c.nightRh) } : undefined,
     ),
-    m.summary.schedule(fmt.dateTime(s.thrownMs), Number.isFinite(s.whenMs) ? fmt.dateTime(s.whenMs) : m.result.noDeadline),
+    m.summary.schedule(
+      fmt.dateTime(s.thrownMs),
+      Number.isFinite(s.whenMs) ? fmt.dateTime(s.whenMs) : m.result.noDeadline,
+    ),
   ];
 }
 
@@ -69,7 +79,10 @@ export function createSummaryCards(root: HTMLElement, initiallyOn: boolean): Sum
       const t = card.querySelector<HTMLButtonElement>('.toggle')!;
       t.setAttribute('aria-expanded', String(open));
       t.textContent = open ? m.summary.collapse : m.summary.edit;
-      t.setAttribute('aria-label', open ? m.summary.collapseLabel(titles[i]!) : m.summary.editLabel(titles[i]!));
+      t.setAttribute(
+        'aria-label',
+        open ? m.summary.collapseLabel(titles[i]!) : m.summary.editLabel(titles[i]!),
+      );
     });
   }
 

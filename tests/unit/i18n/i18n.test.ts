@@ -62,7 +62,13 @@ describe('catalog', () => {
     );
   });
   it('quick date labels', () => {
-    expect([1, 2, 3, 5, 7].map(pl.quickDate)).toEqual(['jutro', 'za 2 dni', 'za 3 dni', 'za 5 dni', 'za tydzień']);
+    expect([1, 2, 3, 5, 7].map(pl.quickDate)).toEqual([
+      'jutro',
+      'za 2 dni',
+      'za 3 dni',
+      'za 5 dni',
+      'za tydzień',
+    ]);
   });
   it('locale registry falls back to Polish', () => {
     expect(LOCALES.pl).toBe(pl);
@@ -111,7 +117,13 @@ describe('English', () => {
     expect(en.plan.twoPhase(p.open, '4 h', 'Wed 4 Mar 12:30', p.full)).toBe(
       'Leave uncovered for 4 h (until Wed 4 Mar 12:30), then wrap fully in a bag.',
     );
-    expect([1, 2, 3, 5, 7].map(en.quickDate)).toEqual(['tomorrow', 'in 2 days', 'in 3 days', 'in 5 days', 'in a week']);
+    expect([1, 2, 3, 5, 7].map(en.quickDate)).toEqual([
+      'tomorrow',
+      'in 2 days',
+      'in 3 days',
+      'in 5 days',
+      'in a week',
+    ]);
   });
 
   it('has the same 12 month and 7 weekday names as Polish', () => {
@@ -126,7 +138,9 @@ describe('English', () => {
       if (typeof x === 'string') strings.push(x);
       else if (typeof x === 'function') {
         // call with plausible arguments so the template text is checked too
-        const out: unknown = x(...Array.from({ length: x.length }, (_, i) => (i === 0 ? 'open' : 'full')));
+        const out: unknown = x(
+          ...Array.from({ length: x.length }, (_, i) => (i === 0 ? 'open' : 'full')),
+        );
         walk(out);
       } else if (x && typeof x === 'object') Object.values(x).forEach(walk);
     };
@@ -141,7 +155,9 @@ describe('resolveLocale', () => {
   const base = { stored: null, browser: [] as string[], hasExistingData: false, available };
 
   it('1. a stored registered choice wins', () => {
-    expect(resolveLocale({ ...base, stored: 'en', browser: ['pl-PL'], hasExistingData: true })).toBe('en');
+    expect(
+      resolveLocale({ ...base, stored: 'en', browser: ['pl-PL'], hasExistingData: true }),
+    ).toBe('en');
     expect(resolveLocale({ ...base, stored: 'pl', browser: ['en-US'] })).toBe('pl');
   });
 

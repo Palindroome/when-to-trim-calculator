@@ -18,7 +18,8 @@ const scheme = (page: Page) =>
 const themeButton = (page: Page, name: string) =>
   page.getByRole('group', { name: /^(Motyw|Theme)$/ }).getByRole('button', { name, exact: true });
 const storedRaw = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
-const dataTheme = (page: Page) => page.evaluate(() => document.documentElement.dataset.theme ?? null);
+const dataTheme = (page: Page) =>
+  page.evaluate(() => document.documentElement.dataset.theme ?? null);
 
 const TOKEN_PAIRS: [string, string, number][] = [
   ['--text', '--bg', 4.5],
@@ -76,9 +77,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
     test('tokens and rendered elements meet WCAG contrast', async ({ page }) => {
       await openApp(page);
-      for (const [fg, bg, min] of TOKEN_PAIRS) expect(await tokenContrast(page, fg, bg), `${fg} on ${bg}`).toBeGreaterThanOrEqual(min);
+      for (const [fg, bg, min] of TOKEN_PAIRS)
+        expect(await tokenContrast(page, fg, bg), `${fg} on ${bg}`).toBeGreaterThanOrEqual(min);
       for (const [fg, bg, min] of ELEMENT_PAIRS) {
-        expect(await elementContrast(page, fg, bg), `${fg.join(' ')} on ${bg.join(' ')}`).toBeGreaterThanOrEqual(min);
+        expect(
+          await elementContrast(page, fg, bg),
+          `${fg.join(' ')} on ${bg.join(' ')}`,
+        ).toBeGreaterThanOrEqual(min);
       }
     });
 
@@ -99,7 +104,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
 }
 
 test.describe('theme switch', () => {
-  test('Dark overrides a light system, Light overrides a dark system, System follows it again', async ({ page }) => {
+  test('Dark overrides a light system, Light overrides a dark system, System follows it again', async ({
+    page,
+  }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await openApp(page);
     await page.evaluate(() => ((window as unknown as { marker: number }).marker = 1));
@@ -126,7 +133,9 @@ test.describe('theme switch', () => {
     expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(1);
   });
 
-  test('the choice persists across reloads and is applied before the body is parsed', async ({ page }) => {
+  test('the choice persists across reloads and is applied before the body is parsed', async ({
+    page,
+  }) => {
     // records data-theme at the moment <body> is inserted, i.e. before anything can be painted
     await page.addInitScript(() => {
       const w = window as unknown as { themeAtBody?: string | null };
@@ -141,14 +150,18 @@ test.describe('theme switch', () => {
     await themeButton(page, 'Ciemny').click();
     await page.reload();
     await expect(page.locator('#result .bar')).toHaveCount(5);
-    expect(await page.evaluate(() => (window as unknown as { themeAtBody?: string | null }).themeAtBody)).toBe('dark');
+    expect(
+      await page.evaluate(() => (window as unknown as { themeAtBody?: string | null }).themeAtBody),
+    ).toBe('dark');
     expect(await scheme(page)).toMatchObject({ colorScheme: 'dark', bg: BG.dark });
     await expect(themeButton(page, 'Ciemny')).toHaveAttribute('aria-pressed', 'true');
 
     await themeButton(page, 'Systemowy').click();
     await page.reload();
     await expect(page.locator('#result .bar')).toHaveCount(5);
-    expect(await page.evaluate(() => (window as unknown as { themeAtBody?: string | null }).themeAtBody)).toBeNull();
+    expect(
+      await page.evaluate(() => (window as unknown as { themeAtBody?: string | null }).themeAtBody),
+    ).toBeNull();
     expect(await scheme(page)).toMatchObject({ colorScheme: 'light', bg: BG.light });
   });
 
@@ -164,16 +177,24 @@ test.describe('theme switch', () => {
     await openApp(page);
     await page.getByRole('button', { name: 'Zapisz tę pracę z planem' }).click();
     await page.getByRole('button', { name: 'English', exact: true }).click();
-    const before = { v1: await storedRaw(page, STORAGE_KEY), lang: await storedRaw(page, LANG_KEY) };
+    const before = {
+      v1: await storedRaw(page, STORAGE_KEY),
+      lang: await storedRaw(page, LANG_KEY),
+    };
     expect(before.v1).not.toBeNull();
     expect(before.lang).toBe('en');
     for (const name of ['Dark', 'Light', 'System', 'Dark']) await themeButton(page, name).click();
     await page.reload();
     await expect(page.locator('#result .bar')).toHaveCount(5);
-    expect({ v1: await storedRaw(page, STORAGE_KEY), lang: await storedRaw(page, LANG_KEY) }).toEqual(before);
+    expect({
+      v1: await storedRaw(page, STORAGE_KEY),
+      lang: await storedRaw(page, LANG_KEY),
+    }).toEqual(before);
   });
 
-  test('keyboard operable, with pressed state, catalog names, tooltips and hidden icons', async ({ page }) => {
+  test('keyboard operable, with pressed state, catalog names, tooltips and hidden icons', async ({
+    page,
+  }) => {
     await openApp(page);
     const group = page.getByRole('group', { name: 'Motyw' });
     const names = ['Systemowy', 'Jasny', 'Ciemny'];
@@ -202,7 +223,8 @@ test.describe('theme switch', () => {
     // the names follow the language; the choice survives the re-render
     await page.getByRole('button', { name: 'English', exact: true }).click();
     await expect(page.getByRole('group', { name: 'Theme' }).getByRole('button')).toHaveCount(3);
-    for (const name of ['System', 'Light', 'Dark']) await expect(themeButton(page, name)).toHaveAttribute('title', name);
+    for (const name of ['System', 'Light', 'Dark'])
+      await expect(themeButton(page, name)).toHaveAttribute('title', name);
     await expect(themeButton(page, 'Light')).toHaveAttribute('aria-pressed', 'true');
     expect(await dataTheme(page)).toBe('light');
   });
@@ -212,11 +234,14 @@ test.describe('theme switch', () => {
     [375, 812],
     [1280, 900],
   ] as const) {
-    test(`${width}px: the toolbar is top right (language, then theme), targets are large enough, nothing overflows`, async ({ page }) => {
+    test(`${width}px: the toolbar is top right (language, then theme), targets are large enough, nothing overflows`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height });
       await page.emulateMedia({ colorScheme: 'dark' });
       await openApp(page);
-      const box = async (name: string) => (await page.getByRole('group', { name, exact: true }).boundingBox())!;
+      const box = async (name: string) =>
+        (await page.getByRole('group', { name, exact: true }).boundingBox())!;
       const [lang, theme, head, h1] = [
         await box('Język'),
         await box('Motyw'),

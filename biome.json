@@ -8,13 +8,13 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 140
+    "lineWidth": 100
   },
   "javascript": {
     "formatter": { "quoteStyle": "single", "trailingCommas": "all" }
   },
   "css": {
-    "formatter": { "enabled": false }
+    "formatter": { "enabled": true }
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
@@ -38,7 +38,14 @@
               "options": {
                 "patterns": [
                   {
-                    "group": ["**/ui", "**/ui/**", "**/i18n", "**/i18n/**", "**/storage", "**/storage/**"],
+                    "group": [
+                      "**/ui",
+                      "**/ui/**",
+                      "**/i18n",
+                      "**/i18n/**",
+                      "**/storage",
+                      "**/storage/**"
+                    ],
                     "message": "src/domain stays pure: no UI, i18n or storage imports."
                   }
                 ]
