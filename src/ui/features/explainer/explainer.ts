@@ -8,7 +8,7 @@ import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, esc } from '../../dom';
 import { icon } from '../../icons';
-import { captureSlides, slideNumbers, stagger } from '../../motion';
+import { animateHeight, captureSlides, slideNumbers, stagger } from '../../motion';
 import { formatNum } from '../../numbers';
 import { coverLabel, type View } from '../../render';
 
@@ -447,7 +447,7 @@ export function update(
   const before = captureSlides(el);
   el.innerHTML = renderSteps(v, t, calibration);
   slideNumbers(el, before);
-  byId(TIP_ID).hidden = true;
+  hideTip(byId(TIP_ID));
 }
 
 const detailsOf = (root: HTMLElement): HTMLDetailsElement =>
@@ -457,17 +457,11 @@ const detailsOf = (root: HTMLElement): HTMLDetailsElement =>
 export const isOpen = (root: HTMLElement): boolean => detailsOf(root).open;
 
 /**
- * Opens the section at once, without its expand transition or reveal (after a language switch), so the
+ * Opens the section at once, without the height motion or the reveal (after a language switch), so the
  * page has its full height straight away and a restored scroll position holds.
  */
 export function open(root: HTMLElement): void {
-  const details = detailsOf(root);
-  details.classList.add('instant');
-  details.open = true;
-  // lays the open height out now, so removing the class starts no transition; it is back for the
-  // reader's next toggle
-  details.getBoundingClientRect();
-  details.classList.remove('instant');
+  detailsOf(root).open = true;
 }
 
 /** Gap between a number and its tooltip, and the tooltip's least distance from the card's edges, px. */
@@ -493,6 +487,12 @@ function showTip(section: HTMLElement, tip: HTMLElement, el: HTMLElement): void 
   tip.style.top = `${above ? r.top - s.top - h - TIP_GAP : r.bottom - s.top + TIP_GAP}px`;
 }
 
+/** Hides the bubble and drops its position, so no inline style stays behind. */
+function hideTip(tip: HTMLElement): void {
+  tip.hidden = true;
+  tip.removeAttribute('style');
+}
+
 /** Escape anywhere closes an open bubble, also one shown by mouse hover (WCAG 1.4.13: dismissible). */
 let escapeListening = false;
 function closeOnEscape(): void {
@@ -500,7 +500,7 @@ function closeOnEscape(): void {
   escapeListening = true;
   document.addEventListener('keydown', (e) => {
     const tip = document.getElementById(TIP_ID);
-    if (e.key === 'Escape' && tip) tip.hidden = true;
+    if (e.key === 'Escape' && tip) hideTip(tip);
   });
 }
 
@@ -515,15 +515,18 @@ export function mount(root: HTMLElement, _ctx: AppContext): void {
   const section = details.closest<HTMLElement>('.explainer')!;
   const tip = section.querySelector<HTMLElement>(`#${TIP_ID}`)!;
   const steps = section.querySelector<HTMLElement>('#explain-steps')!;
-  details.querySelector('summary')!.addEventListener('click', () => {
-    // the click comes before the toggle: closed now means it is opening
-    if (!details.open) stagger(details.querySelectorAll<HTMLElement>('#explain-steps > li'));
+  // folds with the same height motion as the summary cards; opening reveals the steps one by one
+  details.querySelector('summary')!.addEventListener('click', (e) => {
+    e.preventDefault();
+    const opening = !details.open;
+    animateHeight(section, () => {
+      details.open = opening;
+    });
+    if (opening) stagger(steps.querySelectorAll<HTMLElement>(':scope > li'));
   });
   const numberAt = (target: EventTarget | null): HTMLElement | null =>
     target instanceof Element ? target.closest<HTMLElement>('.num-tip') : null;
-  const hide = (): void => {
-    tip.hidden = true;
-  };
+  const hide = (): void => hideTip(tip);
   steps.addEventListener('focusin', (e) => {
     const el = numberAt(e.target);
     if (el) showTip(section, tip, el);
