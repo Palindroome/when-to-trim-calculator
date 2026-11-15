@@ -5,8 +5,11 @@ import { MS_PER_HOUR } from '../../../domain/params';
 import type { PlanResult } from '../../../domain/planner';
 import type { TipId } from '../../../domain/tips';
 import type { Piece } from '../../../domain/types';
+import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
+import { animateNumbers, captureRects, playFrom } from '../../motion';
+import { num } from '../../numbers';
 import { coverLabel, planText, type View } from '../../render';
 import { save } from '../pieces/pieces';
 
@@ -41,11 +44,20 @@ export function renderResult(v: View, r: ResultModel): string {
   let html = '';
   if (rec.status === 'onTarget' && r.window) {
     const { start: ws, end: we } = r.window;
+    const ready = num(fmt, 'ready', {
+      kind: 'dateTime',
+      value: start + rec.option.hours * MS_PER_HOUR,
+    });
+    const loss = num(fmt, 'loss', { kind: 'decimal', value: piece.lossPct, digits: 1 });
+    const grams = num(fmt, 'grams', { kind: 'int', value: (piece.mass * piece.lossPct) / 100 });
+    const winEnd = Number.isFinite(we)
+      ? num(fmt, 'win-end', { kind: 'dateTime', value: start + we * MS_PER_HOUR })
+      : m.result.windowOpenEnd;
     html += `<div class="rec">
         <div class="k">${m.result.recommendation}</div>
-        <div class="big">${esc(planText(v, rec.option, start))}</div>
-        <div class="sub">${m.result.ready(fmt.dateTime(start + rec.option.hours * MS_PER_HOUR), fmt.decimal(piece.lossPct, 1), Math.round((piece.mass * piece.lossPct) / 100))}</div>
-        <div class="win">${m.result.window(fmt.dateTime(start + ws * MS_PER_HOUR), Number.isFinite(we) ? fmt.dateTime(start + we * MS_PER_HOUR) : m.result.windowOpenEnd)}</div>
+        <div class="big" data-anim-text="big">${esc(planText(v, rec.option, start))}</div>
+        <div class="sub" data-anim-text="sub">${m.result.ready(ready, loss, grams)}</div>
+        <div class="win" data-anim-text="win">${m.result.window(num(fmt, 'win-start', { kind: 'dateTime', value: start + ws * MS_PER_HOUR }), winEnd)}</div>
       </div>`;
   } else if (rec.status !== 'onTarget') {
     let err: string;
@@ -71,7 +83,7 @@ export function renderResult(v: View, r: ResultModel): string {
     const extra = plan.excludedWouldMeet
       ? `<div class="extra">${esc(m.errors.excludedWouldMeet)}</div>`
       : '';
-    html += `<div class="rec err"><div class="k">${m.result.warning}</div><div class="big">${esc(err)}</div>${extra}</div>`;
+    html += `<div class="rec err"><div class="k">${m.result.warning}</div><div class="big" data-anim-text="big">${esc(err)}</div>${extra}</div>`;
   }
 
   // comparison bars
@@ -92,10 +104,10 @@ export function renderResult(v: View, r: ResultModel): string {
       Math.abs(t - H) / H <= v.params.planner.targetTolerance;
     const n = r.calibration[c.id]!.samples;
     html += `<div class="bar${off ? ' off' : ''}"><div>${coverLabel(m, c)}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c.environment === 'dampRoom' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
-        <div class="track"><div class="fill ${good ? 'good' : ''}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
-        <div class="t">${fmt.duration(t)}${pct >= 100 && Number.isFinite(t) ? '+' : ''}</div></div>`;
+        <div class="track"><div class="fill ${good ? 'good' : ''}" data-anim-key="fill-${c.id}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" data-anim-key="target-${c.id}" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
+        <div class="t">${num(fmt, `bar-${c.id}`, { kind: 'duration', value: t, suffix: pct >= 100 && Number.isFinite(t) ? '+' : '' })}</div></div>`;
   }
-  html += `</div><div class="legend">${m.result.legend(H > 0 ? fmt.duration(H) : m.result.noDeadline)}</div>`;
+  html += `</div><div class="legend">${m.result.legend(H > 0 ? num(fmt, 'deadline', { kind: 'duration', value: H }) : m.result.noDeadline)}</div>`;
   if (plan.alternatives.length) {
     html +=
       `<div class="muted alt-title">${m.result.alternatives}</div><ul class="alt">` +
@@ -103,18 +115,48 @@ export function renderResult(v: View, r: ResultModel): string {
       `</ul>`;
   }
   for (const tip of r.tips) html += `<div class="tip">${esc(m.tips[tip])}</div>`;
-  if (r.canSave)
-    html += `<div class="actions"><button class="main" id="savebtn">${m.result.save}</button></div>`;
+  if (r.canSave) {
+    html += `<div class="actions"><button class="main" id="savebtn"><span class="lbl">${m.result.save}</span></button><span class="vh" role="status" id="savestatus"></span></div>`;
+  }
   html += `</div>`;
   return html;
 }
 
 export function update(v: View, r: ResultModel): void {
-  byId('result').innerHTML = renderResult(v, r);
+  const el = byId('result');
+  const before = captureRects(el);
+  el.innerHTML = renderResult(v, r);
+  playFrom(before, el);
+  animateNumbers(el, v.fmt);
+}
+
+/** How long the save button says "saved" before its label returns. */
+const SAVED_MS = 1200;
+const CHECK =
+  '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7"/></svg>';
+let savedTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** "Saved" with a check on the button for a moment, announced through the status region next to it. */
+function showSaved(m: Messages): void {
+  const button = byId('savebtn');
+  const status = byId('savestatus');
+  button.classList.add('done');
+  button.innerHTML = `${CHECK}<span class="lbl">${m.result.saved}</span>`;
+  status.textContent = m.result.saved;
+  clearTimeout(savedTimer);
+  savedTimer = setTimeout(() => {
+    // a recalculation in the meantime has already rendered a fresh button
+    if (!button.isConnected) return;
+    button.classList.remove('done');
+    button.innerHTML = `<span class="lbl">${m.result.save}</span>`;
+    status.textContent = '';
+  }, SAVED_MS);
 }
 
 export function mount(root: HTMLElement, ctx: AppContext): void {
   root.querySelector('#result')!.addEventListener('click', (e) => {
-    if (closest(e, '#savebtn')) save(ctx);
+    if (!closest(e, '#savebtn') || !ctx.saveable) return;
+    save(ctx);
+    showSaved(ctx.view.m);
   });
 }

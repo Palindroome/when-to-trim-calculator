@@ -206,6 +206,7 @@ calendar-month::part(selected):hover:enabled {
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-3);
+  position: relative;
 }
 .chip {
   flex: 1 1 auto;
@@ -223,6 +224,9 @@ calendar-month::part(selected):hover:enabled {
   border-radius: var(--radius-md);
   cursor: pointer;
   position: relative;
+  transition:
+    color var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 .chip:hover {
   background: var(--surface-2);

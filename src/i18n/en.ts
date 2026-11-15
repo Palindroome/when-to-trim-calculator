@@ -212,7 +212,7 @@ export const en: Messages = {
   result: {
     recommendation: 'Recommendation',
     warning: 'Warning',
-    ready: (date: string, lossPct: string, grams: number): string =>
+    ready: (date: string, lossPct: string, grams: string): string =>
       `Ready around ${date}: the target is a loss of about ${lossPct}% of the mass (${grams} g).`,
     window: (from: string, to: string): string => `Window: ${from} → ${to}`,
     windowOpenEnd: '…',
@@ -224,6 +224,7 @@ export const en: Messages = {
     noDeadline: '–',
     alternatives: 'Other ways to hit the same deadline:',
     save: 'Save this piece with its plan',
+    saved: 'Saved',
   },
 
   errors: {

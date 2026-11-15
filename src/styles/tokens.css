@@ -31,6 +31,13 @@
   /* control sizes */
   --control-h: 44px;
   --control-h-sm: 32px;
+  /* motion (subtle: 120-320ms; src/ui/motion.ts mirrors the durations and holds the JS spring) */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* spring approximation; --ease-out where linear() is not supported (block below) */
+  --ease-spring: var(--ease-out);
   /* colour roles */
   --bg: #f4ede3;
   --surface: #fcf9f4;
@@ -78,6 +85,11 @@
   --d-wet-soft: #15243a;
   --d-fill: #9a918a;
   --d-scrim: rgb(0 0 0 / 0.6);
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-spring: linear(0, 0.36 9%, 0.81 20%, 1.02 32%, 1.03 40%, 1.01 55%, 1);
+  }
 }
 /* dark: follows the system unless Light is chosen, or chosen explicitly (data-theme on <html>) */
 @media (prefers-color-scheme: dark) {

@@ -2,6 +2,7 @@
 /* language and theme switches: small segmented controls */
 .seg {
   display: flex;
+  position: relative;
 }
 .seg button {
   min-width: 44px;
@@ -18,12 +19,14 @@
   border-radius: 0;
   cursor: pointer;
   position: relative;
+  transition: color var(--dur-base) var(--ease-out);
 }
-.seg button:first-child {
+/* of-type: the sliding indicator (a span) may follow the buttons */
+.seg button:first-of-type {
   margin-left: 0;
   border-radius: var(--radius-md) 0 0 var(--radius-md);
 }
-.seg button:last-child {
+.seg button:last-of-type {
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 .seg button:hover {
@@ -41,6 +44,19 @@
 .seg svg {
   display: block;
   margin: 0 auto;
+}
+/* sliding active indicator (language switch, quick dates): src/ui/motion.ts adds it only while it moves;
+   it passes over the other options and under the newly chosen one, which shows its own accent once it has landed */
+.slide-ind {
+  position: absolute;
+  pointer-events: none;
+  background: var(--accent);
+  border-radius: var(--radius-md);
+  transform-origin: 0 0;
+}
+.sliding > .chip.on,
+.sliding > button[aria-pressed="true"] {
+  background: transparent;
 }
 @media (pointer: coarse) {
   .seg button {

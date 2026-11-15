@@ -23,6 +23,7 @@ import { createWizard } from './features/wizard/wizard';
 import { renderFooter } from './footer';
 import { readAllowedCovers, readName, readPieceInput, readThrownMs, readWhenMs } from './form';
 import { captureForm, type FormState, restoreForm } from './form-state';
+import { slideIndicator, viewTransition } from './motion';
 import type { View } from './render';
 import { renderShell } from './shell';
 
@@ -158,8 +159,14 @@ export function startApp(deps: AppDeps): void {
     if (!next) return;
     deps.onLocaleChange(code);
     if (next === view.m) return;
-    render(next, captureForm(root, covers));
-    root.querySelector<HTMLElement>(`[data-lang="${code}"]`)?.focus();
+    const from = root.querySelector('[data-lang][aria-pressed="true"]')?.getBoundingClientRect();
+    // the page cross-fades into the new language and the switch's highlight slides to the chosen button
+    viewTransition(() => {
+      render(next, captureForm(root, covers));
+      const button = root.querySelector<HTMLElement>(`[data-lang="${code}"]`);
+      button?.focus();
+      if (button) slideIndicator(button.parentElement!, from, button);
+    });
   }
 
   /** (Re)builds the page in `messages`; `form` restores the inputs after a language switch. */

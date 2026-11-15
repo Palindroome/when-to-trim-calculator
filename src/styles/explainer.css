@@ -21,9 +21,27 @@ details summary::after {
   border-right: var(--line-strong) solid var(--text-muted);
   border-bottom: var(--line-strong) solid var(--text-muted);
   transform: rotate(45deg);
+  transition: transform var(--dur-base) var(--ease-out);
 }
 details[open] summary::after {
   transform: rotate(-135deg);
+}
+/* content expands and fades where ::details-content (and interpolate-size for the height) is supported; elsewhere it opens at once */
+details {
+  interpolate-size: allow-keywords;
+}
+details::details-content {
+  block-size: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    block-size var(--dur-slow) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out),
+    content-visibility var(--dur-slow) allow-discrete;
+}
+details[open]::details-content {
+  block-size: auto;
+  opacity: 1;
 }
 details ul {
   margin: var(--space-3) 0 0;

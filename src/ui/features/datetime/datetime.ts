@@ -11,6 +11,7 @@ import {
   toDayKey,
   toTime,
 } from '../../form';
+import { slideIndicator } from '../../motion';
 
 export const QUICK_DAYS = [1, 2, 3, 5, 7] as const;
 
@@ -92,15 +93,21 @@ const chips = (root: HTMLElement): NodeListOf<HTMLButtonElement> =>
   root.querySelectorAll<HTMLButtonElement>('#quick .chip');
 const presets = (root: HTMLElement): NodeListOf<HTMLButtonElement> =>
   root.querySelectorAll<HTMLButtonElement>('#thrown-quick .chip');
-/** Highlights the buttons for which `on` holds, for sight (`.on`) and for assistive tech (`aria-pressed`). */
+/**
+ * Highlights the buttons for which `on` holds, for sight (`.on`) and for assistive tech (`aria-pressed`);
+ * the highlight slides over from the previously chosen button.
+ */
 const press = (
   buttons: NodeListOf<HTMLButtonElement>,
   on: (b: HTMLButtonElement) => boolean,
 ): void => {
+  const group = buttons[0]!.parentElement!;
+  const from = group.querySelector('.chip.on')?.getBoundingClientRect();
   buttons.forEach((b) => {
     b.classList.toggle('on', on(b));
     b.setAttribute('aria-pressed', String(on(b)));
   });
+  slideIndicator(group, from, group.querySelector<HTMLElement>('.chip.on'));
 };
 
 function setWhenDays(root: HTMLElement, ctx: AppContext, days: number): void {
