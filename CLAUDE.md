@@ -143,3 +143,5 @@ Optional extra labels: `accessibility`, `good first issue`. An issue has at most
 ## Agent workflow
 
 Three project agents live in `.claude/agents/`: `issue-writer`, `implementer` and `validator`. How they hand work to each other is described in `docs/agent-workflow.md`.
+
+- **Issues are always drafted and filed by the `issue-writer` agent.** When the user asks to file, raise, draft or write issues, spawn `issue-writer` with the user's request. Don't investigate or write issue bodies yourself. It may use the graphify skill to understand the codebase. Relay the issue URLs and summaries it returns.
