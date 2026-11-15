@@ -2,8 +2,12 @@ import type { CoverDefinition } from './covers';
 import type { ModelParams } from './params';
 import type { Conditions, CoverMultipliers, Piece } from './types';
 
+/** Constants of the Magnus formula: psat(T) = a · exp(b · T / (c + T)), hPa and °C. */
+export const MAGNUS = { a: 6.112, b: 17.62, c: 243.12 } as const;
+
 /** Saturation vapour pressure over water, hPa (Magnus formula). */
-export const psat = (tempC: number): number => 6.112 * Math.exp((17.62 * tempC) / (243.12 + tempC));
+export const psat = (tempC: number): number =>
+  MAGNUS.a * Math.exp((MAGNUS.b * tempC) / (MAGNUS.c + tempC));
 
 /**
  * Drying-speed model: grams of water lost per hour for a piece under a cover at a moment in time.

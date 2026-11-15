@@ -109,6 +109,20 @@ test.describe('page shell', () => {
       'Wynik',
     ]);
     await expect(steps.nth(0)).toContainText('Masa 500 g, ścianka 6 mm, dno 9 mm.');
+    await expect(steps.nth(0)).toContainText(
+      'Masa ceramiczna: Kamionka gładka – gęstość 1,9 g/cm³ (wspólna dla wszystkich mas), spowolnienie × 1, bazowa utrata 6% masy.',
+    );
+    // each step leads with its formula from the model code
+    await expect(steps.locator('.desc code').first()).toHaveText('m = max(m_min, m_wpisana)');
+    await expect(steps.nth(1).locator('.desc code')).toHaveText(
+      'A = m ÷ ρ ÷ (s ÷ 10) × f_kształt ÷ 10 000',
+    );
+    await expect(steps.nth(4).locator('.desc code')).toHaveText([
+      'e_s(T) = 6,112 × exp(17,62 × T ÷ (243,12 + T))',
+      'VPD = max(VPD_min, e_s(T) × (1 − RH ÷ 100))',
+    ]);
+    for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8])
+      await expect(steps.nth(i).locator('.desc code').first()).toBeVisible();
     await expect(steps.nth(1)).toContainText('500 g ÷ 1,9 g/cm³ ÷ 0,6 cm = 439 cm²');
     await expect(steps.nth(3)).toContainText('6% (masa) + 0 (mokrość) + 0 (cel) = 6% masy');
     await expect(steps.nth(4)).toContainText('W pracowni przy toczeniu: 20 °C, 50%');
@@ -123,7 +137,7 @@ test.describe('page shell', () => {
     const bars = await page.locator('#result .bar .t').allTextContents();
     const times = await explainerSteps(page).nth(6).locator('.rows li').allTextContents();
     expect(times.map((t) => t.replace(/^.*: /, ''))).toEqual(bars.map((b) => b.replace('+', '')));
-    const result = explainerSteps(page).nth(8).locator('p');
+    const result = explainerSteps(page).nth(8).locator('p:not(.desc)');
     await expect(result).toHaveText([
       (await page.locator('#result .rec .sub').textContent())!,
       (await page.locator('#result .rec .win').textContent())!,
@@ -159,13 +173,77 @@ test.describe('page shell', () => {
     await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
   });
 
-  test('the steps follow the language switch', async ({ page }) => {
+  test('the steps follow the language switch and the open section stays open', async ({ page }) => {
     await openApp(page);
     await page.locator('.explainer summary').click();
     await page.getByRole('button', { name: 'English' }).click();
     await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
+    await expect(explainerSteps(page).locator('h3').first()).toBeVisible();
     await expect(explainerSteps(page).locator('h3').first()).toHaveText('Your piece');
     await expect(explainerSteps(page).nth(1)).toContainText('500 g ÷ 1.9 g/cm³ ÷ 0.6 cm = 439 cm²');
+    await page.getByRole('button', { name: 'Polski' }).click();
+    await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
+    await expect(explainerSteps(page).locator('h3').first()).toHaveText('Dane pracy');
+    // a closed section stays closed
+    await page.locator('.explainer summary').click();
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    await expect(page.locator('.explainer details')).not.toHaveAttribute('open', '');
+  });
+
+  test('the language switch keeps the scroll position', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 700 });
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const english = page.getByRole('button', { name: 'English' });
+    await english.focus();
+    await page.evaluate(() => window.scrollTo(0, 600));
+    const before = await page.evaluate(() => window.scrollY);
+    await page.keyboard.press('Enter');
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    expect(await page.evaluate(() => window.scrollY)).toBe(before);
+    await expect(page.getByRole('button', { name: 'English' })).toBeFocused();
+  });
+
+  test('technical terms link to Wikipedia in the page language, in a new tab', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const links = page.locator('#explain-steps a');
+    const all = async (): Promise<string[][]> =>
+      links.evaluateAll((els) =>
+        els.map((a) => [
+          a.getAttribute('href')!,
+          a.getAttribute('target')!,
+          a.getAttribute('rel')!,
+          a.textContent!,
+        ]),
+      );
+    const pl = await all();
+    expect(pl.map(([href]) => href)).toEqual([
+      'https://en.wikipedia.org/wiki/Vapour-pressure_deficit',
+      'https://pl.wikipedia.org/wiki/Para_nasycona',
+      'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      'https://pl.wikipedia.org/wiki/Wilgotno%C5%9B%C4%87_wzgl%C4%99dna',
+      'https://pl.wikipedia.org/wiki/Metoda_Eulera',
+      // the default deadline needs a two-phase plan, whose switch time is bisected
+      'https://pl.wikipedia.org/wiki/Metoda_r%C3%B3wnego_podzia%C5%82u',
+    ]);
+    for (const [, target, rel, label] of pl) {
+      expect(target).toBe('_blank');
+      expect(rel).toBe('noopener noreferrer');
+      expect(label).toContain('(otwiera się w nowej karcie)');
+    }
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    expect((await all()).map(([href]) => href)).toEqual([
+      'https://en.wikipedia.org/wiki/Vapour-pressure_deficit',
+      'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      'https://en.wikipedia.org/wiki/Relative_humidity',
+      'https://en.wikipedia.org/wiki/Euler_method',
+      'https://en.wikipedia.org/wiki/Bisection_method',
+    ]);
   });
 });
 

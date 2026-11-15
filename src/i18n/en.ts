@@ -289,10 +289,55 @@ export const en: Messages = {
     summary: 'How it calculates – step by step',
     intro:
       'Each step shows the formula and the numbers from your form. When you change an input, the numbers update at once.',
+    formula: {
+      inputs: 'm = max(m_min, m_entered)',
+      inputsSymbols: 'the same for the wall w and the base b; without a base, b = w',
+      surface: 'A = m ÷ ρ ÷ (w ÷ 10) × f_shape ÷ 10 000',
+      surfaceSymbols: 'A – surface in m², m – mass in g, ρ – clay density, w – wall in mm',
+      slowness: 'S = f_shape × f_clay × f_bat × max(1, b ÷ w)^p',
+      slownessSymbols: 'b – base, w – wall, p – thick-base exponent',
+      target:
+        'target = l_clay + Δ_wetness + Δ_target; window = [target − Δ_below, target + Δ_above]',
+      targetSymbols: 'l_clay – loss for the clay body, in % of the mass',
+      psat: (a: string, b: string, c: string): string =>
+        `e_s(T) = ${a} × exp(${b} × T ÷ (${c} + T))`,
+      vpd: 'VPD = max(VPD_min, e_s(T) × (1 − RH ÷ 100))',
+      airSymbols: 'T – temperature in °C, RH – relative humidity in %',
+      rate: 'r = k × A × VPD × f_air × f_cover ÷ (S × M)',
+      rateSymbols: 'k – evaporation coefficient, M – calibration multiplier',
+      time: 'loss(t + Δt) = loss(t) + r(t) × Δt, until loss ≥ target',
+      timeSymbols: 'Δt – simulation step',
+      plan: '|t − H| ÷ H ≤ tolerance',
+      planSymbols: 't – time of an option, H – time to the deadline',
+      result: 'ready = thrown + t_plan; window = thrown + [t(window start), t(window end)]',
+    },
+    terms: {
+      vpd: {
+        label: 'The vapour pressure deficit (VPD)',
+        href: 'https://en.wikipedia.org/wiki/Vapour-pressure_deficit',
+      },
+      psat: {
+        label: 'saturation vapour pressure',
+        href: 'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      },
+      magnus: {
+        label: 'the Magnus formula',
+        href: 'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      },
+      rh: { label: 'relative humidity', href: 'https://en.wikipedia.org/wiki/Relative_humidity' },
+      euler: { label: 'the Euler method', href: 'https://en.wikipedia.org/wiki/Euler_method' },
+      bisection: {
+        label: 'repeatedly halving the interval',
+        href: 'https://en.wikipedia.org/wiki/Bisection_method',
+      },
+      newTab: '(opens in a new tab)',
+    },
     inputs: {
       title: 'Your piece',
       values: (mass: string, wall: string, base: string): string =>
         `Mass ${mass} g, wall ${wall} mm, base ${base} mm.`,
+      material: (clay: string, density: string, slow: string, loss: string): string =>
+        `Clay body: ${clay} – density ${density} g/cm³ (the same for every clay body), slowness × ${slow}, base loss ${loss}% of the mass.`,
       massClamped: (min: string): string => `Mass below the model minimum: using ${min} g.`,
       wallClamped: (min: string): string => `Wall below the model minimum: using ${min} mm.`,
       baseClamped: (min: string): string => `Base below the model minimum: using ${min} mm.`,
@@ -325,7 +370,8 @@ export const en: Messages = {
     },
     air: {
       title: 'Drying power of the air',
-      text: 'The vapour pressure deficit (VPD) says how much more moisture the air can take: saturation pressure at the given temperature × (1 − humidity).',
+      text: (vpd: string, psat: string, magnus: string, rh: string): string =>
+        `${vpd} says how much more moisture the air can take: the ${psat} at the given temperature (from ${magnus}) × (1 − ${rh}).`,
       start: 'Studio at throwing time',
       night: (from: string, to: string): string => `Studio at night (${from}–${to})`,
       damp: 'Damp room',
@@ -343,8 +389,7 @@ export const en: Messages = {
     },
     rate: {
       title: 'Drying rate for each option',
-      text: (k: string): string =>
-        `At throwing time: ${k} × surface × VPD × airflow × cover factor ÷ (slowness × calibration multiplier).`,
+      text: 'At throwing time: surface, vapour pressure deficit and airflow speed it up; the cover, slowness and calibration hold it back.',
       row: (
         cover: string,
         k: string,
@@ -366,8 +411,8 @@ export const en: Messages = {
     },
     time: {
       title: 'Time to the target',
-      text: (step: string, grams: string): string =>
-        `A simulation in ${step} steps subtracts the evaporated water until ${grams} g are gone.`,
+      text: (euler: string, step: string, grams: string): string =>
+        `A simulation in ${step} steps (${euler}) subtracts the evaporated water until ${grams} g are gone.`,
       night: 'Night hours use the night conditions.',
       row: (cover: string, duration: string): string => `${cover}: ${duration}`,
     },
@@ -383,8 +428,14 @@ export const en: Messages = {
       excluded: (covers: string): string => `${covers}: unticked in the coverings, left out.`,
       single: (cover: string, hours: string, deadline: string, off: string, tol: string): string =>
         `${cover} meets the deadline: ${hours} against ${deadline}, a difference of ${off}% within ±${tol}%.`,
-      twoPhase: (tol: string, first: string, duration: string, then: string): string =>
-        `No single option meets the deadline within ±${tol}%, so the plan has two phases: ${first} for ${duration}, then ${then}. The switch time is found by repeatedly halving the interval.`,
+      twoPhase: (
+        tol: string,
+        first: string,
+        duration: string,
+        then: string,
+        bisection: string,
+      ): string =>
+        `No single option meets the deadline within ±${tol}%, so the plan has two phases: ${first} for ${duration}, then ${then}. The switch time is found by ${bisection}.`,
       tooFast: (fastest: string, deadline: string): string =>
         `The fastest option needs ${fastest}, but the deadline is ${deadline} away: the deadline is too early.`,
       tooSlow: (slowest: string, deadline: string): string =>

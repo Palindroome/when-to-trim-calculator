@@ -321,10 +321,60 @@ export const pl = {
     summary: 'Jak to liczy – krok po kroku',
     intro:
       'Każdy krok pokazuje wzór i liczby z Twojego formularza. Gdy zmienisz dane, liczby przeliczą się od razu.',
+    /** Each step's formula as in the model code (shown as code) and what its symbols stand for. */
+    formula: {
+      inputs: 'm = max(m_min, m_wpisana)',
+      inputsSymbols: 'tak samo ścianka s i dno d; bez dna d = s',
+      surface: 'A = m ÷ ρ ÷ (s ÷ 10) × f_kształt ÷ 10 000',
+      surfaceSymbols: 'A – powierzchnia w m², m – masa w g, ρ – gęstość gliny, s – ścianka w mm',
+      slowness: 'S = f_kształt × f_masa × f_podłoże × max(1, d ÷ s)^p',
+      slownessSymbols: 'd – dno, s – ścianka, p – wykładnik grubego dna',
+      target: 'cel = u_masa + Δ_mokrość + Δ_cel; okno = [cel − Δ_dół, cel + Δ_góra]',
+      targetSymbols: 'u_masa – utrata dla masy ceramicznej, w % masy',
+      psat: (a: string, b: string, c: string): string =>
+        `e_s(T) = ${a} × exp(${b} × T ÷ (${c} + T))`,
+      vpd: 'VPD = max(VPD_min, e_s(T) × (1 − RH ÷ 100))',
+      airSymbols: 'T – temperatura w °C, RH – wilgotność względna w %',
+      rate: 'r = k × A × VPD × f_ruch × f_okrycie ÷ (S × M)',
+      rateSymbols: 'k – współczynnik parowania, M – mnożnik kalibracji',
+      time: 'utrata(t + Δt) = utrata(t) + r(t) × Δt, aż utrata ≥ cel',
+      timeSymbols: 'Δt – krok symulacji',
+      plan: '|t − H| ÷ H ≤ tolerancja',
+      planSymbols: 't – czas wariantu, H – czas do terminu',
+      result: 'gotowa = toczenie + t_planu; okno = toczenie + [t(początek okna), t(koniec okna)]',
+    },
+    /** Linked terms: Polish Wikipedia where it has an article, otherwise English. */
+    terms: {
+      vpd: {
+        label: 'Niedobór pary (VPD)',
+        href: 'https://en.wikipedia.org/wiki/Vapour-pressure_deficit',
+      },
+      psat: {
+        label: 'ciśnienie pary nasyconej',
+        href: 'https://pl.wikipedia.org/wiki/Para_nasycona',
+      },
+      magnus: {
+        label: 'wzorem Magnusa',
+        href: 'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      },
+      rh: {
+        label: 'wilgotność względna',
+        href: 'https://pl.wikipedia.org/wiki/Wilgotno%C5%9B%C4%87_wzgl%C4%99dna',
+      },
+      euler: { label: 'metodą Eulera', href: 'https://pl.wikipedia.org/wiki/Metoda_Eulera' },
+      bisection: {
+        label: 'połowienie przedziału',
+        href: 'https://pl.wikipedia.org/wiki/Metoda_r%C3%B3wnego_podzia%C5%82u',
+      },
+      /** the accessible hint after each link */
+      newTab: '(otwiera się w nowej karcie)',
+    },
     inputs: {
       title: 'Dane pracy',
       values: (mass: string, wall: string, base: string): string =>
         `Masa ${mass} g, ścianka ${wall} mm, dno ${base} mm.`,
+      material: (clay: string, density: string, slow: string, loss: string): string =>
+        `Masa ceramiczna: ${clay} – gęstość ${density} g/cm³ (wspólna dla wszystkich mas), spowolnienie × ${slow}, bazowa utrata ${loss}% masy.`,
       massClamped: (min: string): string => `Masa poniżej minimum modelu: liczę z ${min} g.`,
       wallClamped: (min: string): string => `Ścianka poniżej minimum modelu: liczę z ${min} mm.`,
       baseClamped: (min: string): string => `Dno poniżej minimum modelu: liczę z ${min} mm.`,
@@ -357,7 +407,8 @@ export const pl = {
     },
     air: {
       title: 'Siła schnięcia powietrza',
-      text: 'Niedobór pary (VPD) mówi, ile wilgoci powietrze może jeszcze przyjąć: ciśnienie nasycenia przy danej temperaturze × (1 − wilgotność).',
+      text: (vpd: string, psat: string, magnus: string, rh: string): string =>
+        `${vpd} mówi, ile wilgoci powietrze może jeszcze przyjąć: ${psat} przy danej temperaturze (liczone ${magnus}) × (1 − ${rh}).`,
       start: 'W pracowni przy toczeniu',
       night: (from: string, to: string): string => `W pracowni nocą (${from}–${to})`,
       damp: 'W mokrej przechowalni',
@@ -375,8 +426,7 @@ export const pl = {
     },
     rate: {
       title: 'Tempo schnięcia w każdym wariancie',
-      text: (k: string): string =>
-        `W chwili toczenia: ${k} × powierzchnia × VPD × ruch powietrza × współczynnik okrycia ÷ (spowolnienie × mnożnik kalibracji).`,
+      text: 'W chwili toczenia: powierzchnia, niedobór pary i ruch powietrza przyspieszają, okrycie, spowolnienie i kalibracja hamują.',
       row: (
         cover: string,
         k: string,
@@ -397,8 +447,8 @@ export const pl = {
     },
     time: {
       title: 'Czas do celu',
-      text: (step: string, grams: string): string =>
-        `Symulacja co ${step} odejmuje odparowaną wodę, aż ubędzie ${grams} g.`,
+      text: (euler: string, step: string, grams: string): string =>
+        `Symulacja krokami po ${step} (${euler}) odejmuje odparowaną wodę, aż ubędzie ${grams} g.`,
       night: 'Nocne godziny liczy z warunkami nocnymi.',
       row: (cover: string, duration: string): string => `${cover}: ${duration}`,
     },
@@ -414,8 +464,14 @@ export const pl = {
       excluded: (covers: string): string => `${covers}: wyłączone w sposobach okrycia, pomijam.`,
       single: (cover: string, hours: string, deadline: string, off: string, tol: string): string =>
         `${cover} trafia w termin: ${hours} wobec ${deadline}, różnica ${off}% mieści się w ±${tol}%.`,
-      twoPhase: (tol: string, first: string, duration: string, then: string): string =>
-        `Żaden wariant sam nie trafia w termin z dokładnością ±${tol}%, więc plan ma dwie fazy: ${first} przez ${duration}, potem ${then}. Moment zmiany szukam przez połowienie przedziału.`,
+      twoPhase: (
+        tol: string,
+        first: string,
+        duration: string,
+        then: string,
+        bisection: string,
+      ): string =>
+        `Żaden wariant sam nie trafia w termin z dokładnością ±${tol}%, więc plan ma dwie fazy: ${first} przez ${duration}, potem ${then}. Moment zmiany szukam przez ${bisection}.`,
       tooFast: (fastest: string, deadline: string): string =>
         `Najszybszy wariant potrzebuje ${fastest}, a do terminu jest ${deadline}: termin jest za wcześnie.`,
       tooSlow: (slowest: string, deadline: string): string =>

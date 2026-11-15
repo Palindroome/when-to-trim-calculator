@@ -43,6 +43,8 @@ const numbers = (page: Page): Promise<Record<string, string>> =>
     ),
   );
 
+const explainerStep = (page: Page, i: number) => page.locator('#explain-steps > li').nth(i);
+
 /** "1 d 3 h", "5 h", "40 min" (optionally with "+") in hours. */
 const hours = (text: string): number => {
   const part = (re: RegExp): number => Number(re.exec(text)?.[1] ?? 0);
@@ -205,6 +207,48 @@ test.describe('with motion', () => {
         els.map((el) => [getComputedStyle(el).opacity, el.getAttribute('style')]),
       );
     expect(settled.every(([o, s]) => o === '1' && s === null)).toBe(true);
+  });
+
+  test('explainer numbers slide digit by digit, are read once, and end on the exact text', async ({
+    page,
+  }) => {
+    const steps = async (p: Page): Promise<void> => {
+      await p.locator('.explainer summary').click();
+      await fill(p, 'Masa po toczeniu', '1000');
+    };
+    await page.locator('.explainer summary').click();
+    await waitForMotionIdle(page);
+    await fill(page, 'Masa po toczeniu', '1000');
+    const sliding = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('#explain-steps .slide[aria-hidden="true"]')].map(
+        (el) => ({
+          columns: el.querySelectorAll('.slide-col').length,
+          final: el.nextElementSibling?.matches('.vh') ? el.nextElementSibling.textContent : null,
+        }),
+      ),
+    );
+    expect(sliding.length).toBeGreaterThan(0);
+    for (const s of sliding) {
+      expect(s.columns).toBeGreaterThan(0);
+      expect(s.final).toMatch(/\d/);
+    }
+    const tabular = await page
+      .locator('#explain-steps .slide')
+      .evaluateAll((els) =>
+        els.every((el) => getComputedStyle(el).fontVariantNumeric.includes('tabular-nums')),
+      );
+    expect(tabular).toBe(true);
+    await waitForMotionIdle(page);
+    await expect(page.locator('#explain-steps .slide-col')).toHaveCount(0);
+    await expect(page.locator('#explain-steps .slide[aria-hidden]')).toHaveCount(0);
+    await expect(page.locator('#explain-steps .slide + .vh')).toHaveCount(0);
+    await expect(explainerStep(page, 1)).toContainText('1000 g ÷ 1,9 g/cm³ ÷ 0,6 cm = 877 cm²');
+    const settled = await page.locator('#explain-steps').innerHTML();
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+    await steps(page);
+    await expect(explainerStep(page, 1)).toContainText('877 cm²');
+    expect(await page.locator('#explain-steps').innerHTML()).toBe(settled);
   });
 
   test('the night fields expand and collapse', async ({ page }) => {
@@ -484,10 +528,17 @@ test.describe('with reduced motion', () => {
     await expect(page.locator('.slide-ind')).toHaveCount(0);
   });
 
-  test('the explainer opens with its steps at once', async ({ page }) => {
+  test('the explainer opens with its steps at once, and its numbers change without sliding', async ({
+    page,
+  }) => {
     await page.locator('.explainer summary').click();
     await expect(page.locator('#explain-steps > li').first()).toBeVisible();
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+    expect(await helperIdleNow(page)).toBe(true);
+    await fill(page, 'Masa po toczeniu', '1000');
+    await expect(explainerStep(page, 1)).toContainText('877 cm²');
+    await expect(page.locator('#explain-steps .slide-col')).toHaveCount(0);
+    await expect(page.locator('#explain-steps .slide[aria-hidden]')).toHaveCount(0);
     expect(await helperIdleNow(page)).toBe(true);
   });
 

@@ -114,3 +114,24 @@ details[open] summary::after {
 .steps .rows .formula {
   margin: 0;
 }
+/* the step's formula from the model code: quieter than the worked numbers below it */
+.steps .desc {
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+.steps .desc code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--text-xs);
+  color: var(--text);
+}
+.steps .symbols {
+  display: block;
+  font-size: var(--text-xs);
+}
+.steps a {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+.steps a:hover {
+  color: var(--accent-hover);
+}

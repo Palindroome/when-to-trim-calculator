@@ -178,11 +178,16 @@ export function startApp(deps: AppDeps): void {
     deps.onLocaleChange(code);
     if (next === view.m) return;
     const from = root.querySelector('[data-lang][aria-pressed="true"]')?.getBoundingClientRect();
+    const explainerOpen = explainer.isOpen(root);
+    const scrollY = window.scrollY;
     // the page cross-fades into the new language and the switch's highlight slides to the chosen button
     viewTransition(() => {
       render(next, captureForm(root, covers));
+      if (explainerOpen) explainer.open(root);
+      window.scrollTo(0, scrollY);
       const button = root.querySelector<HTMLElement>(`[data-lang="${code}"]`);
-      button?.focus();
+      // the scroll position stays where the reader was
+      button?.focus({ preventScroll: true });
       if (button) slideIndicator(button.parentElement!, from, button);
     });
   }
