@@ -52,7 +52,7 @@ const ALL = [
   '#result',
   '4Sprawdź wagą',
   '5Moje prace i kalibracja',
-  'Jak to liczy (i czego jeszcze nie umie)',
+  'Jak to liczy – krok po kroku',
 ];
 
 async function walkThrough(page: Page): Promise<void> {

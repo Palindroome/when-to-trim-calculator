@@ -56,7 +56,7 @@ test.describe('page shell', () => {
     await expect(page.locator('#result .bar svg')).toHaveCount(5);
     const summary = page.locator('details > summary');
     await expect(summary.locator('svg')).toHaveCount(1);
-    await expect(summary).toHaveAccessibleName('Jak to liczy (i czego jeszcze nie umie)');
+    await expect(summary).toHaveAccessibleName('Jak to liczy – krok po kroku');
     // each cover pill shows its cover's icon next to the check / cross and keeps its name
     const pills = page.locator('#covers .pill');
     await expect(pills).toHaveCount(5);
@@ -87,20 +87,305 @@ test.describe('page shell', () => {
     ]);
   });
 
-  test('explainer is collapsed and expands on click', async ({ page }) => {
+  test('explainer is collapsed and expands into numbered steps with the current numbers', async ({
+    page,
+  }) => {
     await openApp(page);
-    const summary = page.getByText('Jak to liczy (i czego jeszcze nie umie)');
-    const body = page.getByText(/^Parowanie zależy od tego/);
-    await expect(body).toBeHidden();
+    const summary = page.getByText('Jak to liczy – krok po kroku');
+    const steps = explainerSteps(page);
+    await expect(steps.first()).toBeHidden();
     await summary.click();
-    await expect(body).toBeVisible();
-    await expect(page.locator('details li')).toHaveCount(6);
-    await expect(page.locator('details li').nth(1)).toContainText(
-      'cały worek ≈ 7%, szczelne pudełko ≈ 5%',
+    await expect(steps.first()).toBeVisible();
+    await expect(page.locator('#explain-steps')).toHaveAttribute('role', 'list');
+    await expect(steps.locator('h3')).toHaveText([
+      'Dane pracy',
+      'Odsłonięta powierzchnia',
+      'Spowolnienie',
+      'Cel i okno',
+      'Siła schnięcia powietrza',
+      'Tempo schnięcia w każdym wariancie',
+      'Czas do celu',
+      'Wybór planu',
+      'Wynik',
+    ]);
+    await expect(steps.nth(0)).toContainText('Masa 500 g, ścianka 6 mm, dno 9 mm.');
+    await expect(steps.nth(0)).toContainText(
+      'Masa ceramiczna: Kamionka gładka – gęstość 1,9 g/cm³ (wspólna dla wszystkich mas), spowolnienie × 1, bazowa utrata 6% masy.',
     );
-    await expect(page.locator('details li').nth(5)).toContainText('czujniki BLE');
+    // each step leads with its formula from the model code
+    await expect(steps.locator('.desc code').first()).toHaveText('m = max(m_min, m_wpisana)');
+    await expect(steps.nth(1).locator('.desc code')).toHaveText(
+      'A = m ÷ ρ ÷ (s ÷ 10) × f_kształt ÷ 10 000',
+    );
+    await expect(steps.nth(4).locator('.desc code')).toHaveText([
+      'e_s(T) = 6,112 × exp(17,62 × T ÷ (243,12 + T))',
+      'VPD = max(VPD_min, e_s(T) × (1 − clamp(RH, RH_min, RH_max) ÷ 100))',
+    ]);
+    await expect(steps.nth(4).locator('.symbols')).toHaveText(
+      'T – temperatura w °C, RH – wilgotność względna w %, ograniczona do 1–99%; VPD_min = 0,05 hPa',
+    );
+    // step 6: each cover's calibration first, then the formula and the rate that use it
+    await expect(steps.nth(5).locator('.desc code')).toHaveText(
+      'r = 1 ÷ M × f_okrycie × f_ruch × k × A × VPD ÷ S',
+    );
+    await expect(steps.nth(5).locator('.rows li .cover-line').first()).toHaveText(
+      'Odkryta: kalibracja ÷ 1, okrycie × 1, ruch powietrza × 1,6',
+    );
+    await expect(steps.nth(5).locator('.rows li').first()).toHaveText(
+      'Odkryta: kalibracja ÷ 1, okrycie × 1, ruch powietrza × 1,6' +
+        '1 ÷ 1 × 1 × 1,6 × 5,1 × 0,0702 × 11,66 ÷ 1,28 = 5,24 g/h',
+    );
+    for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8])
+      await expect(steps.nth(i).locator('.desc code').first()).toBeVisible();
+    await expect(steps.nth(1)).toContainText('500 g ÷ 1,9 g/cm³ ÷ 0,6 cm = 439 cm²');
+    await expect(steps.nth(3)).toContainText('6% (masa) + 0 (mokrość) + 0 (cel) = 6% masy');
+    await expect(steps.nth(4)).toContainText('W pracowni przy toczeniu: 20 °C, 50%');
+    await expect(steps.nth(5).locator('.rows li')).toHaveCount(5);
+    await expect(steps.nth(7)).toContainText('Do terminu jest 2 d 1 h.');
+    await expect(page.locator('.explainer')).toContainText('czujniki BLE');
+  });
+
+  test('step 7 matches the bars and step 9 the recommendation', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const bars = await page.locator('#result .bar .t').allTextContents();
+    const times = await explainerSteps(page).nth(6).locator('.rows li').allTextContents();
+    expect(times.map((t) => t.replace(/^.*: /, ''))).toEqual(bars.map((b) => b.replace('+', '')));
+    const result = explainerSteps(page).nth(8).locator('p:not(.desc)');
+    await expect(result).toHaveText([
+      (await page.locator('#result .rec .sub').textContent())!,
+      (await page.locator('#result .rec .win').textContent())!,
+    ]);
+  });
+
+  test('step 8 names the branch taken', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const plan = explainerSteps(page).nth(7);
+    await setDateTime(page, 'Chcę trymować', '2026-03-04T11:00');
+    await expect(plan).toContainText('termin jest za wcześnie');
+    await setDateTime(page, 'Chcę trymować', '2026-03-01T10:00');
+    await expect(plan).toHaveText(/Termin trymowania musi być po toczeniu\./);
+    await expect(explainerSteps(page)).toHaveCount(8);
+    await setDateTime(page, 'Chcę trymować', '2026-03-12T10:00');
+    await expect(plan).toContainText('Mokra przechowalnia: w grze');
+  });
+
+  test('editing the piece and the conditions updates the steps while the section stays open', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const steps = explainerSteps(page);
+    const rate = await steps.nth(5).locator('.rows li').first().textContent();
+    await fill(page, 'Masa po toczeniu', '1000');
+    await expect(steps.nth(1)).toContainText('1000 g ÷ 1,9 g/cm³ ÷ 0,6 cm = 877 cm²');
+    await expect(steps.nth(3)).toContainText('= 6% masy, czyli 60 g wody');
+    await fill(page, 'Temperatura w pracowni', '25');
+    await expect(steps.nth(4)).toContainText('W pracowni przy toczeniu: 25 °C, 50%');
+    await expect(steps.nth(5).locator('.rows li').first()).not.toHaveText(rate!);
+    await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
+  });
+
+  test('the steps follow the language switch and the open section stays open', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
+    await expect(explainerSteps(page).locator('h3').first()).toBeVisible();
+    await expect(explainerSteps(page).locator('h3').first()).toHaveText('Your piece');
+    await expect(explainerSteps(page).nth(1)).toContainText('500 g ÷ 1.9 g/cm³ ÷ 0.6 cm = 439 cm²');
+    await page.getByRole('button', { name: 'Polski' }).click();
+    await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
+    await expect(explainerSteps(page).locator('h3').first()).toHaveText('Dane pracy');
+    // a closed section stays closed
+    await page.locator('.explainer summary').click();
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    await expect(page.locator('.explainer details')).not.toHaveAttribute('open', '');
+  });
+
+  test('the language switch keeps the scroll position', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 700 });
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const english = page.getByRole('button', { name: 'English' });
+    await english.focus();
+    await page.evaluate(() => window.scrollTo(0, 600));
+    const before = await page.evaluate(() => window.scrollY);
+    await page.keyboard.press('Enter');
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    expect(await page.evaluate(() => window.scrollY)).toBe(before);
+    await expect(page.getByRole('button', { name: 'English' })).toBeFocused();
+  });
+
+  test('the language switch keeps a scroll position far down the open section', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 700 });
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    // the last step, below where the page would end with the section closed
+    await explainerSteps(page).last().scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+    // a click by script, without scrolling to the header first
+    await page.getByRole('button', { name: 'English' }).evaluate((b: HTMLElement) => b.click());
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    expect(await page.evaluate(() => window.scrollY)).toBe(before);
+  });
+
+  test('every number in the steps explains itself on hover, focus and tap', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const tip = page.locator('#explain-tip');
+    const numbers = page.locator('#explain-steps .num-tip');
+    await expect(tip).toBeHidden();
+    // every number is focusable and described by its own label, which the bubble shows
+    const all = await numbers.evaluateAll((els) =>
+      els.map((el) => ({
+        tabindex: el.getAttribute('tabindex'),
+        label: el.dataset.tip,
+        description: document.getElementById(el.getAttribute('aria-describedby') ?? '')
+          ?.textContent,
+      })),
+    );
+    expect(all.length).toBeGreaterThan(50);
+    for (const n of all) {
+      expect(n.tabindex).toBe('0');
+      expect(n.label).toBeTruthy();
+      expect(n.description).toBe(n.label);
+    }
+    await expect(tip).toHaveAttribute('aria-hidden', 'true');
+    // the description does not depend on which number had focus before
+    await numbers.first().focus();
+    await numbers.first().blur();
+    const sideArea = explainerSteps(page).nth(1).locator('.formula .num-tip').nth(3);
+    await expect(sideArea).toHaveAccessibleDescription('powierzchnia jednej strony arkusza gliny');
+    // the density in step 2, by mouse; the bubble stays while the pointer is on it
+    const density = explainerSteps(page).nth(1).locator('.formula .num-tip').nth(1);
+    await expect(density).toHaveText('1,9');
+    await density.hover();
+    await expect(tip).toBeVisible();
+    await expect(tip).toHaveText('gęstość masy ceramicznej');
+    await tip.hover();
+    await expect(tip).toBeVisible();
+    await page.mouse.move(0, 0);
+    await expect(tip).toBeHidden();
+    // a hovered bubble closes with Escape
+    await density.hover();
+    await expect(tip).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(tip).toBeHidden();
+    await page.mouse.move(0, 0);
+    // by keyboard, closed with Escape
+    await density.focus();
+    await expect(tip).toHaveText('gęstość masy ceramicznej');
+    await expect(density).toHaveAccessibleDescription('gęstość masy ceramicznej');
+    await page.keyboard.press('Escape');
+    await expect(tip).toBeHidden();
+    await page.keyboard.press('Tab');
+    await expect(tip).toBeVisible();
+    // the next number, the wall in centimetres
+    await expect(tip).toHaveText('grubość ścianki w centymetrach');
+    // by tap (a click), in English too
+    await page.getByRole('button', { name: 'English' }).click();
+    await explainerSteps(page).nth(1).locator('.formula .num-tip').nth(1).click();
+    await expect(tip).toHaveText("clay's density");
+  });
+
+  test('no number in the steps is left without an explanation', async ({ page }) => {
+    await openApp(page);
+    await setNight(page, true);
+    await page.locator('.explainer summary').click();
+    const bare = (): Promise<string[]> =>
+      page.evaluate(() => {
+        const out: string[] = [];
+        const walker = document.createTreeWalker(
+          document.getElementById('explain-steps')!,
+          NodeFilter.SHOW_TEXT,
+        );
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          const el = n.parentElement!;
+          // the formulas in code too; only the hidden link hints are skipped
+          if (el.closest('.num-tip, .vh')) continue;
+          if (/\d/.test(n.textContent ?? '')) out.push(n.textContent!);
+        }
+        return out;
+      });
+    expect(await bare()).toEqual([]);
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    expect(await bare()).toEqual([]);
+  });
+
+  test('phone: a tapped number explains itself inside the card, without a horizontal scroll', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const card = (await page.locator('.explainer').boundingBox())!;
+    const tip = page.locator('#explain-tip');
+    for (const target of [
+      explainerSteps(page).nth(1).locator('.formula .num-tip').first(),
+      explainerSteps(page).nth(5).locator('.rows .num-tip').last(),
+    ]) {
+      await target.click();
+      await expect(tip).toBeVisible();
+      const box = (await tip.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(card.x);
+      expect(box.x + box.width).toBeLessThanOrEqual(card.x + card.width);
+      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    }
+  });
+
+  test('technical terms link to Wikipedia in the page language, in a new tab', async ({ page }) => {
+    await openApp(page);
+    await page.locator('.explainer summary').click();
+    const links = page.locator('#explain-steps a');
+    const all = async (): Promise<string[][]> =>
+      links.evaluateAll((els) =>
+        els.map((a) => [
+          a.getAttribute('href')!,
+          a.getAttribute('target')!,
+          a.getAttribute('rel')!,
+          a.textContent!,
+        ]),
+      );
+    const pl = await all();
+    expect(pl.map(([href]) => href)).toEqual([
+      'https://en.wikipedia.org/wiki/Vapour-pressure_deficit',
+      'https://pl.wikipedia.org/wiki/Ci%C5%9Bnienie_pary_nasyconej',
+      'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      'https://pl.wikipedia.org/wiki/Wilgotno%C5%9B%C4%87_wzgl%C4%99dna',
+      'https://pl.wikipedia.org/wiki/Metoda_Eulera',
+      // the default deadline needs a two-phase plan, whose switch time is bisected
+      'https://pl.wikipedia.org/wiki/Metoda_r%C3%B3wnego_podzia%C5%82u',
+    ]);
+    for (const [, target, rel, label] of pl) {
+      expect(target).toBe('_blank');
+      expect(rel).toBe('noopener noreferrer');
+      expect(label).toContain('(otwiera się w nowej karcie)');
+    }
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    expect((await all()).map(([href]) => href)).toEqual([
+      'https://en.wikipedia.org/wiki/Vapour-pressure_deficit',
+      'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      'https://en.wikipedia.org/wiki/Relative_humidity',
+      'https://en.wikipedia.org/wiki/Euler_method',
+      'https://en.wikipedia.org/wiki/Bisection_method',
+    ]);
   });
 });
+
+const explainerSteps = (page: Page): Locator => page.locator('#explain-steps > li');
 
 test.describe('inputs and defaults', () => {
   test('every field starts with the documented default', async ({ page }) => {

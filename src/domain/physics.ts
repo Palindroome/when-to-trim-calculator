@@ -2,8 +2,12 @@ import type { CoverDefinition } from './covers';
 import type { ModelParams } from './params';
 import type { Conditions, CoverMultipliers, Piece } from './types';
 
+/** Constants of the Magnus formula: psat(T) = a · exp(b · T / (c + T)), hPa and °C. */
+export const MAGNUS = { a: 6.112, b: 17.62, c: 243.12 } as const;
+
 /** Saturation vapour pressure over water, hPa (Magnus formula). */
-export const psat = (tempC: number): number => 6.112 * Math.exp((17.62 * tempC) / (243.12 + tempC));
+export const psat = (tempC: number): number =>
+  MAGNUS.a * Math.exp((MAGNUS.b * tempC) / (MAGNUS.c + tempC));
 
 /**
  * Drying-speed model: grams of water lost per hour for a piece under a cover at a moment in time.
@@ -20,32 +24,65 @@ export interface RateModel {
   ): number;
 }
 
+/** The air around a piece and how much more water vapour it can take. */
+export interface Climate {
+  /** °C */
+  temp: number;
+  /** % RH, as entered */
+  rh: number;
+  /** % RH, clamped to `rhClamp` */
+  rhUsed: number;
+  /** hPa, saturation vapour pressure at `temp` */
+  psat: number;
+  /** hPa, vapour pressure deficit, at least `minVpd` */
+  vpd: number;
+}
+
+/** Whether the night conditions apply at this moment. */
+export const isNightAt = (timeMs: number, env: Conditions, p: ModelParams): boolean => {
+  const hour = new Date(timeMs).getHours();
+  return env.night && (hour >= p.night.fromHour || hour < p.night.toHour);
+};
+
+/** The climate of a cover's environment: the damp room, or the studio by day or at night. */
+export function climate(
+  environment: CoverDefinition['environment'],
+  night: boolean,
+  env: Conditions,
+  p: ModelParams,
+): Climate {
+  const damp = environment === 'dampRoom';
+  const temp = damp ? env.dampTemp : night ? env.nightTemp : env.temp;
+  const rh = damp ? env.dampRh : night ? env.nightRh : env.rh;
+  const rhUsed = Math.min(p.rhClamp.max, Math.max(p.rhClamp.min, rh));
+  const ps = psat(temp);
+  return { temp, rh, rhUsed, psat: ps, vpd: Math.max(p.minVpd, ps * (1 - rhUsed / 100)) };
+}
+
+/** How much of the studio's airflow reaches a piece under this cover. */
+export function airFactor(cover: CoverDefinition, env: Conditions, p: ModelParams): number {
+  if (cover.environment === 'dampRoom') return 1;
+  const airflow = p.airflowFactor[env.airflow];
+  return cover.airflow === 'full' ? airflow : cover.airflow === 'damped' ? Math.sqrt(airflow) : 1;
+}
+
+const physicalModels = new WeakSet<RateModel>();
+
+/** Whether `model` is a `physicalRateModel`, whose rate splits into the factors above. */
+export const isPhysicalRateModel = (model: RateModel): boolean => physicalModels.has(model);
+
 /** Evaporation driven by the vapour-pressure deficit, airflow and exposed area. */
 export function physicalRateModel(p: ModelParams): RateModel {
-  return {
+  const model: RateModel = {
     rate(cover, timeMs, piece, env, multipliers) {
-      let temp: number;
-      let rh: number;
-      let air: number;
-      if (cover.environment === 'dampRoom') {
-        temp = env.dampTemp;
-        rh = env.dampRh;
-        air = 1;
-      } else {
-        const hour = new Date(timeMs).getHours();
-        const isNight = env.night && (hour >= p.night.fromHour || hour < p.night.toHour);
-        temp = isNight ? env.nightTemp : env.temp;
-        rh = isNight ? env.nightRh : env.rh;
-        const airflow = p.airflowFactor[env.airflow];
-        air =
-          cover.airflow === 'full' ? airflow : cover.airflow === 'damped' ? Math.sqrt(airflow) : 1;
-      }
-      const clampedRh = Math.min(p.rhClamp.max, Math.max(p.rhClamp.min, rh));
-      const vpd = Math.max(p.minVpd, psat(temp) * (1 - clampedRh / 100));
+      const { vpd } = climate(cover.environment, isNightAt(timeMs, env, p), env, p);
+      const air = airFactor(cover, env, p);
       return (
         (p.evaporationCoefficient * piece.area * vpd * air * cover.factor) /
         (piece.slow * (multipliers[cover.id] ?? 1))
       );
     },
   };
+  physicalModels.add(model);
+  return model;
 }

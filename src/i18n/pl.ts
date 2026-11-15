@@ -313,14 +313,260 @@ export const pl = {
       'Mnożnik &gt; 1 oznacza, że w Twojej pracowni ten wariant schnie wolniej, niż zakłada model.',
   },
 
+  /**
+   * "How it calculates": one step per stage of the calculation, with the numbers from the form.
+   * Every number arrives already formatted; none is written into these strings.
+   */
   explainer: {
-    summary: 'Jak to liczy (i czego jeszcze nie umie)',
-    itemsHtml: [
-      '<b>Parowanie</b> zależy od tego, ile pary wodnej powietrze może jeszcze przyjąć (niedobór pary: ciśnienie nasycenia przy danej temperaturze × (1 − wilgotność)). Do tego dochodzą ruch powietrza i odsłonięta powierzchnia, liczona z masy, grubości ścianki i kształtu.',
-      '<b>Opatulenie</b> ma współczynnik: worek częściowo ≈ 30% tempa na otwartym powietrzu, cały worek ≈ 7%, szczelne pudełko ≈ 5%. Przechowalnia liczona jest z jej własnej temperatury i wilgotności. Ponieważ jest mała, kalkulator proponuje ją tylko wtedy, gdy praca ma zostać bardzo mokra (cel „doklejanie uch / miękka”) albo gdy czekanie trwa 4 dni lub dłużej.',
-      '<b>Skórzana twardość</b> to utrata ok. 5–7% masy od toczenia, zależnie od masy ceramicznej, mokrości i celu. Okno trymowania to mniej więcej ±1–1,5 punktu procentowego wokół tej wartości.',
-      '<b>Grube dno, porcelana, plastikowy bat i forma zamknięta</b> wydłużają czas. Gips go skraca.',
-      'Wszystkie współczynniki to <b>założenia startowe</b>. Każda zapisana praca z oceną „za mokra / w sam raz / za sucha” koryguje mnożnik dla danego opatulenia.',
+    summary: 'Jak to liczy – krok po kroku',
+    intro:
+      'Każdy krok pokazuje wzór i liczby z Twojego formularza. Gdy zmienisz dane, liczby przeliczą się od razu.',
+    /** Each step's formula as in the model code (shown as code) and what its symbols stand for. */
+    formula: {
+      inputs: 'm = max(m_min, m_wpisana)',
+      inputsSymbols: 'tak samo ścianka s i dno d; bez dna d = s',
+      surface: (mmToCm: string, cm2ToM2: string): string =>
+        `A = m ÷ ρ ÷ (s ÷ ${mmToCm}) × f_kształt ÷ ${cm2ToM2}`,
+      surfaceSymbols: 'A – powierzchnia w m², m – masa w g, ρ – gęstość gliny, s – ścianka w mm',
+      slowness: (floor: string): string =>
+        `S = f_kształt × f_masa × f_podłoże × max(${floor}, d ÷ s)^p`,
+      slownessSymbols: 'd – dno, s – ścianka, p – wykładnik grubego dna',
+      target: 'cel = u_masa + Δ_mokrość + Δ_cel; okno = [cel − Δ_dół, cel + Δ_góra]',
+      targetSymbols: 'u_masa – utrata dla masy ceramicznej, w % masy',
+      psat: (a: string, b: string, c: string): string =>
+        `e_s(T) = ${a} × exp(${b} × T ÷ (${c} + T))`,
+      vpd: (whole: string, percent: string): string =>
+        `VPD = max(VPD_min, e_s(T) × (${whole} − clamp(RH, RH_min, RH_max) ÷ ${percent}))`,
+      airSymbols: (vpdMin: string, rhMin: string, rhMax: string): string =>
+        `T – temperatura w °C, RH – wilgotność względna w %, ograniczona do ${rhMin}–${rhMax}%; VPD_min = ${vpdMin} hPa`,
+      rate: (one: string): string => `r = ${one} ÷ M × f_okrycie × f_ruch × k × A × VPD ÷ S`,
+      rateSymbols:
+        'najpierw to, co zależy od wariantu: mnożnik kalibracji M (dzieli tempo), okrycie i ruch powietrza pod nim; k – współczynnik parowania',
+      time: 'utrata(t + Δt) = utrata(t) + r(t) × Δt, aż utrata ≥ cel',
+      timeSymbols: 'Δt – krok symulacji',
+      plan: '|t − H| ÷ H ≤ tolerancja',
+      planSymbols: 't – czas wariantu, H – czas do terminu',
+      result: 'gotowa = toczenie + t_planu; okno = toczenie + [t(początek okna), t(koniec okna)]',
+    },
+    /** Linked terms: Polish Wikipedia where it has an article, otherwise English. */
+    terms: {
+      vpd: {
+        label: 'Niedobór pary (VPD)',
+        href: 'https://en.wikipedia.org/wiki/Vapour-pressure_deficit',
+      },
+      psat: {
+        label: 'ciśnienie pary nasyconej',
+        href: 'https://pl.wikipedia.org/wiki/Ci%C5%9Bnienie_pary_nasyconej',
+      },
+      magnus: {
+        label: 'wzorem Magnusa',
+        href: 'https://en.wikipedia.org/wiki/Vapour_pressure_of_water',
+      },
+      rh: {
+        label: 'wilgotność względna',
+        href: 'https://pl.wikipedia.org/wiki/Wilgotno%C5%9B%C4%87_wzgl%C4%99dna',
+      },
+      euler: { label: 'metodą Eulera', href: 'https://pl.wikipedia.org/wiki/Metoda_Eulera' },
+      bisection: {
+        label: 'połowienie przedziału',
+        href: 'https://pl.wikipedia.org/wiki/Metoda_r%C3%B3wnego_podzia%C5%82u',
+      },
+      /** the accessible hint after each link */
+      newTab: '(otwiera się w nowej karcie)',
+    },
+    /** What each number in the steps is: shown on hover, focus or tap, and read as its description. */
+    labels: {
+      mass: 'masa po toczeniu, użyta w obliczeniu',
+      wall: 'grubość ścianki',
+      base: 'grubość dna',
+      minMass: 'najmniejsza masa w modelu',
+      minWall: 'najmniejsza grubość ścianki w modelu',
+      minBase: 'najmniejsza grubość dna w modelu',
+      density: 'gęstość masy ceramicznej',
+      claySlow: 'spowolnienie przez masę ceramiczną',
+      clayLoss: 'utrata masy dla tej masy ceramicznej',
+      wallCm: 'grubość ścianki w centymetrach',
+      sideArea: 'powierzchnia jednej strony arkusza gliny',
+      areaFactor: 'współczynnik powierzchni dla kształtu',
+      area: 'odsłonięta powierzchnia',
+      thickExponent: 'wykładnik grubego dna',
+      thick: 'współczynnik grubego dna',
+      shapeSlow: 'spowolnienie przez kształt',
+      batSlow: 'spowolnienie przez podłoże',
+      slow: 'łączne spowolnienie',
+      wetness: 'poprawka za mokrość, w punktach procentowych',
+      stage: 'poprawka za cel, w punktach procentowych',
+      loss: 'docelowa utrata masy',
+      targetGrams: 'woda do odparowania do celu',
+      softPct: 'początek okna: utrata masy',
+      softGrams: 'początek okna: woda do odparowania',
+      hardPct: 'koniec okna: utrata masy',
+      hardGrams: 'koniec okna: woda do odparowania',
+      magnusA: 'stała a wzoru Magnusa, hPa',
+      magnusB: 'stała b wzoru Magnusa',
+      magnusC: 'stała c wzoru Magnusa, °C',
+      minVpd: 'najmniejszy niedobór pary w modelu',
+      rhMin: 'najniższa wilgotność brana do obliczeń',
+      rhMax: 'najwyższa wilgotność brana do obliczeń',
+      temp: 'temperatura powietrza',
+      rh: 'wilgotność względna, jak wpisana',
+      psat: 'ciśnienie pary nasyconej w tej temperaturze',
+      rhUsed: 'wilgotność użyta w obliczeniu (po ograniczeniu)',
+      vpd: 'niedobór pary (VPD)',
+      airflowFactor: 'mnożnik ruchu powietrza dla odkrytej pracy',
+      multiplier: 'mnożnik kalibracji tego wariantu (z ocen Twoich prac)',
+      samples: 'liczba ocenionych prac w tym wariancie',
+      factor: 'współczynnik okrycia: jaka część tempa na otwartym powietrzu zostaje',
+      air: 'ruch powietrza, który dociera pod to okrycie',
+      k: 'współczynnik parowania',
+      rate: 'tempo schnięcia w chwili toczenia',
+      nightRate: 'tempo schnięcia nocą',
+      stepHours: 'krok symulacji',
+      hours: 'czas do celu w tym wariancie',
+      deadline: 'czas od toczenia do terminu',
+      dampMin: 'czekanie, od którego proponuję mokrą przechowalnię',
+      optionHours: 'czas wybranego wariantu',
+      off: 'różnica względem terminu',
+      tolerance: 'dopuszczalna różnica względem terminu',
+      switchAfter: 'czas pierwszej fazy',
+      fastest: 'czas najszybszego dostępnego wariantu',
+      slowest: 'czas najwolniejszego dostępnego wariantu',
+      ready: 'kiedy praca dojdzie do celu',
+      windowStart: 'początek okna',
+      windowEnd: 'koniec okna',
+      nightFrom: 'godzina, od której liczę warunki nocne',
+      nightTo: 'godzina, do której liczę warunki nocne',
+      neutral: 'wartość bez wpływu na tempo schnięcia',
+      thickFloor: 'najmniejszy współczynnik grubego dna: cieńsze dno nie przyspiesza',
+      whole: 'całość, czyli 100% wilgotności',
+      sealedAir: 'pod szczelnym okryciem ruch powietrza nie dociera',
+      calibrationOne: 'kalibracja dzieli tempo przez swój mnożnik',
+      mmToCm: 'przeliczenie milimetrów na centymetry',
+      cm2ToM2: 'przeliczenie cm² na m²',
+      percent: 'przeliczenie procentów na ułamek',
+    },
+    inputs: {
+      title: 'Dane pracy',
+      values: (mass: string, wall: string, base: string): string =>
+        `Masa ${mass} g, ścianka ${wall} mm, dno ${base} mm.`,
+      material: (clay: string, density: string, slow: string, loss: string): string =>
+        `Masa ceramiczna: ${clay} – gęstość ${density} g/cm³ (wspólna dla wszystkich mas), spowolnienie × ${slow}, bazowa utrata ${loss}% masy.`,
+      massClamped: (min: string): string => `Masa poniżej minimum modelu: liczę z ${min} g.`,
+      wallClamped: (min: string): string => `Ścianka poniżej minimum modelu: liczę z ${min} mm.`,
+      baseClamped: (min: string): string => `Dno poniżej minimum modelu: liczę z ${min} mm.`,
+      baseFromWall: 'Grubość dna nie podana: przyjmuję grubość ścianki.',
+    },
+    surface: {
+      title: 'Odsłonięta powierzchnia',
+      text: 'Glinę liczę jak płaski arkusz o grubości ścianki, a kształt mówi, ile tej powierzchni oddaje wodę.',
+      sheet: (mass: string, density: string, wallCm: string, side: string): string =>
+        `${mass} g ÷ ${density} g/cm³ ÷ ${wallCm} cm = ${side} cm²`,
+      area: (side: string, factor: string, shape: string, area: string): string =>
+        `${side} cm² × ${factor} (${shape}) = ${area} m²`,
+    },
+    slowness: {
+      title: 'Spowolnienie',
+      text: (neutral: string): string =>
+        `Kształt, masa ceramiczna, podłoże i grube dno zmieniają tempo schnięcia. Wynik powyżej ${neutral} oznacza wolniej, poniżej ${neutral} szybciej.`,
+      thick: (base: string, wall: string, exponent: string, thick: string, floor: string): string =>
+        `grube dno: (${base} mm ÷ ${wall} mm)^${exponent} = ${thick} (co najmniej ${floor})`,
+      product: (shape: string, clay: string, bat: string, thick: string, slow: string): string =>
+        `${shape} (kształt) × ${clay} (masa) × ${bat} (podłoże) × ${thick} (dno) = ${slow}`,
+    },
+    target: {
+      title: 'Cel i okno',
+      text: (stage: string): string =>
+        `Ile procent masy musi odparować do etapu „${stage}”: wartość dla masy ceramicznej plus poprawki za mokrość i cel.`,
+      loss: (clay: string, wetness: string, stage: string, loss: string, grams: string): string =>
+        `${clay}% (masa) ${wetness} (mokrość) ${stage} (cel) = ${loss}% masy, czyli ${grams} g wody`,
+      window: (soft: string, softG: string, hard: string, hardG: string): string =>
+        `Okno: od ${soft}% (${softG} g) do ${hard}% (${hardG} g)`,
+    },
+    air: {
+      title: 'Siła schnięcia powietrza',
+      text: (vpd: string, psat: string, magnus: string, rh: string, whole: string): string =>
+        `${vpd} mówi, ile wilgoci powietrze może jeszcze przyjąć: ${psat} przy danej temperaturze (liczone ${magnus}) × (${whole} − ${rh}).`,
+      start: 'W pracowni przy toczeniu',
+      night: (from: string, to: string): string => `W pracowni nocą (${from}–${to})`,
+      damp: 'W mokrej przechowalni',
+      vpd: (
+        where: string,
+        temp: string,
+        rh: string,
+        psat: string,
+        whole: string,
+        rhUsed: string,
+        vpd: string,
+      ): string =>
+        `${where}: ${temp} °C, ${rh}% → ${psat} hPa × (${whole} − ${rhUsed}%) = ${vpd} hPa`,
+      floor: (min: string): string => ` (nie mniej niż ${min} hPa)`,
+      airflow: (label: string, factor: string, sealed: string): string =>
+        `Ruch powietrza „${label}”: × ${factor} dla odkrytej pracy, pierwiastek z tego pod luźnym workiem, × ${sealed} pod szczelnym okryciem.`,
+    },
+    rate: {
+      title: 'Tempo schnięcia w każdym wariancie',
+      text: 'W chwili toczenia: powierzchnia, niedobór pary i ruch powietrza przyspieszają, okrycie, spowolnienie i kalibracja hamują.',
+      /** first line of a cover: what the cover itself contributes, its calibration first */
+      cover: (cover: string, multiplier: string, factor: string, air: string): string =>
+        `${cover}: kalibracja ÷ ${multiplier}, okrycie × ${factor}, ruch powietrza × ${air}`,
+      modelCover: (cover: string, multiplier: string): string =>
+        `${cover}: kalibracja ÷ ${multiplier}`,
+      calibrated: (n: string): string => ` (z ocenionych prac: ${n})`,
+      row: (
+        one: string,
+        multiplier: string,
+        factor: string,
+        air: string,
+        k: string,
+        area: string,
+        vpd: string,
+        slow: string,
+        rate: string,
+      ): string =>
+        `${one} ÷ ${multiplier} × ${factor} × ${air} × ${k} × ${area} × ${vpd} ÷ ${slow} = ${rate} g/h`,
+      modelText: 'W chwili toczenia, według dopasowanego modelu (bez rozbicia na czynniki).',
+      modelRow: (rate: string): string => `${rate} g/h`,
+      night: (from: string, to: string, rates: string): string => `Nocą (${from}–${to}): ${rates}.`,
+      nightRate: (cover: string, rate: string): string => `${cover} ${rate} g/h`,
+    },
+    time: {
+      title: 'Czas do celu',
+      text: (euler: string, step: string, grams: string): string =>
+        `Symulacja krokami po ${step} (${euler}) odejmuje odparowaną wodę, aż ubędzie ${grams} g.`,
+      night: 'Nocne godziny liczy z warunkami nocnymi.',
+      row: (cover: string, duration: string): string => `${cover}: ${duration}`,
+    },
+    plan: {
+      title: 'Wybór planu',
+      deadline: (hours: string): string => `Do terminu jest ${hours}.`,
+      gateOpen: (covers: string, soft: string, min: string): string =>
+        `${covers}: w grze, bo cel to „${soft}” albo czekanie trwa ${min} lub dłużej.`,
+      gateClosed: (covers: string, soft: string, min: string): string =>
+        `${covers}: pomijam, bo cel to nie „${soft}”, a czekanie jest krótsze niż ${min}.`,
+      gateOnlyChoice: (covers: string, soft: string, min: string): string =>
+        `${covers}: zwykle tylko dla celu „${soft}” albo czekania od ${min}, ale innych sposobów okrycia nie zaznaczono.`,
+      excluded: (covers: string): string => `${covers}: wyłączone w sposobach okrycia, pomijam.`,
+      single: (cover: string, hours: string, deadline: string, off: string, tol: string): string =>
+        `${cover} trafia w termin: ${hours} wobec ${deadline}, różnica ${off}% mieści się w ±${tol}%.`,
+      twoPhase: (
+        tol: string,
+        first: string,
+        duration: string,
+        then: string,
+        bisection: string,
+      ): string =>
+        `Żaden wariant sam nie trafia w termin z dokładnością ±${tol}%, więc plan ma dwie fazy: ${first} przez ${duration}, potem ${then}. Moment zmiany szukam przez ${bisection}.`,
+      tooFast: (fastest: string, deadline: string): string =>
+        `Najszybszy wariant potrzebuje ${fastest}, a do terminu jest ${deadline}: termin jest za wcześnie.`,
+      tooSlow: (slowest: string, deadline: string): string =>
+        `Nawet najwolniejszy wariant dochodzi do celu w ${slowest}, przed terminem (${deadline}): termin jest za późno.`,
+    },
+    result: {
+      title: 'Wynik',
+      none: 'Żaden plan nie trafia w termin, więc nie ma daty gotowości. Zobacz ostrzeżenie w rekomendacji.',
+    },
+    notes: [
+      'Wszystkie współczynniki to założenia startowe. Każda zapisana praca z oceną „za mokra / w sam raz / za sucha” koryguje mnożnik dla danego opatulenia.',
       'Twoje prace zapisują się w tej przeglądarce na tym urządzeniu i zostają po jej zamknięciu. Znikną tylko, jeśli wyczyścisz dane przeglądania. Nigdzie ich nie wysyłamy. W kolejnej wersji temperaturę i wilgotność mogą wpisywać czujniki BLE z półki i przechowalni.',
     ],
   },

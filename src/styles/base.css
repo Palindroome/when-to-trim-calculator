@@ -44,6 +44,20 @@ body {
 .num {
   font-variant-numeric: tabular-nums;
 }
+/* sliding numbers (src/ui/motion.ts slideNumbers): one clipped column per rolling digit, its strip of
+   digits stacked one line apart; tabular digits keep every column as wide as the final digit */
+.slide {
+  font-variant-numeric: tabular-nums;
+}
+.slide-col {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: text-bottom;
+}
+.slide-strip,
+.slide-strip > span {
+  display: block;
+}
 /* no movement at all under reduced motion; src/ui/motion.ts skips its animations too.
    transition:none rather than a tiny duration: with the default transition-property (all) a tiny duration
    would delay every style change by a frame */

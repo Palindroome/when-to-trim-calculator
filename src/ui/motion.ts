@@ -13,6 +13,8 @@ const DUR = { fast: 120, base: 200 } as const;
 const EASE_OUT = 'cubic-bezier(.2,.8,.2,1)';
 /** how far a fading-in element rises, px */
 const RISE = 5;
+/** delay between items of a staggered reveal, ms */
+const STAGGER = 40;
 /** the spring counts as settled within this fraction of the distance */
 const REST = 0.005;
 
@@ -190,6 +192,23 @@ export function reveal(el: HTMLElement): void {
   );
 }
 
+/** Elements fade in with a small rise one after another, each STAGGER ms after the previous one. */
+export function stagger(els: Iterable<HTMLElement>): void {
+  if (prefersReducedMotion()) return;
+  let i = 0;
+  for (const el of els) {
+    play(
+      el,
+      [
+        { opacity: 0, transform: `translateY(${RISE}px)` },
+        { opacity: 1, transform: 'none' },
+      ],
+      // backwards: a waiting element stays hidden until its turn
+      { duration: DUR.base, easing: EASE_OUT, delay: i++ * STAGGER, fill: 'backwards' },
+    );
+  }
+}
+
 /** A new element arrives: fade, rise and a slight scale (spring). */
 export function enter(el: HTMLElement): void {
   if (prefersReducedMotion()) return;
@@ -345,6 +364,105 @@ export function viewTransition(update: () => void): void {
     return;
   }
   track(document.startViewTransition(update).finished);
+}
+
+// ---------- sliding numbers ----------
+// The idea of the "Sliding Number" primitive in Animate UI (https://animate-ui.com): each digit is a column
+// that rolls to its new value. Written from scratch for the plain DOM; no code is taken from it.
+
+/** Final text of every `[data-slide]` by key, before `root` is re-rendered; stops running slides. */
+export function captureSlides(root: HTMLElement): Map<string, string> {
+  const texts = new Map<string, string>();
+  if (prefersReducedMotion()) return texts;
+  for (const el of root.querySelectorAll<HTMLElement>('[data-slide]'))
+    texts.set(el.dataset.slide!, el.dataset.slideFinal ?? el.textContent ?? '');
+  for (const a of root.getAnimations({ subtree: true })) if (a.id === 'slide') a.cancel();
+  return texts;
+}
+
+/**
+ * After a re-render: in every `[data-slide]` whose text changed, each changed digit rolls through the
+ * digits in between to its new value (the spring), right-aligned against the previous text. While it
+ * rolls, the element is aria-hidden and a visually hidden sibling holds the final text, so a screen
+ * reader reads the number once; it ends on exactly the rendered text.
+ */
+export function slideNumbers(root: HTMLElement, prev: ReadonlyMap<string, string>): void {
+  if (prefersReducedMotion() || !prev.size) return;
+  for (const el of root.querySelectorAll<HTMLElement>('[data-slide]')) {
+    const from = prev.get(el.dataset.slide!);
+    const to = el.textContent ?? '';
+    if (from !== undefined && from !== to) slide(el, from, to);
+  }
+}
+
+const isDigit = (c: string | undefined): c is string => c !== undefined && c >= '0' && c <= '9';
+
+function slide(el: HTMLElement, from: string, to: string): void {
+  // the font's content box: a column this tall, aligned to the text bottom, keeps every digit on the baseline
+  const lh = el.getBoundingClientRect().height;
+  const shift = to.length - from.length;
+  const columns: { strip: HTMLElement; start: number; end: number }[] = [];
+  el.textContent = '';
+  for (let i = 0; i < to.length; i++) {
+    const c = to[i]!;
+    const prior = from[i - shift];
+    if (!isDigit(c) || prior === c) {
+      el.append(c);
+      continue;
+    }
+    // a digit that appears (the number got longer) rolls up from 0
+    const a = isDigit(prior) ? Number(prior) : 0;
+    const b = Number(c);
+    const lo = Math.min(a, b);
+    const n = Math.abs(b - a) + 1;
+    const col = document.createElement('span');
+    col.className = 'slide-col';
+    col.style.height = `${lh}px`;
+    const strip = document.createElement('span');
+    strip.className = 'slide-strip';
+    for (let d = lo; d < lo + n; d++) {
+      const digit = document.createElement('span');
+      digit.style.height = digit.style.lineHeight = `${lh}px`;
+      digit.textContent = String(d);
+      strip.append(digit);
+    }
+    col.append(strip);
+    el.append(col);
+    // up towards a larger digit, down towards a smaller one
+    const far = -(n - 1) * lh;
+    columns.push(b > a ? { strip, start: 0, end: far } : { strip, start: far, end: 0 });
+  }
+  if (!columns.length) {
+    el.textContent = to;
+    return;
+  }
+  const sr = document.createElement('span');
+  sr.className = 'vh';
+  sr.textContent = to;
+  el.after(sr);
+  el.setAttribute('aria-hidden', 'true');
+  el.dataset.slideFinal = to;
+  const settle = (): void => {
+    el.textContent = to;
+    el.removeAttribute('aria-hidden');
+    delete el.dataset.slideFinal;
+    sr.remove();
+  };
+  // tracked as a whole, so the test hook also waits for the final text
+  track(
+    Promise.all(
+      columns.map(({ strip, start, end }) => {
+        const anim = play(
+          strip,
+          [{ transform: `translateY(${start}px)` }, { transform: `translateY(${end}px)` }],
+          // forwards: the strip holds the new digit until the plain text replaces it
+          { ...springTiming(), fill: 'forwards' },
+        );
+        anim.id = 'slide';
+        return anim.finished;
+      }),
+    ).then(settle, settle),
+  );
 }
 
 // ---------- counting numbers ----------

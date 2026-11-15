@@ -1,4 +1,5 @@
 // The page: its state (saved pieces, the plan to save, the language), the recalculation and the composition of the features.
+import { explainCalculation } from '../domain/explain';
 import { MS_PER_HOUR } from '../domain/params';
 import { derivePiece } from '../domain/piece';
 import { planDrying } from '../domain/planner';
@@ -9,11 +10,12 @@ import { calibrationSamples, type StoredPiece } from '../storage/pieces';
 import type { SessionSnapshot } from '../storage/session';
 import { perCoverCalibration } from './calibration';
 import type { AppContext, AppDeps, Saveable } from './context';
-import { byId, closest } from './dom';
+import { byId } from './dom';
 import { createSummaryCards, renderSummaries } from './features/cards/cards';
 import * as conditionsSection from './features/conditions/conditions';
 import * as coverFilter from './features/covers/covers';
 import * as datetime from './features/datetime/datetime';
+import * as explainer from './features/explainer/explainer';
 import * as header from './features/header/header';
 import * as pieceSection from './features/piece/piece';
 import * as piecesSection from './features/pieces/pieces';
@@ -24,7 +26,7 @@ import { createWizard } from './features/wizard/wizard';
 import { renderFooter } from './footer';
 import { readAllowedCovers, readName, readPieceInput, readThrownMs, readWhenMs } from './form';
 import { captureForm, type FormState, restoreForm } from './form-state';
-import { animateHeight, reveal, slideIndicator, viewTransition } from './motion';
+import { slideIndicator, viewTransition } from './motion';
 import type { View } from './render';
 import { renderShell } from './shell';
 
@@ -43,6 +45,7 @@ const FEATURES = [
   result,
   weight,
   piecesSection,
+  explainer,
 ];
 
 export function startApp(deps: AppDeps): void {
@@ -90,18 +93,6 @@ export function startApp(deps: AppDeps): void {
   };
 
   const cards = createSummaryCards(root, deps.wizard.load() === 'done');
-  // the explainer folds with the same height motion as the summary cards
-  root.addEventListener('click', (e) => {
-    const details = closest(e, 'details > summary')?.parentElement as
-      | HTMLDetailsElement
-      | undefined;
-    if (!details) return;
-    e.preventDefault();
-    animateHeight(details.closest<HTMLElement>('section')!, () => {
-      details.open = !details.open;
-    });
-    if (details.open) reveal(details.querySelector<HTMLElement>('ul')!);
-  });
   const wizard = createWizard(root, deps.wizard, (outcome) => cards.set(outcome === 'done'));
   const welcome = createWelcome(root, ctx, {
     onNew: () => {
@@ -145,16 +136,18 @@ export function startApp(deps: AppDeps): void {
     }
 
     const tips = tipsFor(rec, piece, dc.conditions, params, covers);
+    const calibration = ctx.perCover();
     result.update(view, {
       piece,
       startMs,
       plan,
       window,
       tips,
-      calibration: ctx.perCover(),
+      calibration,
       canSave: saveable !== null,
       allowed,
     });
+    explainer.update(view, explainCalculation(input, dc, plan, allowed), calibration);
     cards.update(
       renderSummaries(view, {
         name: readName(),
@@ -173,11 +166,16 @@ export function startApp(deps: AppDeps): void {
     deps.onLocaleChange(code);
     if (next === view.m) return;
     const from = root.querySelector('[data-lang][aria-pressed="true"]')?.getBoundingClientRect();
+    const explainerOpen = explainer.isOpen(root);
+    const scrollY = window.scrollY;
     // the page cross-fades into the new language and the switch's highlight slides to the chosen button
     viewTransition(() => {
       render(next, captureForm(root, covers));
+      if (explainerOpen) explainer.open(root);
+      window.scrollTo(0, scrollY);
       const button = root.querySelector<HTMLElement>(`[data-lang="${code}"]`);
-      button?.focus();
+      // the scroll position stays where the reader was
+      button?.focus({ preventScroll: true });
       if (button) slideIndicator(button.parentElement!, from, button);
     });
   }

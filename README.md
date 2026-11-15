@@ -58,10 +58,11 @@ src/
     types.ts          ids (ShapeId, ClayId, ...), Piece, Conditions, Plan
     covers.ts         CoverId, CoverDefinition (factor, airflow, environment, planner gate), coverById
     params.ts         ModelParams + DEFAULT_PARAMS: every model constant in one typed object, including the built-in covers
-    piece.ts          derivePiece: area, slowness, target loss / trimming window
-    physics.ts        psat, RateModel interface, physicalRateModel
+    piece.ts          derivePiece: area, slowness, target loss / trimming window (pieceBreakdown: with every intermediate)
+    physics.ts        psat, climate (VPD), airFactor, RateModel interface, physicalRateModel
     simulate.ts       time-stepping simulation of a covering plan
     planner.ts        planDrying: single / two-phase plans, warnings, alternatives; optional allow-list of covers
+    explain.ts        explainCalculation: the numbers behind a recommendation, step by step (CalculationTrace)
     calibration.ts    Calibrator interface, geometricMeanCalibrator, feedbackToSample
     weight.ts         weight check (loss vs. window, time remaining)
     tips.ts           which practical tips apply
@@ -99,6 +100,7 @@ src/
       result/         recommendation, comparison bars, alternatives, tips, save button
       weight/         section 4 weight check
       pieces/         section 5: saved pieces, feedback, calibration table
+      explainer/      "Jak to liczy – krok po kroku": the calculation as numbered steps with the live numbers, each explained on hover, focus or tap (labels in `explainer.labels`)
       wizard/         first-run wizard: shows the [data-step] sections (1-3) one at a time, then the whole page
       cards/          sections 1-3 collapse to one-line summaries that open on click (collapsed after the wizard)
       welcome/        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction
@@ -136,5 +138,5 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
   2. Fill them in `save` (`ui/features/pieces/pieces.ts`).
   3. Keep the key `kiedy-trymowac-v1`, or introduce a v2 repository that migrates from v1.
 - **Sensors.** Implement `ConditionsSource` (`domain/conditions.ts`): `read()` returns `Conditions`, and the optional `subscribe(onChange)` triggers a recalculation. `formConditionsSource` in `ui/form.ts` is the current implementation. A sensor source can wrap it and override, for example, `temp` and `rh`.
-- **Motion.** Animations are subtle (120–320 ms, springs without overshoot) and only make changes easier to follow. Only `src/ui/motion.ts` animates; features call its helpers (`captureRects`/`playFrom` around a re-render, `animateNumbers`, `enter`/`exit`, `reveal`, `toggleHeight`, `slideIndicator`, `viewTransition`). Durations and easings are tokens in `tokens.css`; the JS spring is `SPRING` in `motion.ts`. Under `prefers-reduced-motion: reduce` nothing moves, and the settled page is always identical to the reduced-motion one. The e2e suite runs with reduced motion (`playwright.config.ts`); `tests/e2e/motion.spec.ts` turns it off and waits on `window.__motionIdle()`.
+- **Motion.** Animations are subtle (120–320 ms, springs without overshoot) and only make changes easier to follow. Only `src/ui/motion.ts` animates; features call its helpers (`captureRects`/`playFrom` around a re-render, `animateNumbers`, `captureSlides`/`slideNumbers` around a re-render (changed digits roll to their new value), `enter`/`exit`, `reveal`, `stagger`, `toggleHeight`, `slideIndicator`, `viewTransition`). Durations and easings are tokens in `tokens.css`; the JS spring is `SPRING` in `motion.ts`. Under `prefers-reduced-motion: reduce` nothing moves, and the settled page is always identical to the reduced-motion one. The e2e suite runs with reduced motion (`playwright.config.ts`); `tests/e2e/motion.spec.ts` turns it off and waits on `window.__motionIdle()`.
 - **Storage.** `PieceRepository` hides localStorage. The localStorage implementation keeps the prototype's v1 format byte-for-byte, so existing data keeps working.

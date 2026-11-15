@@ -43,6 +43,8 @@ const numbers = (page: Page): Promise<Record<string, string>> =>
     ),
   );
 
+const explainerStep = (page: Page, i: number) => page.locator('#explain-steps > li').nth(i);
+
 /** "1 d 3 h", "5 h", "40 min" (optionally with "+") in hours. */
 const hours = (text: string): number => {
   const part = (re: RegExp): number => Number(re.exec(text)?.[1] ?? 0);
@@ -179,6 +181,138 @@ test.describe('with motion', () => {
     await waitForMotionIdle(page);
     await expect(page.locator('#pieces .piece')).toHaveCount(0);
     await expect(page.locator('#pieces .empty')).toBeVisible();
+  });
+
+  test('opening the explainer reveals its steps one after another, then leaves them as they are', async ({
+    page,
+  }) => {
+    await page.locator('.explainer summary').click();
+    const stepDelays = (): Promise<number[]> =>
+      page.evaluate(() =>
+        document
+          .getAnimations()
+          .filter((a) =>
+            ((a.effect as KeyframeEffect).target as Element | null)?.matches('#explain-steps > li'),
+          )
+          .map((a) => Number(a.effect!.getTiming().delay)),
+      );
+    // the toggle event comes a task after the click
+    await expect.poll(async () => (await stepDelays()).length).toBe(9);
+    const delays = await stepDelays();
+    for (let i = 1; i < delays.length; i++) expect(delays[i]).toBeGreaterThan(delays[i - 1]!);
+    await waitForMotionIdle(page);
+    const settled = await page
+      .locator('#explain-steps > li')
+      .evaluateAll((els) =>
+        els.map((el) => [getComputedStyle(el).opacity, el.getAttribute('style')]),
+      );
+    expect(settled.every(([o, s]) => o === '1' && s === null)).toBe(true);
+  });
+
+  test('explainer numbers slide digit by digit, are read once, and end on the exact text', async ({
+    page,
+  }) => {
+    const steps = async (p: Page): Promise<void> => {
+      await p.locator('.explainer summary').click();
+      await fill(p, 'Masa po toczeniu', '1000');
+    };
+    await page.locator('.explainer summary').click();
+    await waitForMotionIdle(page);
+    await fill(page, 'Masa po toczeniu', '1000');
+    const sliding = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('#explain-steps .slide[aria-hidden="true"]')].map(
+        (el) => ({
+          columns: el.querySelectorAll('.slide-col').length,
+          final: el.nextElementSibling?.matches('.vh') ? el.nextElementSibling.textContent : null,
+        }),
+      ),
+    );
+    expect(sliding.length).toBeGreaterThan(0);
+    for (const s of sliding) {
+      expect(s.columns).toBeGreaterThan(0);
+      expect(s.final).toMatch(/\d/);
+    }
+    const tabular = await page
+      .locator('#explain-steps .slide')
+      .evaluateAll((els) =>
+        els.every((el) => getComputedStyle(el).fontVariantNumeric.includes('tabular-nums')),
+      );
+    expect(tabular).toBe(true);
+    await waitForMotionIdle(page);
+    await expect(page.locator('#explain-steps .slide-col')).toHaveCount(0);
+    await expect(page.locator('#explain-steps .slide[aria-hidden]')).toHaveCount(0);
+    await expect(page.locator('#explain-steps .slide + .vh')).toHaveCount(0);
+    await expect(explainerStep(page, 1)).toContainText('1000 g ÷ 1,9 g/cm³ ÷ 0,6 cm = 877 cm²');
+    const settled = await page.locator('#explain-steps').innerHTML();
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+    await steps(page);
+    await expect(explainerStep(page, 1)).toContainText('877 cm²');
+    expect(await page.locator('#explain-steps').innerHTML()).toBe(settled);
+  });
+
+  test('only values that changed slide, also when a minimum-value note appears', async ({
+    page,
+  }) => {
+    await page.locator('.explainer summary').click();
+    await waitForMotionIdle(page);
+    // 1 mm is below the model minimum: a note with the minimum appears in step 1
+    await fill(page, 'Grubość ścianki', '1');
+    const sliding = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('#explain-steps .slide[aria-hidden="true"]')].map(
+        (el) => el.dataset.slide,
+      ),
+    );
+    expect(sliding).toContain('inputs-wall-0');
+    for (const unchanged of [
+      'inputs-mass-0',
+      'inputs-base-0',
+      'inputs-density-0',
+      'inputs-claySlow-0',
+    ])
+      expect(sliding).not.toContain(unchanged);
+    await waitForMotionIdle(page);
+    await expect(explainerStep(page, 0)).toContainText(
+      'Ścianka poniżej minimum modelu: liczę z 2 mm.',
+    );
+  });
+
+  test('the language switch keeps a scroll position far down the open explainer', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 700 });
+    await page.reload();
+    await page.locator('.explainer summary').click();
+    await waitForMotionIdle(page);
+    // the last step, below where the page would end with the section closed
+    await explainerStep(page, 8).scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+    // a click by script, without scrolling to the header first
+    await page.getByRole('button', { name: 'English' }).evaluate((b: HTMLElement) => b.click());
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    await waitForMotionIdle(page);
+    expect(await page.evaluate(() => window.scrollY)).toBe(before);
+    await expect(page.locator('.explainer details')).toHaveAttribute('open', '');
+  });
+
+  test('a sliding number keeps its explanation and is read once', async ({ page }) => {
+    await page.locator('.explainer summary').click();
+    await waitForMotionIdle(page);
+    await fill(page, 'Masa po toczeniu', '1000');
+    const mass = explainerStep(page, 1).locator('.formula .num-tip').first();
+    await mass.focus();
+    await expect(page.locator('#explain-tip')).toHaveText('masa po toczeniu, użyta w obliczeniu');
+    await expect(mass).toHaveAccessibleDescription('masa po toczeniu, użyta w obliczeniu');
+    // mid-slide the digit columns are hidden and one copy of the final number is exposed
+    const exposed = await mass.evaluate((el) =>
+      [...el.childNodes]
+        .filter((n) => !(n instanceof Element && n.getAttribute('aria-hidden') === 'true'))
+        .map((n) => n.textContent)
+        .join(''),
+    );
+    expect(exposed).toBe('1000');
+    await waitForMotionIdle(page);
+    await expect(mass).toHaveText('1000');
   });
 
   test('the night fields expand and collapse', async ({ page }) => {
@@ -456,6 +590,20 @@ test.describe('with reduced motion', () => {
     await expect(page.locator('#result .num[aria-hidden]')).toHaveCount(0);
     expect(await helperIdleNow(page)).toBe(true);
     await expect(page.locator('.slide-ind')).toHaveCount(0);
+  });
+
+  test('the explainer opens with its steps at once, and its numbers change without sliding', async ({
+    page,
+  }) => {
+    await page.locator('.explainer summary').click();
+    await expect(page.locator('#explain-steps > li').first()).toBeVisible();
+    expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+    expect(await helperIdleNow(page)).toBe(true);
+    await fill(page, 'Masa po toczeniu', '1000');
+    await expect(explainerStep(page, 1)).toContainText('877 cm²');
+    await expect(page.locator('#explain-steps .slide-col')).toHaveCount(0);
+    await expect(page.locator('#explain-steps .slide[aria-hidden]')).toHaveCount(0);
+    expect(await helperIdleNow(page)).toBe(true);
   });
 
   test('removing a piece removes it at once', async ({ page }) => {

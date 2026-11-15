@@ -1,4 +1,5 @@
 import type { CoverId } from './covers';
+import type { ModelParams } from './params';
 import { type DryingContext, hoursToLoss } from './simulate';
 import type { Plan, StageId } from './types';
 
@@ -32,6 +33,8 @@ export interface PlanResult {
   alternatives: PlanOption[];
   /** the allowed covers miss the deadline, but planning with every cover would meet it */
   excludedWouldMeet: boolean;
+  /** the covers the planner chose from: the allowed ones, gated covers only when open or nothing else is allowed */
+  candidates: CoverId[];
 }
 
 export interface PlanOptions {
@@ -51,6 +54,10 @@ export function dominantCover(plan: Plan, dominantFirstPhaseHours: number): Cove
   if (plan.length === 1) return plan[0]!.cover;
   return plan[0]!.hours > dominantFirstPhaseHours ? plan[0]!.cover : plan[1]!.cover;
 }
+
+/** Whether covers gated 'longWaitOrSoft' may be planned: stage "soft" or a wait of at least `dampMinHours`. */
+export const gateOpen = (stage: StageId, deadlineHours: number, p: ModelParams): boolean =>
+  stage === 'soft' || deadlineHours >= p.planner.dampMinHours;
 
 /**
  * What to recommend when no plan meets the deadline `H`. With nothing excluded: the first / last
@@ -108,12 +115,13 @@ export function planDrying(
       recommendation: { status: 'invalidDeadline' },
       alternatives: [],
       excludedWouldMeet: false,
+      candidates: [],
     };
   }
 
   // gated covers (the damp room is small) are suggested only for very wet work or long waits,
   // unless nothing else is allowed
-  const openGate = stage === 'soft' || H >= cfg.dampMinHours;
+  const openGate = gateOpen(stage, H, ctx.params);
   const gated = allowedSet.filter((c) => c.gate !== 'longWaitOrSoft' || openGate);
   const candidates = (gated.length ? gated : allowedSet).map((c) => c.id);
 
@@ -190,5 +198,5 @@ export function planDrying(
     filtered &&
     recommendation.status !== 'onTarget' &&
     planDrying(ctx, H, stage).recommendation.status === 'onTarget';
-  return { deadlineHours: H, singles, recommendation, alternatives, excludedWouldMeet };
+  return { deadlineHours: H, singles, recommendation, alternatives, excludedWouldMeet, candidates };
 }
