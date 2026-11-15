@@ -9,7 +9,7 @@ import { calibrationSamples, type StoredPiece } from '../storage/pieces';
 import type { SessionSnapshot } from '../storage/session';
 import { perCoverCalibration } from './calibration';
 import type { AppContext, AppDeps, Saveable } from './context';
-import { byId } from './dom';
+import { byId, closest } from './dom';
 import { createSummaryCards, renderSummaries } from './features/cards/cards';
 import * as conditionsSection from './features/conditions/conditions';
 import * as coverFilter from './features/covers/covers';
@@ -24,7 +24,7 @@ import { createWizard } from './features/wizard/wizard';
 import { renderFooter } from './footer';
 import { readAllowedCovers, readName, readPieceInput, readThrownMs, readWhenMs } from './form';
 import { captureForm, type FormState, restoreForm } from './form-state';
-import { slideIndicator, viewTransition } from './motion';
+import { animateHeight, reveal, slideIndicator, viewTransition } from './motion';
 import type { View } from './render';
 import { renderShell } from './shell';
 
@@ -90,6 +90,18 @@ export function startApp(deps: AppDeps): void {
   };
 
   const cards = createSummaryCards(root, deps.wizard.load() === 'done');
+  // the explainer folds with the same height motion as the summary cards
+  root.addEventListener('click', (e) => {
+    const details = closest(e, 'details > summary')?.parentElement as
+      | HTMLDetailsElement
+      | undefined;
+    if (!details) return;
+    e.preventDefault();
+    animateHeight(details.closest<HTMLElement>('section')!, () => {
+      details.open = !details.open;
+    });
+    if (details.open) reveal(details.querySelector<HTMLElement>('ul')!);
+  });
   const wizard = createWizard(root, deps.wizard, (outcome) => cards.set(outcome === 'done'));
   const welcome = createWelcome(root, ctx, {
     onNew: () => {

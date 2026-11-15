@@ -57,9 +57,5 @@ body {
     transition: none !important;
     scroll-behavior: auto !important;
   }
-  /* separate rule: a browser without ::details-content would drop the whole selector list above */
-  ::details-content {
-    transition: none !important;
-  }
   /* biome-ignore-end lint/complexity/noImportantStyles: must override every component's animation and transition */
 }
