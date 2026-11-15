@@ -1,4 +1,4 @@
-/* ---------- summary cards: after the wizard, sections 1-3 collapse to one line until opened ---------- */
+/* ---------- summary cards: sections 1-3 collapse to one line until opened (outside the wizard) ---------- */
 .card-head {
   display: flex;
   align-items: center;
@@ -21,27 +21,25 @@
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
-main:not(.compact) .compact-only,
-main.wizard .compact-only {
+main.wizard .card[data-step] .toggle,
+main.wizard .card[data-step] .summary,
+main:not(.wizard) .card[data-step]:not(.collapsed) .summary {
   display: none;
 }
-main.compact:not(.wizard) .card[data-step]:not(.collapsed) .summary {
+main:not(.wizard) .collapsed .card-body {
   display: none;
 }
-main.compact:not(.wizard) .collapsed .card-body {
-  display: none;
-}
-main.compact:not(.wizard) .collapsed .card-head {
+main:not(.wizard) .collapsed .card-head {
   margin-bottom: var(--space-2);
 }
-main.compact:not(.wizard) .collapsed {
+main:not(.wizard) .collapsed {
   cursor: pointer;
 }
-main.compact:not(.wizard) .collapsed:hover {
+main:not(.wizard) .collapsed:hover {
   border-color: var(--border-strong);
 }
 /* the whole collapsed card is the toggle's click target */
-main.compact:not(.wizard) .collapsed .toggle::after {
+main:not(.wizard) .collapsed .toggle::after {
   content: "";
   position: absolute;
   inset: 0;

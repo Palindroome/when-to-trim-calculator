@@ -150,10 +150,14 @@ test.describe('wizard', () => {
     expect(await focused(page)).toBe('1Praca');
     expect(await stored(page, WIZARD_KEY)).toBe('skipped');
     await expect(page.locator('#mass')).toBeVisible();
-    await expect(toggle(page, 1)).toBeHidden();
+    await expect(toggle(page, 1)).toBeVisible();
+    await expect(toggle(page, 1)).toHaveText('Zwiń');
+    await expect(toggle(page, 1)).toHaveAttribute('aria-expanded', 'true');
     await page.reload();
     await expect(page.locator('#mass')).toBeVisible();
     await expect(progress(page)).toBeHidden();
+    await expect(toggle(page, 1)).toBeVisible();
+    await expect(toggle(page, 1)).toHaveText('Zwiń');
   });
 
   test('the wizard can be re-opened from the full form through the welcome screen', async ({
@@ -227,6 +231,55 @@ test.describe('summary cards', () => {
     await expect(toggle(page, 1)).toHaveText('Edit');
     await expect(toggle(page, 2)).toHaveText('Collapse');
     await expect(summary(page, 3)).toHaveText('Thrown Wed 4 Mar 09:00 · trim Fri 6 Mar 10:00');
+  });
+});
+
+test.describe('summary cards after skipping the wizard', () => {
+  test('each card starts expanded and collapses to its summary; edits still drive the result', async ({
+    page,
+  }) => {
+    await openApp(page, { wizard: true });
+    await skip(page).click();
+    for (const [n, title] of [
+      [1, 'Praca'],
+      [2, 'Warunki'],
+      [3, 'Termin'],
+    ] as const) {
+      await expect(toggle(page, n)).toBeVisible();
+      await expect(toggle(page, n)).toHaveText('Zwiń');
+      await expect(toggle(page, n)).toHaveAttribute('aria-expanded', 'true');
+      await expect(toggle(page, n)).toHaveAttribute('aria-label', `Zwiń: ${title}`);
+      await expect(summary(page, n)).toBeHidden();
+    }
+    await toggle(page, 1).click();
+    await expect(toggle(page, 1)).toHaveText('Zmień');
+    await expect(toggle(page, 1)).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggle(page, 1)).toHaveAttribute('aria-label', 'Zmień: Praca');
+    await expect(page.locator('#mass')).toBeHidden();
+    await expect(summary(page, 1)).toHaveText(
+      'Kubek / cylinder · 500 g · ścianka 6 mm, dno 9 mm · Kamionka gładka',
+    );
+    // the other cards are unaffected
+    await expect(toggle(page, 2)).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#when-day-btn')).toBeVisible();
+    // "Zmień" reopens it; an edit feeds the result and, once collapsed again, the summary
+    await toggle(page, 1).click();
+    await expect(toggle(page, 1)).toHaveAttribute('aria-expanded', 'true');
+    await fill(page, 'Masa po toczeniu', '2000');
+    expect(await snapshot(page)).toEqual(GOLDEN['mass 2000']);
+    await toggle(page, 1).click();
+    await expect(summary(page, 1)).toContainText('2000 g');
+    expect(await snapshot(page)).toEqual(GOLDEN['mass 2000']);
+  });
+
+  test('a collapsed card stays collapsed across a language switch', async ({ page }) => {
+    await openApp(page);
+    await toggle(page, 2).click();
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(toggle(page, 1)).toHaveText('Collapse');
+    await expect(toggle(page, 2)).toHaveText('Edit');
+    await expect(toggle(page, 2)).toHaveAttribute('aria-expanded', 'false');
+    await expect(summary(page, 2)).toBeVisible();
   });
 });
 
