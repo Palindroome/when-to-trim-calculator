@@ -2,6 +2,7 @@
 import type { Conditions, PieceInput } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import { closest } from '../../dom';
+import { animateHeight, reveal } from '../../motion';
 import type { View } from '../../render';
 
 /** A numbered form section (1–3) with its collapse toggle and summary line; `body` is its fields. */
@@ -92,7 +93,9 @@ export function createSummaryCards(root: HTMLElement, initiallyOn: boolean): Sum
     if (!card) return;
     const i = cards().indexOf(card);
     if (!toggled.delete(i)) toggled.add(i);
-    apply();
+    const open = on === toggled.has(i);
+    animateHeight(card, apply);
+    reveal(card.querySelector<HTMLElement>(open ? '.card-body' : '.summary')!);
   });
 
   return {

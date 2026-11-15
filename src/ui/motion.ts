@@ -268,6 +268,27 @@ export function toggleHeight(el: HTMLElement, show: boolean): void {
   );
 }
 
+/**
+ * Runs `mutate`, a DOM change that resizes the element, and animates the element's height from what is on
+ * screen now (mid-animation included) to its new natural height: growing with the spring, shrinking fast.
+ */
+export function animateHeight(el: HTMLElement, mutate: () => void): void {
+  const from = el.getBoundingClientRect().height;
+  for (const a of el.getAnimations()) a.cancel();
+  mutate();
+  const to = el.getBoundingClientRect().height;
+  if (prefersReducedMotion() || Math.abs(to - from) < 0.5) return;
+  // overflow is clipped by the animation itself, so no inline style is ever written
+  play(
+    el,
+    [
+      { height: `${from}px`, overflow: 'hidden' },
+      { height: `${to}px`, overflow: 'hidden' },
+    ],
+    to > from ? springTiming() : { duration: DUR.fast, easing: EASE_OUT },
+  );
+}
+
 const slides = new WeakMap<HTMLElement, Animation>();
 
 /**
