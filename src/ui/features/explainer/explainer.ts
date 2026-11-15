@@ -12,11 +12,20 @@ import { captureSlides, slideNumbers, stagger } from '../../motion';
 import { formatNum } from '../../numbers';
 import { coverLabel, type View } from '../../render';
 
-/** Id of the one tooltip that explains whichever number is hovered, focused or tapped. */
+/** Id of the one bubble that shows the label of whichever number is hovered, focused or tapped. */
 const TIP_ID = 'explain-tip';
+
+type NumId = keyof Messages['explainer']['labels'];
+
+/** Id of the hidden element that holds a label: every number of that kind is described by it. */
+const labelId = (id: NumId): string => `explain-label-${id}`;
 
 export function markup(m: Messages): string {
   const e = m.explainer;
+  const labels = (Object.keys(e.labels) as NumId[])
+    .map((id) => `<span id="${labelId(id)}">${esc(e.labels[id])}</span>`)
+    .join('');
+  // the bubble is only the visual copy of a label; screen readers get it from the hidden labels
   return `<section class="card explainer">
     <details>
       <summary>${icon('info')}${e.summary}</summary>
@@ -24,11 +33,10 @@ export function markup(m: Messages): string {
       <ol class="steps" role="list" id="explain-steps"></ol>
       ${e.notes.map((n) => `<p class="note">${n}</p>`).join('\n      ')}
     </details>
-    <div class="tip-bubble" role="tooltip" id="${TIP_ID}" hidden></div>
+    <div hidden>${labels}</div>
+    <div class="tip-bubble" id="${TIP_ID}" aria-hidden="true" hidden></div>
   </section>`;
 }
-
-type NumId = keyof Messages['explainer']['labels'];
 
 // Sentences come from the catalog (trusted); labels are escaped where they are passed in.
 const step = (key: string, title: string, lines: string[]): string =>
@@ -62,7 +70,7 @@ export function renderSteps(
     const key = `${scope}-${id}`;
     const i = seen.get(key) ?? 0;
     seen.set(key, i + 1);
-    return `<span class="num-tip" tabindex="0" data-tip="${esc(e.labels[id])}" aria-describedby="${TIP_ID}"><span class="slide" data-slide="${key}-${i}">${s}</span></span>`;
+    return `<span class="num-tip" tabindex="0" data-tip="${esc(e.labels[id])}" aria-describedby="${labelId(id)}"><span class="slide" data-slide="${key}-${i}">${s}</span></span>`;
   };
   /** at most `digits` decimals, trailing zeros dropped */
   const dec = (x: number, digits: number): string =>
@@ -79,7 +87,11 @@ export function renderSteps(
   const excludedMark = (line: string, c: CoverTrace): string =>
     c.excluded ? `${line} · ${esc(m.result.excludedBar)}` : line;
   const { input, piece } = t;
-  const night = { from: String(p.night.fromHour), to: String(p.night.toHour) };
+  /** the night hours, as numbers with their labels */
+  const nightFrom = (): string => num('nightFrom', String(p.night.fromHour));
+  const nightTo = (): string => num('nightTo', String(p.night.toHour));
+  /** the "1" of a formula, explained like any other number */
+  const one = (id: NumId): string => num(id, dec(1, 0));
   const out: string[] = [];
 
   // 1. inputs, after the clamps, and the clay body's values
@@ -143,7 +155,7 @@ export function renderSteps(
   at('slowness');
   out.push(
     step('slowness', e.slowness.title, [
-      text(e.slowness.text),
+      text(e.slowness.text(one('neutral'))),
       code(f.slowness, f.slownessSymbols),
       formula(
         e.slowness.thick(
@@ -151,6 +163,7 @@ export function renderSteps(
           n('wall', piece.wall, 1),
           n('thickExponent', p.baseThicknessExponent, 2),
           n('thick', piece.thick, 2),
+          one('thickFloor'),
         ),
       ),
       formula(
@@ -200,20 +213,30 @@ export function renderSteps(
         n('temp', c.temp, 1),
         n('rh', c.rh, 1),
         n('psat', c.psat, 1),
+        one('whole'),
         n('rhUsed', c.rhUsed, 1),
         n('vpd', c.vpd, 2),
       ) + (c.vpd === p.minVpd ? e.air.floor(n('minVpd', p.minVpd, 2)) : '')
     );
   };
   const climates = [vpd('air-start', e.air.start, t.air.start)];
-  if (t.air.night) climates.push(vpd('air-night', e.air.night(night.from, night.to), t.air.night));
+  if (t.air.night) {
+    at('air-night');
+    climates.push(vpd('air-night', e.air.night(nightFrom(), nightTo()), t.air.night));
+  }
   if (v.covers.some((c) => c.environment === 'dampRoom'))
     climates.push(vpd('air-damp', e.air.damp, t.air.damp));
   at('air');
   out.push(
     step('air', e.air.title, [
       text(
-        e.air.text(link(e.terms.vpd), link(e.terms.psat), link(e.terms.magnus), link(e.terms.rh)),
+        e.air.text(
+          link(e.terms.vpd),
+          link(e.terms.psat),
+          link(e.terms.magnus),
+          link(e.terms.rh),
+          one('whole'),
+        ),
       ),
       code(f.psat(n('magnusA', MAGNUS.a, 3), n('magnusB', MAGNUS.b, 2), n('magnusC', MAGNUS.c, 2))),
       code(
@@ -229,6 +252,7 @@ export function renderSteps(
         e.air.airflow(
           esc(m.options.airflow[t.air.airflow]),
           n('airflowFactor', t.air.airflowFactor, 2),
+          one('sealedAir'),
         ),
       ),
     ]),
@@ -251,9 +275,10 @@ export function renderSteps(
           e.rate.cover(label(c.cover), multiplier, n('factor', c.factor, 2), n('air', c.air, 2)),
         ) +
         e.rate.row(
+          one('calibrationOne'),
+          n('multiplier', c.multiplier, 2),
           n('factor', c.factor, 2),
           n('air', c.air, 2),
-          n('multiplier', c.multiplier, 2),
           n('k', p.evaporationCoefficient, 2),
           n('area', piece.area, 4),
           n('vpd', vpdUsed, 2),
@@ -276,7 +301,7 @@ export function renderSteps(
       ...(t.physical ? [code(f.rate, f.rateSymbols)] : []),
       rows(rateRows),
       ...(nightRates.length
-        ? [text(e.rate.night(night.from, night.to, nightRates.join(', ')))]
+        ? [text(e.rate.night(nightFrom(), nightTo(), nightRates.join(', ')))]
         : []),
     ]),
   );
@@ -448,8 +473,8 @@ export function open(root: HTMLElement): void {
 const TIP_GAP = 6;
 
 /**
- * Shows `el`'s label in the tooltip above it (below when there is no room), kept inside the card.
- * The tooltip is the `aria-describedby` of every number, so a screen reader reads the label on focus.
+ * Shows `el`'s label in the bubble above it (below when there is no room), kept inside the card. Only a
+ * visual copy: each number is described by its own hidden label, whatever was focused before.
  */
 function showTip(section: HTMLElement, tip: HTMLElement, el: HTMLElement): void {
   tip.textContent = el.dataset.tip ?? '';
@@ -467,11 +492,24 @@ function showTip(section: HTMLElement, tip: HTMLElement, el: HTMLElement): void 
   tip.style.top = `${above ? r.top - s.top - h - TIP_GAP : r.bottom - s.top + TIP_GAP}px`;
 }
 
+/** Escape anywhere closes an open bubble, also one shown by mouse hover (WCAG 1.4.13: dismissible). */
+let escapeListening = false;
+function closeOnEscape(): void {
+  if (escapeListening) return;
+  escapeListening = true;
+  document.addEventListener('keydown', (e) => {
+    const tip = document.getElementById(TIP_ID);
+    if (e.key === 'Escape' && tip) tip.hidden = true;
+  });
+}
+
 /**
  * Opening the section by the user (click or keyboard on the summary) reveals its steps one after another.
- * Numbers explain themselves on mouse hover, keyboard focus and tap; Escape closes the explanation.
+ * Numbers explain themselves on mouse hover, keyboard focus and tap; the bubble stays while the pointer
+ * is on it, and Escape closes it.
  */
 export function mount(root: HTMLElement, _ctx: AppContext): void {
+  closeOnEscape();
   const details = detailsOf(root);
   const section = details.closest<HTMLElement>('.explainer')!;
   const tip = section.querySelector<HTMLElement>(`#${TIP_ID}`)!;
@@ -501,11 +539,12 @@ export function mount(root: HTMLElement, _ctx: AppContext): void {
   });
   steps.addEventListener('pointerout', (e) => {
     const el = numberAt(e.target);
-    // still inside the same number, or it has focus: keep it
+    // still inside the same number, onto the bubble (hoverable), or it has focus: keep it
     if (!el || e.pointerType !== 'mouse' || numberAt(e.relatedTarget) === el) return;
-    if (document.activeElement !== el) hide();
+    if (e.relatedTarget === tip || document.activeElement === el) return;
+    hide();
   });
-  steps.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') hide();
+  tip.addEventListener('pointerleave', (e) => {
+    if (e.pointerType === 'mouse' && !numberAt(e.relatedTarget)) hide();
   });
 }

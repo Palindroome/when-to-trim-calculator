@@ -336,9 +336,9 @@ export const pl = {
       vpd: 'VPD = max(VPD_min, e_s(T) × (1 − clamp(RH, RH_min, RH_max) ÷ 100))',
       airSymbols: (vpdMin: string, rhMin: string, rhMax: string): string =>
         `T – temperatura w °C, RH – wilgotność względna w %, ograniczona do ${rhMin}–${rhMax}%; VPD_min = ${vpdMin} hPa`,
-      rate: 'r = f_okrycie × f_ruch ÷ M × k × A × VPD ÷ S',
+      rate: 'r = 1 ÷ M × f_okrycie × f_ruch × k × A × VPD ÷ S',
       rateSymbols:
-        'najpierw to, co zależy od wariantu: okrycie, ruch powietrza pod nim i mnożnik kalibracji M; k – współczynnik parowania',
+        'najpierw to, co zależy od wariantu: mnożnik kalibracji M (dzieli tempo), okrycie i ruch powietrza pod nim; k – współczynnik parowania',
       time: 'utrata(t + Δt) = utrata(t) + r(t) × Δt, aż utrata ≥ cel',
       timeSymbols: 'Δt – krok symulacji',
       plan: '|t − H| ÷ H ≤ tolerancja',
@@ -431,6 +431,13 @@ export const pl = {
       ready: 'kiedy praca dojdzie do celu',
       windowStart: 'początek okna',
       windowEnd: 'koniec okna',
+      nightFrom: 'godzina, od której liczę warunki nocne',
+      nightTo: 'godzina, do której liczę warunki nocne',
+      neutral: 'wartość bez wpływu na tempo schnięcia',
+      thickFloor: 'najmniejszy współczynnik grubego dna: cieńsze dno nie przyspiesza',
+      whole: 'całość, czyli 100% wilgotności',
+      sealedAir: 'pod szczelnym okryciem ruch powietrza nie dociera',
+      calibrationOne: 'kalibracja dzieli tempo przez swój mnożnik',
     },
     inputs: {
       title: 'Dane pracy',
@@ -453,9 +460,10 @@ export const pl = {
     },
     slowness: {
       title: 'Spowolnienie',
-      text: 'Kształt, masa ceramiczna, podłoże i grube dno zmieniają tempo schnięcia. Wynik powyżej 1 oznacza wolniej, poniżej 1 szybciej.',
-      thick: (base: string, wall: string, exponent: string, thick: string): string =>
-        `grube dno: (${base} mm ÷ ${wall} mm)^${exponent} = ${thick} (co najmniej 1)`,
+      text: (neutral: string): string =>
+        `Kształt, masa ceramiczna, podłoże i grube dno zmieniają tempo schnięcia. Wynik powyżej ${neutral} oznacza wolniej, poniżej ${neutral} szybciej.`,
+      thick: (base: string, wall: string, exponent: string, thick: string, floor: string): string =>
+        `grube dno: (${base} mm ÷ ${wall} mm)^${exponent} = ${thick} (co najmniej ${floor})`,
       product: (shape: string, clay: string, bat: string, thick: string, slow: string): string =>
         `${shape} (kształt) × ${clay} (masa) × ${bat} (podłoże) × ${thick} (dno) = ${slow}`,
     },
@@ -470,8 +478,8 @@ export const pl = {
     },
     air: {
       title: 'Siła schnięcia powietrza',
-      text: (vpd: string, psat: string, magnus: string, rh: string): string =>
-        `${vpd} mówi, ile wilgoci powietrze może jeszcze przyjąć: ${psat} przy danej temperaturze (liczone ${magnus}) × (1 − ${rh}).`,
+      text: (vpd: string, psat: string, magnus: string, rh: string, whole: string): string =>
+        `${vpd} mówi, ile wilgoci powietrze może jeszcze przyjąć: ${psat} przy danej temperaturze (liczone ${magnus}) × (${whole} − ${rh}).`,
       start: 'W pracowni przy toczeniu',
       night: (from: string, to: string): string => `W pracowni nocą (${from}–${to})`,
       damp: 'W mokrej przechowalni',
@@ -480,33 +488,36 @@ export const pl = {
         temp: string,
         rh: string,
         psat: string,
+        whole: string,
         rhUsed: string,
         vpd: string,
-      ): string => `${where}: ${temp} °C, ${rh}% → ${psat} hPa × (1 − ${rhUsed}%) = ${vpd} hPa`,
+      ): string =>
+        `${where}: ${temp} °C, ${rh}% → ${psat} hPa × (${whole} − ${rhUsed}%) = ${vpd} hPa`,
       floor: (min: string): string => ` (nie mniej niż ${min} hPa)`,
-      airflow: (label: string, factor: string): string =>
-        `Ruch powietrza „${label}”: × ${factor} dla odkrytej pracy, pierwiastek z tego pod luźnym workiem, × 1 pod szczelnym okryciem.`,
+      airflow: (label: string, factor: string, sealed: string): string =>
+        `Ruch powietrza „${label}”: × ${factor} dla odkrytej pracy, pierwiastek z tego pod luźnym workiem, × ${sealed} pod szczelnym okryciem.`,
     },
     rate: {
       title: 'Tempo schnięcia w każdym wariancie',
       text: 'W chwili toczenia: powierzchnia, niedobór pary i ruch powietrza przyspieszają, okrycie, spowolnienie i kalibracja hamują.',
       /** first line of a cover: what the cover itself contributes, its calibration first */
       cover: (cover: string, multiplier: string, factor: string, air: string): string =>
-        `${cover}: kalibracja × ${multiplier}, okrycie × ${factor}, ruch powietrza × ${air}`,
+        `${cover}: kalibracja ÷ ${multiplier}, okrycie × ${factor}, ruch powietrza × ${air}`,
       modelCover: (cover: string, multiplier: string): string =>
-        `${cover}: kalibracja × ${multiplier}`,
+        `${cover}: kalibracja ÷ ${multiplier}`,
       calibrated: (n: string): string => ` (z ocenionych prac: ${n})`,
       row: (
+        one: string,
+        multiplier: string,
         factor: string,
         air: string,
-        multiplier: string,
         k: string,
         area: string,
         vpd: string,
         slow: string,
         rate: string,
       ): string =>
-        `${factor} × ${air} ÷ ${multiplier} × ${k} × ${area} × ${vpd} ÷ ${slow} = ${rate} g/h`,
+        `${one} ÷ ${multiplier} × ${factor} × ${air} × ${k} × ${area} × ${vpd} ÷ ${slow} = ${rate} g/h`,
       modelText: 'W chwili toczenia, według dopasowanego modelu (bez rozbicia na czynniki).',
       modelRow: (rate: string): string => `${rate} g/h`,
       night: (from: string, to: string, rates: string): string => `Nocą (${from}–${to}): ${rates}.`,

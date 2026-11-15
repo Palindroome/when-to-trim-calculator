@@ -126,13 +126,14 @@ test.describe('page shell', () => {
     );
     // step 6: each cover's calibration first, then the formula and the rate that use it
     await expect(steps.nth(5).locator('.desc code')).toHaveText(
-      'r = f_okrycie × f_ruch ÷ M × k × A × VPD ÷ S',
+      'r = 1 ÷ M × f_okrycie × f_ruch × k × A × VPD ÷ S',
     );
     await expect(steps.nth(5).locator('.rows li .cover-line').first()).toHaveText(
-      'Odkryta: kalibracja × 1, okrycie × 1, ruch powietrza × 1,6',
+      'Odkryta: kalibracja ÷ 1, okrycie × 1, ruch powietrza × 1,6',
     );
     await expect(steps.nth(5).locator('.rows li').first()).toHaveText(
-      /^Odkryta: kalibracja × 1, okrycie × 1, ruch powietrza × 1,61 × 1,6 ÷ 1 × 5,1 × 0,0702 × 11,66 ÷ 1,28 = 5,24 g\/h$/,
+      'Odkryta: kalibracja ÷ 1, okrycie × 1, ruch powietrza × 1,6' +
+        '1 ÷ 1 × 1 × 1,6 × 5,1 × 0,0702 × 11,66 ÷ 1,28 = 5,24 g/h',
     );
     for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8])
       await expect(steps.nth(i).locator('.desc code').first()).toBeVisible();
@@ -240,29 +241,43 @@ test.describe('page shell', () => {
     const tip = page.locator('#explain-tip');
     const numbers = page.locator('#explain-steps .num-tip');
     await expect(tip).toBeHidden();
-    // every number is focusable, described by the tooltip, and has a label
+    // every number is focusable and described by its own label, which the bubble shows
     const all = await numbers.evaluateAll((els) =>
-      els.map((el) => [
-        el.getAttribute('tabindex'),
-        el.getAttribute('aria-describedby'),
-        el.dataset.tip,
-      ]),
+      els.map((el) => ({
+        tabindex: el.getAttribute('tabindex'),
+        label: el.dataset.tip,
+        description: document.getElementById(el.getAttribute('aria-describedby') ?? '')
+          ?.textContent,
+      })),
     );
     expect(all.length).toBeGreaterThan(50);
-    for (const [tabindex, describedby, label] of all) {
-      expect(tabindex).toBe('0');
-      expect(describedby).toBe('explain-tip');
-      expect(label).toBeTruthy();
+    for (const n of all) {
+      expect(n.tabindex).toBe('0');
+      expect(n.label).toBeTruthy();
+      expect(n.description).toBe(n.label);
     }
-    await expect(tip).toHaveAttribute('role', 'tooltip');
-    // the density in step 2, by mouse
+    await expect(tip).toHaveAttribute('aria-hidden', 'true');
+    // the description does not depend on which number had focus before
+    await numbers.first().focus();
+    await numbers.first().blur();
+    const sideArea = explainerSteps(page).nth(1).locator('.formula .num-tip').nth(3);
+    await expect(sideArea).toHaveAccessibleDescription('powierzchnia jednej strony arkusza gliny');
+    // the density in step 2, by mouse; the bubble stays while the pointer is on it
     const density = explainerSteps(page).nth(1).locator('.formula .num-tip').nth(1);
     await expect(density).toHaveText('1,9');
     await density.hover();
     await expect(tip).toBeVisible();
     await expect(tip).toHaveText('gęstość masy ceramicznej');
+    await tip.hover();
+    await expect(tip).toBeVisible();
     await page.mouse.move(0, 0);
     await expect(tip).toBeHidden();
+    // a hovered bubble closes with Escape
+    await density.hover();
+    await expect(tip).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(tip).toBeHidden();
+    await page.mouse.move(0, 0);
     // by keyboard, closed with Escape
     await density.focus();
     await expect(tip).toHaveText('gęstość masy ceramicznej');
@@ -277,6 +292,31 @@ test.describe('page shell', () => {
     await page.getByRole('button', { name: 'English' }).click();
     await explainerSteps(page).nth(1).locator('.formula .num-tip').nth(1).click();
     await expect(tip).toHaveText("clay's density");
+  });
+
+  test('no number in the steps is left without an explanation', async ({ page }) => {
+    await openApp(page);
+    await setNight(page, true);
+    await page.locator('.explainer summary').click();
+    const bare = (): Promise<string[]> =>
+      page.evaluate(() => {
+        const out: string[] = [];
+        const walker = document.createTreeWalker(
+          document.getElementById('explain-steps')!,
+          NodeFilter.SHOW_TEXT,
+        );
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          const el = n.parentElement!;
+          // formulas in code are symbols; link hints and headings hold no numbers of the model
+          if (el.closest('.num-tip, code, .vh')) continue;
+          if (/\d/.test(n.textContent ?? '')) out.push(n.textContent!);
+        }
+        return out;
+      });
+    expect(await bare()).toEqual([]);
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.getByText('How it calculates – step by step')).toBeVisible();
+    expect(await bare()).toEqual([]);
   });
 
   test('phone: a tapped number explains itself inside the card, without a horizontal scroll', async ({

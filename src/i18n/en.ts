@@ -304,9 +304,9 @@ export const en: Messages = {
       vpd: 'VPD = max(VPD_min, e_s(T) × (1 − clamp(RH, RH_min, RH_max) ÷ 100))',
       airSymbols: (vpdMin: string, rhMin: string, rhMax: string): string =>
         `T – temperature in °C, RH – relative humidity in %, limited to ${rhMin}–${rhMax}%; VPD_min = ${vpdMin} hPa`,
-      rate: 'r = f_cover × f_air ÷ M × k × A × VPD ÷ S',
+      rate: 'r = 1 ÷ M × f_cover × f_air × k × A × VPD ÷ S',
       rateSymbols:
-        'first what depends on the option: the cover, the airflow under it and the calibration multiplier M; k – evaporation coefficient',
+        'first what depends on the option: the calibration multiplier M (it divides the rate), the cover and the airflow under it; k – evaporation coefficient',
       time: 'loss(t + Δt) = loss(t) + r(t) × Δt, until loss ≥ target',
       timeSymbols: 'Δt – simulation step',
       plan: '|t − H| ÷ H ≤ tolerance',
@@ -393,6 +393,13 @@ export const en: Messages = {
       ready: 'when the piece reaches the target',
       windowStart: 'window start',
       windowEnd: 'window end',
+      nightFrom: 'hour from which the night conditions apply',
+      nightTo: 'hour until which the night conditions apply',
+      neutral: 'the value with no effect on the drying speed',
+      thickFloor: 'smallest thick-base factor: a thinner base does not speed it up',
+      whole: 'the whole, i.e. 100% humidity',
+      sealedAir: 'no airflow reaches the piece under a tight cover',
+      calibrationOne: 'calibration divides the rate by its multiplier',
     },
     inputs: {
       title: 'Your piece',
@@ -415,9 +422,10 @@ export const en: Messages = {
     },
     slowness: {
       title: 'Slowness',
-      text: 'The shape, clay body, bat and a thick base change the drying speed. A result above 1 means slower, below 1 faster.',
-      thick: (base: string, wall: string, exponent: string, thick: string): string =>
-        `thick base: (${base} mm ÷ ${wall} mm)^${exponent} = ${thick} (at least 1)`,
+      text: (neutral: string): string =>
+        `The shape, clay body, bat and a thick base change the drying speed. A result above ${neutral} means slower, below ${neutral} faster.`,
+      thick: (base: string, wall: string, exponent: string, thick: string, floor: string): string =>
+        `thick base: (${base} mm ÷ ${wall} mm)^${exponent} = ${thick} (at least ${floor})`,
       product: (shape: string, clay: string, bat: string, thick: string, slow: string): string =>
         `${shape} (shape) × ${clay} (clay) × ${bat} (bat) × ${thick} (base) = ${slow}`,
     },
@@ -432,8 +440,8 @@ export const en: Messages = {
     },
     air: {
       title: 'Drying power of the air',
-      text: (vpd: string, psat: string, magnus: string, rh: string): string =>
-        `${vpd} says how much more moisture the air can take: the ${psat} at the given temperature (from ${magnus}) × (1 − ${rh}).`,
+      text: (vpd: string, psat: string, magnus: string, rh: string, whole: string): string =>
+        `${vpd} says how much more moisture the air can take: the ${psat} at the given temperature (from ${magnus}) × (${whole} − ${rh}).`,
       start: 'Studio at throwing time',
       night: (from: string, to: string): string => `Studio at night (${from}–${to})`,
       damp: 'Damp room',
@@ -442,32 +450,35 @@ export const en: Messages = {
         temp: string,
         rh: string,
         psat: string,
+        whole: string,
         rhUsed: string,
         vpd: string,
-      ): string => `${where}: ${temp} °C, ${rh}% → ${psat} hPa × (1 − ${rhUsed}%) = ${vpd} hPa`,
+      ): string =>
+        `${where}: ${temp} °C, ${rh}% → ${psat} hPa × (${whole} − ${rhUsed}%) = ${vpd} hPa`,
       floor: (min: string): string => ` (at least ${min} hPa)`,
-      airflow: (label: string, factor: string): string =>
-        `Airflow “${label}”: × ${factor} for an uncovered piece, its square root under a loose bag, × 1 under a tight cover.`,
+      airflow: (label: string, factor: string, sealed: string): string =>
+        `Airflow “${label}”: × ${factor} for an uncovered piece, its square root under a loose bag, × ${sealed} under a tight cover.`,
     },
     rate: {
       title: 'Drying rate for each option',
       text: 'At throwing time: surface, vapour pressure deficit and airflow speed it up; the cover, slowness and calibration hold it back.',
       cover: (cover: string, multiplier: string, factor: string, air: string): string =>
-        `${cover}: calibration × ${multiplier}, cover × ${factor}, airflow × ${air}`,
+        `${cover}: calibration ÷ ${multiplier}, cover × ${factor}, airflow × ${air}`,
       modelCover: (cover: string, multiplier: string): string =>
-        `${cover}: calibration × ${multiplier}`,
+        `${cover}: calibration ÷ ${multiplier}`,
       calibrated: (n: string): string => ` (from rated pieces: ${n})`,
       row: (
+        one: string,
+        multiplier: string,
         factor: string,
         air: string,
-        multiplier: string,
         k: string,
         area: string,
         vpd: string,
         slow: string,
         rate: string,
       ): string =>
-        `${factor} × ${air} ÷ ${multiplier} × ${k} × ${area} × ${vpd} ÷ ${slow} = ${rate} g/h`,
+        `${one} ÷ ${multiplier} × ${factor} × ${air} × ${k} × ${area} × ${vpd} ÷ ${slow} = ${rate} g/h`,
       modelText: 'At throwing time, from the fitted model (not split into factors).',
       modelRow: (rate: string): string => `${rate} g/h`,
       night: (from: string, to: string, rates: string): string =>
