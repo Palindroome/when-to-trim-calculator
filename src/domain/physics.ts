@@ -38,11 +38,15 @@ export interface Climate {
   vpd: number;
 }
 
-/** Whether the night conditions apply at this moment. */
-export const isNightAt = (timeMs: number, env: Conditions, p: ModelParams): boolean => {
+/** Whether this moment falls in the night hours `p.night` (local time), whether or not night mode is on. */
+export const isNightHour = (timeMs: number, p: ModelParams): boolean => {
   const hour = new Date(timeMs).getHours();
-  return env.night && (hour >= p.night.fromHour || hour < p.night.toHour);
+  return hour >= p.night.fromHour || hour < p.night.toHour;
 };
+
+/** Whether the night conditions apply at this moment. */
+export const isNightAt = (timeMs: number, env: Conditions, p: ModelParams): boolean =>
+  env.night && isNightHour(timeMs, p);
 
 /** The climate of a cover's environment: the damp room, or the studio by day or at night. */
 export function climate(
