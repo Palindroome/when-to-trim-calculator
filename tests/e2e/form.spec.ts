@@ -439,6 +439,8 @@ test.describe('calendar', () => {
     await expect(calendarDialog(page, 'Chcę trymować').locator('[slot="heading"]')).toContainText(
       /kwiecień 2026/i,
     );
+    // the heading updates before DOM focus moves, so wait for the day itself
+    await expect(calendarDay(page, 'Chcę trymować', 14)).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(calendarDialog(page, 'Chcę trymować')).toBeHidden();
     await expect(button).toBeFocused();
@@ -696,6 +698,8 @@ test.describe('date-time keyboard use', () => {
     // the calendar moves focus to the chosen day once it has rendered
     await expect(calendarDay(page, 'Chcę trymować', 6)).toBeFocused();
     await page.keyboard.press('ArrowRight');
+    // focus moves to the new day after an async re-render; Enter before that picks the old day
+    await expect(calendarDay(page, 'Chcę trymować', 7)).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page.locator('#when-day-btn')).toBeFocused();
     await expectDateTime(page, 'Chcę trymować', '2026-03-07T10:00');
