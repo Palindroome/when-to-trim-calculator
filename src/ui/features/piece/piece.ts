@@ -11,6 +11,7 @@ export function markup(m: Messages): string {
   const o = m.options;
   return stepCard(
     1,
+    'vessel',
     m.sections.piece,
     `<div class="grid">
       <div class="full"><label for="name">${f.name}</label><input id="name" placeholder="${f.namePlaceholder}"></div>

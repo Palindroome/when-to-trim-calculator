@@ -4,6 +4,7 @@ import type { ActivityStore } from '../../../storage/activity';
 import type { StoredPiece } from '../../../storage/pieces';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
+import { icon } from '../../icons';
 import type { View } from '../../render';
 import { pieceHighlights } from '../pieces/pieces';
 
@@ -20,7 +21,7 @@ export function markup(m: Messages): string {
     </ol>
     <p class="muted">${m.welcome.privacy}</p>
     <div class="welcome-actions">
-      <button type="button" class="main" id="welcome-new">${m.welcome.start}</button>
+      <button type="button" class="main" id="welcome-new">${icon('plus')}${m.welcome.start}</button>
       <button type="button" class="ghost" id="welcome-pieces" aria-expanded="false" aria-controls="welcome-list"></button>
     </div>
     <ul class="welcome-list" id="welcome-list" hidden></ul>

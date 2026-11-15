@@ -53,8 +53,33 @@
   border: 1px solid var(--input-border);
   border-radius: var(--radius-md);
 }
-.pill .ico {
+/* the cover's icon with the check / cross as a small badge on its lower right corner */
+.pill .mark {
+  position: relative;
   flex: none;
+}
+.pill .cover-ico {
+  display: block;
+  width: 1em;
+  height: 1em;
+}
+.pill .ico {
+  position: absolute;
+  /* overhangs into the face's gap, so the pill is no wider than with a plain check */
+  right: -2px;
+  bottom: -3px;
+  width: 10px;
+  height: 10px;
+  padding: 1px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--input-border);
+}
+.pill input:checked + .face .ico.on {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  box-shadow: none;
 }
 .pill .ico.on,
 .pill input:checked + .face .ico.off {

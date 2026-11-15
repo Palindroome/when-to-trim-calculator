@@ -86,6 +86,7 @@ src/
     render.ts         View, and the cover and plan wording several features share
     calibration.ts    perCoverCalibration: the calibration of every cover, for the bars and the calibration table
     footer.ts         site footer: author's profile links with inline SVG icons
+    icons.ts          icon(name) and coverIcon(id): the decorative stroke icons (headings, result, controls); covers without one get a neutral icon
     motion.ts         every UI animation (WAAPI with a spring as CSS linear(), counting numbers); nothing under reduced motion
     numbers.ts        counting numbers in the result: their markup, per-frame wording and when they snap
     dom.ts            byId, esc, options, closest (event delegation)

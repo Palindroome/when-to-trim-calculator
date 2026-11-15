@@ -2,14 +2,15 @@
 import type { Conditions, PieceInput } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import { closest } from '../../dom';
+import { type IconName, icon } from '../../icons';
 import { animateHeight, reveal } from '../../motion';
 import type { View } from '../../render';
 
-/** A numbered form section (1–3) with its collapse toggle and summary line; `body` is its fields. */
-export function stepCard(n: number, title: string, body: string): string {
+/** A numbered form section (1–3) with its icon, collapse toggle and summary line; `body` is its fields. */
+export function stepCard(n: number, ico: IconName, title: string, body: string): string {
   return `<section class="card" data-step>
     <div class="card-head">
-      <h2><span class="n">${n}</span>${title}</h2>
+      <h2><span class="n">${n}</span>${icon(ico)}${title}</h2>
       <button type="button" class="ghost toggle" aria-expanded="true" aria-controls="body-${n}"></button>
     </div>
     <p class="summary"></p>

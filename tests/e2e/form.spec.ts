@@ -33,6 +33,44 @@ test.describe('page shell', () => {
     ]);
   });
 
+  test('decorative icons on the headings and the result leave accessible names alone', async ({
+    page,
+  }) => {
+    await openApp(page);
+    // the names as computed before the icons were added
+    const names = [
+      '1 Praca',
+      '2 Warunki',
+      '3 Termin',
+      'Ile to potrwa w każdym wariancie',
+      '4 Sprawdź wagą',
+      '5 Moje prace i kalibracja',
+    ];
+    const h2 = page.getByRole('heading', { level: 2 });
+    await expect(h2).toHaveCount(names.length);
+    for (const [i, name] of names.entries()) {
+      await expect(h2.nth(i)).toHaveAccessibleName(name);
+      await expect(h2.nth(i).locator('svg')).toHaveCount(1);
+    }
+    await expect(page.locator('#result .rec .k svg')).toHaveCount(1);
+    await expect(page.locator('#result .bar svg')).toHaveCount(5);
+    const summary = page.locator('details > summary');
+    await expect(summary.locator('svg')).toHaveCount(1);
+    await expect(summary).toHaveAccessibleName('Jak to liczy (i czego jeszcze nie umie)');
+    // each cover pill shows its cover's icon next to the check / cross and keeps its name
+    const pills = page.locator('#covers .pill');
+    await expect(pills).toHaveCount(5);
+    await expect(pills.locator('.cover-ico')).toHaveCount(5);
+    const boxes = page.locator('#covers').getByRole('checkbox');
+    const covers = ['Odkryta', 'Worek częściowo', 'Mokra przechowalnia', 'Cały worek', 'Pudełko'];
+    for (const [i, name] of covers.entries()) {
+      await expect(boxes.nth(i)).toHaveAccessibleName(name);
+    }
+    // every inline icon on the page is hidden from assistive technology
+    const visibleToAt = page.locator('svg:not([aria-hidden="true"][focusable="false"])');
+    await expect(visibleToAt).toHaveCount(0);
+  });
+
   test('unit suffixes next to numeric inputs', async ({ page }) => {
     await openApp(page);
     await expect(page.locator('.unit span')).toHaveText([
