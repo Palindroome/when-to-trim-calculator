@@ -86,7 +86,7 @@ Other agents may be testing in other worktrees at the same time, and a server on
 
 **You make no GitHub writes at all:** no labels, no comments, no assignments, no PR reviews. Your only output is the report you return to whoever spawned you. That is normally the implementer, which acts on it and owns all status labels and issue comments.
 
-Return the report in this shape, so the implementer can act on it directly and paste it into the issue:
+Return the report in this shape, so the implementer can act on it directly:
 
 ```markdown
 ## Validation: approved | changes requested

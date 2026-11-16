@@ -80,7 +80,7 @@ Context, the current behaviour, related issues.
 
 ## Proposed design
 - Where it plugs in (modules, interfaces, extension points), new types or functions, data flow.
-- UI changes, with every new string added to `src/i18n/pl.ts` (and other locales if any).
+- UI changes, with every new string added to `src/i18n/pl.ts` and `src/i18n/en.ts`.
 - Storage or migration impact (`kiedy-trymowac-v1` must stay readable).
 - How it keeps future work easy (more languages, ML-fitted params, sensors).
 
