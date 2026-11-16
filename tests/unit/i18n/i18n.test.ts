@@ -53,6 +53,15 @@ describe('decimal', () => {
   });
 });
 
+describe('coords', () => {
+  it('names a point to 0.1° with the locale separator and the hemisphere', () => {
+    expect(fmt.coords(50.1, 19.9)).toBe('50,1° N, 19,9° E');
+    expect(fmt.coords(52, 21)).toBe('52,0° N, 21,0° E');
+    expect(createFormatter(en, 30).coords(50.1, 19.9)).toBe('50.1° N, 19.9° E');
+    expect(createFormatter(en, 30).coords(-33.9, -70.7)).toBe('33.9° S, 70.7° W');
+  });
+});
+
 describe('catalog', () => {
   it('plan sentences', () => {
     const p = pl.covers.phrase;

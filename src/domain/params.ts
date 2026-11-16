@@ -85,7 +85,8 @@ export const DEFAULT_PARAMS: ModelParams = {
   minVpd: 0.05,
   rhClamp: { min: 1, max: 99 },
   night: { fromHour: 22, toHour: 7 },
-  forecastHours: 24,
+  // longer than the 9 h night (22–7), so the window always has day hours
+  forecastHours: 12,
   covers: [
     { id: 'open', factor: 1, airflow: 'full', environment: 'room' },
     { id: 'partial', factor: 0.3, airflow: 'damped', environment: 'room' },

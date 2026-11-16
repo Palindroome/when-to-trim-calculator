@@ -192,7 +192,7 @@ export function startApp(deps: AppDeps): void {
       Object.keys(deps.locales),
       theme ?? 'system',
       covers,
-      deps.weather !== undefined,
+      deps.weather ? params.forecastHours : null,
     );
     if (deps.footer) deps.footer.innerHTML = renderFooter(m);
     wizard.mount(m);

@@ -145,10 +145,27 @@ export const pl = {
   /** optional fill of temperature and humidity in "Warunki" from a weather forecast */
   weather: {
     fetch: 'Pobierz z prognozy pogody',
-    note: 'Po kliknięciu wysyłamy do Open-Meteo.com przybliżoną lokalizację (z dokładnością do ok. 10 km), żeby pobrać prognozę na najbliższe 24 h. Twoich prac nie wysyłamy.',
+    note: (hours: number): string =>
+      `Po kliknięciu otwieramy mapę – jej kafelki pobieramy z serwerów OpenStreetMap, które widzą Twój adres IP i oglądany obszar. Wpisana nazwa miejscowości trafia do Open-Meteo.com, a po zatwierdzeniu wysyłamy tam wskazany punkt zaokrąglony do ok. 10 km, żeby pobrać prognozę na najbliższe ${hours} h. Lokalizację z przeglądarki pokazujemy tylko na mapie. Twoich prac nie wysyłamy nigdzie.`,
     attribution: 'Dane pogodowe:',
     loading: 'Pobieram prognozę…',
     filled: (time: string): string => `≈ z prognozy (na zewnątrz), ${time}`,
+    /** a field group the forecast window has no hours for keeps its values */
+    kept: {
+      day: (hours: number): string =>
+        `Wartości dzienne bez zmian – brak godzin dziennych w najbliższych ${hours} h.`,
+      night: (hours: number): string =>
+        `Wartości nocne bez zmian – brak godzin nocnych w najbliższych ${hours} h.`,
+    },
+    mapTitle: 'Wskaż miejsce prognozy',
+    mapNote:
+      'Kafelki mapy pochodzą z OpenStreetMap (widzi Twój adres IP i oglądany obszar). Do Open-Meteo.com trafia wpisana miejscowość i zatwierdzony punkt zaokrąglony do ok. 10 km.',
+    map: 'Mapa: kliknij, aby postawić pinezkę; strzałki przesuwają, + i − przybliżają',
+    pinAtCentre: 'Postaw pinezkę na środku mapy',
+    pin: (name: string): string => `Pinezka: ${name}`,
+    noPin: 'Brak pinezki – kliknij mapę.',
+    confirm: 'Zatwierdź',
+    cancel: 'Anuluj',
     searchLabel: 'Miejscowość',
     searchPlaceholder: 'np. Kraków',
     search: 'Szukaj',
@@ -157,7 +174,8 @@ export const pl = {
     place: (name: string): string => `Miejsce: ${name}`,
     forget: 'Zapomnij miejsce',
     errors: {
-      location: 'Nie udało się ustalić lokalizacji. Wpisz miejscowość.',
+      location: 'Nie udało się ustalić lokalizacji – wskaż miejsce na mapie.',
+      map: 'Nie udało się wczytać mapy. Sprawdź połączenie.',
       offline: 'Brak połączenia z serwisem pogodowym. Wartości bez zmian.',
       service: 'Serwis pogodowy nie odpowiedział poprawnie. Wartości bez zmian.',
     },

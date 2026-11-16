@@ -4,7 +4,7 @@ import { roundCoord, WeatherError, type WeatherProvider } from './provider';
 
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search';
-/** today and tomorrow in the place's time zone cover the next 24 h */
+/** today and tomorrow in the place's time zone cover the `ModelParams.forecastHours` (12 h) window */
 const FORECAST_DAYS = 2;
 const MAX_PLACES = 5;
 

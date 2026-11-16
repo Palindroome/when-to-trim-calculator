@@ -129,10 +129,26 @@ export const en: Messages = {
 
   weather: {
     fetch: 'Fill from the weather forecast',
-    note: 'When you click, your approximate location (to about 10 km) is sent to Open-Meteo.com to get the forecast for the next 24 h. Your pieces are not sent.',
+    note: (hours: number): string =>
+      `When you click, a map opens. Its tiles come from the OpenStreetMap servers, which see your IP address and the area you view. A town name you type goes to Open-Meteo.com, and after you confirm, the chosen point, rounded to about 10 km, is sent there to get the forecast for the next ${hours} h. Your browser location is only shown on the map. Your pieces are not sent anywhere.`,
     attribution: 'Weather data:',
     loading: 'Getting the forecast…',
     filled: (time: string): string => `≈ from the forecast (outdoors), ${time}`,
+    kept: {
+      day: (hours: number): string =>
+        `Day values unchanged – no daytime hours in the next ${hours} h.`,
+      night: (hours: number): string =>
+        `Night values unchanged – no night hours in the next ${hours} h.`,
+    },
+    mapTitle: 'Choose the forecast place',
+    mapNote:
+      'Map tiles come from OpenStreetMap (it sees your IP address and the area you view). Open-Meteo.com gets the town you type and the confirmed point, rounded to about 10 km.',
+    map: 'Map: click to place the pin; arrow keys pan, + and − zoom',
+    pinAtCentre: 'Place the pin at the map centre',
+    pin: (name: string): string => `Pin: ${name}`,
+    noPin: 'No pin yet – click the map.',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
     searchLabel: 'Town',
     searchPlaceholder: 'e.g. Krakow',
     search: 'Search',
@@ -141,7 +157,8 @@ export const en: Messages = {
     place: (name: string): string => `Place: ${name}`,
     forget: 'Forget place',
     errors: {
-      location: 'Your location could not be determined. Type a town.',
+      location: 'Your location could not be determined – choose the place on the map.',
+      map: 'The map could not be loaded. Check your connection.',
       offline: 'The weather service could not be reached. Values unchanged.',
       service: 'The weather service did not answer properly. Values unchanged.',
     },

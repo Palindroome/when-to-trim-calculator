@@ -106,6 +106,12 @@ describe('weather place', () => {
     expect(loadPlace(s)).toBeNull();
   });
 
+  it('still loads a town stored by the first version, named after the search result', () => {
+    const s = new MemoryStorage();
+    s.setItem(WEATHER_PLACE_KEY, '{"name":"Kraków","lat":50.1,"lon":19.9}');
+    expect(loadPlace(s)).toEqual({ name: 'Kraków', lat: 50.1, lon: 19.9 });
+  });
+
   it.each([
     '',
     '{',

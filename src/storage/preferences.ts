@@ -4,7 +4,7 @@ import type { Place } from '../domain/weather';
 export const LANGUAGE_KEY = 'kiedy-trymowac-lang';
 /** Colour scheme chosen with the switch; no key means "follow the system". Also read by the inline script in index.html. */
 export const THEME_KEY = 'kiedy-trymowac-theme';
-/** Town chosen for the weather forecast in "Warunki" (JSON `Place`, rounded coordinates). */
+/** Point confirmed on the map for the weather forecast in "Warunki" (JSON `Place`, rounded coordinates). */
 export const WEATHER_PLACE_KEY = 'kiedy-trymowac-weather-place';
 
 export type Theme = 'light' | 'dark';

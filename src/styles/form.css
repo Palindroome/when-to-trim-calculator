@@ -147,19 +147,92 @@ select {
 .weather a {
   color: inherit;
 }
-.wx-search {
-  width: 100%;
+/* the map dialog: like the calendar dialog, a bottom sheet on phones */
+dialog.wx-dialog {
+  box-sizing: border-box;
+  width: min(36rem, calc(100% - 2 * var(--space-4)));
+  max-width: none;
+  max-height: calc(100% - 2 * var(--space-4));
+  padding: var(--space-4);
+  overflow-y: auto;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+dialog.wx-dialog[open] {
+  display: grid;
+  gap: var(--space-2);
+}
+dialog.wx-dialog::backdrop {
+  background: var(--scrim);
+}
+@media (max-width: 479px) {
+  dialog.wx-dialog {
+    width: 100%;
+    max-height: 100%;
+    margin: auto 0 0;
+    padding: var(--space-3);
+    border-width: 1px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+}
+.wx-dialog h3 {
+  margin: 0;
+  font-size: var(--text-md);
+}
+.wx-dialog label {
+  margin: 0;
+}
+/* 44 px touch targets, above button.ghost */
+dialog.wx-dialog button {
+  min-height: var(--control-h);
 }
 .wx-row {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 .wx-row input {
-  flex: 1;
+  flex: 1 1 10rem;
   min-width: 0;
 }
-.wx-row button {
-  min-height: var(--control-h);
+.wx-map {
+  height: min(55vh, 24rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.wx-map:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: var(--ring-width);
+}
+/* the pin: a CSS teardrop whose tip is the point (Leaflet moves the element itself with a transform) */
+.wx-marker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  background: var(--accent);
+  border: 2px solid var(--accent-contrast);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: var(--shadow-2);
+}
+.wx-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.wx-actions button {
+  flex: 1 1 auto;
+}
+.wx-actions button.main {
+  width: auto;
+}
+.wx-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .wx-results {
   display: flex;

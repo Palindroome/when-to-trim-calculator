@@ -7,8 +7,8 @@ import { toggleHeight } from '../../motion';
 import { stepCard } from '../cards/cards';
 import * as weatherFill from './weather';
 
-/** `weather`: whether to offer the weather-forecast fill below the temperature and humidity. */
-export function markup(m: Messages, weather: boolean): string {
+/** `weatherHours`: the forecast window of the weather fill offered below the temperature and humidity; null for none. */
+export function markup(m: Messages, weatherHours: number | null): string {
   const f = m.fields;
   const u = m.units;
   return stepCard(
@@ -17,7 +17,7 @@ export function markup(m: Messages, weather: boolean): string {
     m.sections.conditions,
     `<div class="grid">
       <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="text" inputmode="decimal" autocomplete="off" value="20"><span>${u.celsius}</span></div></div>
-      <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="text" inputmode="decimal" autocomplete="off" value="50"><span>${u.percent}</span></div></div>${weather ? `\n      ${weatherFill.markup(m)}` : ''}
+      <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="text" inputmode="decimal" autocomplete="off" value="50"><span>${u.percent}</span></div></div>${weatherHours === null ? '' : `\n      ${weatherFill.markup(m, weatherHours)}`}
       <div class="full"><label for="air">${f.airflow}</label>
         <select id="air">
           ${options(AIRFLOWS, m.options.airflow, 'light')}
