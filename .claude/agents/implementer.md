@@ -78,7 +78,7 @@ bash $S/worktree.sh <branch>   # W=~/wtc-worktrees/<branch>
   - prefer the simplest change that meets the acceptance criteria.
 - Follow the architecture rules:
   - `src/domain` stays pure;
-  - every user-facing string goes in `src/i18n/pl.ts`, typed via `Messages`;
+  - every user-facing string goes in `src/i18n/pl.ts` (the `Messages` source of truth) and in `src/i18n/en.ts`;
   - constants go in `ModelParams`;
   - the storage format stays backward compatible;
   - new seams follow the existing interfaces (`RateModel`, `Calibrator`, `ConditionsSource`, `PieceRepository`).

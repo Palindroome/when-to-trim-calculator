@@ -37,7 +37,7 @@ Run them with `wsl -e bash -l <checkout>/scripts/agent/<script> <args>`. Argumen
 | `worktree.sh <branch>` | reuses or creates `~/wtc-worktrees/<branch>` from `origin/main`, then runs `npm ci` |
 | `worktree.sh --validate <branch>` / `--main` / `--remove <path>` | fresh detached worktree for validation or for reproducing on `origin/main`; removal |
 | `check.sh [steps…]` | lint (lint + format check), typecheck, unit, e2e (own free port), build; one line per step, plus the failure tail |
-| `viewport.sh [--shots DIR] [--keep]` | builds and serves on a free port; checks 320/375/1280 px for overflow, a rendered `#result` and console errors; stops its server |
+| `viewport.sh [--shots DIR] [--keep] [--widths 320,768]` | builds and serves on a free port; checks 320/375/1280 px (or the given widths) for overflow, a rendered `#result` and console errors; stops its server |
 | `hygiene.sh <branch> [N]` | base on `origin/main`, identity, AI mentions, commit convention, `Fixes #N`, stray files, `src/domain` purity |
 
 ## Commands
@@ -51,9 +51,10 @@ npm run test:unit
 npm run test:e2e              # builds, then runs Playwright against the build
 npm run build
 npm run validate              # lint, format check, typecheck, unit, build (no e2e)
+npm run test:visual           # optional screenshot comparison (see README)
 ```
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit, e2e, build and shellcheck on every PR; `ci-result` is the summary check. Pages deploys only after CI passes on `main`.
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit, e2e, build and shellcheck on every PR and on pushes to `main`; `ci-result` is the summary check. Pages deploys only after CI passes on `main`.
 
 ## Rules
 
