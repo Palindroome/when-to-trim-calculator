@@ -40,7 +40,7 @@ Validation reports and hand-off reports never go to the issue. They pass only be
 - The agent:
   - investigates the code;
   - reproduces bugs on the live site or a local build;
-  - checks for duplicates (`gh issue list --search`).
+  - checks for duplicates (`search.sh`).
 - It then opens one issue per independent problem. Each issue uses the bug or feature template from the agent's instructions and is labelled with exactly one type label (`bug`, `enhancement`, `documentation`) plus one or more `area:*` labels.
 - No status label at this stage.
 - Labels: only labels from the approved table in `CLAUDE.md` are used.
@@ -52,18 +52,17 @@ Validation reports and hand-off reports never go to the issue. They pass only be
 ## 2. Implementing (`implementer`)
 
 - **Task linked to an issue** (`#N`, an issue URL, or a task matching an open issue):
-  - `gh issue edit N --add-assignee @me`;
-  - swap any `status:*` label for `status:in-progress`;
+  - assigns itself and swaps any `status:*` label for `status:in-progress` (`status.sh N in-progress --assign`);
   - branch `fix/N-short-slug` for bugs, `feat/N-short-slug` for enhancements, `docs/N-…` for docs.
 - **Task without an issue:** no GitHub changes. Branch `fix/…`, `feat/…` or `chore/…` from a short slug.
 - **Branch base:**
   - A new branch always starts from an up-to-date `origin/main`.
-  - It lives in its own worktree under `~/wtc-worktrees/<branch-name>`, so the main checkout and other agents are never disturbed.
+  - It lives in its own worktree under `~/wtc-worktrees/<branch-name>` (created by `worktree.sh`), so the main checkout and other agents are never disturbed.
   - Between validation rounds, and when the user restarts work after `status:changes-requested`, it reuses the existing branch and worktree.
 - **Changes:**
-  - Commits are small and focused, written in the imperative mood, and may reference the issue (`Fixes #N` in the final commit body).
+  - Commits are small and focused, follow the Conventional Commits convention in `CLAUDE.md` (`type(scope): subject`), and the final one has `Fixes #N` in its footer.
   - The configured git identity is used, with no AI attribution (see `CLAUDE.md`).
-- **Before handing off:** `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run test:unit`, `npm run test:e2e` and `npm run build` must all pass. New behaviour has tests, and golden data is re-recorded only for scenarios that are meant to change.
+- **Before handing off:** `npm run lint`, `npm run format:check`, `npm run typecheck`, `npm run test:unit`, `npm run test:e2e` and `npm run build` must all pass (`check.sh` runs them all), and `hygiene.sh` must report no failures. New behaviour has tests, and golden data is re-recorded only for scenarios that are meant to change.
 - **Validation loop (up to 3 rounds):** the implementer owns the loop and its status labels. It posts no issue comments in the loop.
   1. It sets `status:needs-validation` and spawns a **fresh** validator with the branch, the issue, the round number and, from round 2 on, the previous report.
   2. If the report says changes are requested, it sets `status:in-progress`, fixes every finding, re-runs all checks, commits, and starts the next round.
@@ -101,8 +100,8 @@ Validation reports and hand-off reports never go to the issue. They pass only be
 
 - When the user asks, an agent pushes the validated feature branch and opens a PR against `main`.
 - The user reviews and merges the PR on GitHub. No agent ever merges into or pushes `main`, even when asked to; it opens a PR instead.
-- A merge to `main` deploys to GitHub Pages automatically.
-- Remove worktrees for merged branches: `git worktree remove ~/wtc-worktrees/<branch>`.
+- A merge to `main` deploys to GitHub Pages automatically once CI passes on `main` (`.github/workflows/pages.yml`).
+- Remove worktrees for merged branches: `worktree.sh --remove ~/wtc-worktrees/<branch>`.
 
 ## Tooling
 
