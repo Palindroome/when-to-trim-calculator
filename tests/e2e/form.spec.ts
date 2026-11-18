@@ -1071,19 +1071,32 @@ test.describe('number validation', () => {
     await expect(page.locator('#wout .state')).toHaveCount(1);
   });
 
-  test('a flagged night field stops counting while the night switch is off', async ({ page }) => {
-    await openApp(page);
-    await setNight(page, true);
-    const input = field(page, 'Wilgotność nocą');
-    await input.fill('150');
-    await expectFlagged(page, input, PERCENT);
-    await setNight(page, false);
-    await expect(input).not.toHaveAttribute('aria-invalid');
-    await expect(page.locator('#result .bar')).toHaveCount(5);
-    await setNight(page, true);
-    await expectFlagged(page, input, PERCENT);
-    await expectBlocked(page);
-  });
+  for (const [label, bad, message] of [
+    ['Wilgotność nocą', '150', PERCENT],
+    ['Temperatura nocą (22–7)', 'abc', 'Wpisz liczbę, np. 6,5.'],
+  ] as const) {
+    test(`a flagged night field "${bad}" stops counting while the night switch is off`, async ({
+      page,
+    }) => {
+      await openApp(page);
+      await setNight(page, true);
+      const input = field(page, label);
+      await input.fill(bad);
+      await input.press('Tab');
+      await expectFlagged(page, input, message);
+      await expectBlocked(page);
+      await setNight(page, false);
+      await expect(page.locator('#result .bar')).toHaveCount(5);
+      await expect(page.locator('#savebtn')).toHaveCount(1);
+      // flagged again when shown, also after a language switch while it was hidden
+      await page.getByRole('button', { name: 'English' }).click();
+      await expect(page.locator('#result .bar')).toHaveCount(5);
+      await page.getByRole('button', { name: 'Polski' }).click();
+      await setNight(page, true);
+      await expectFlagged(page, input, message);
+      await expectBlocked(page);
+    });
+  }
 
   test('empty fields fall back as before and are not flagged', async ({ page }) => {
     await openApp(page);

@@ -107,13 +107,11 @@ function numberMessage(m: Messages, id: NumberFieldId, check: NumberCheck): stri
 /**
  * Flags a number field that is out of range or, once left (`done`), cannot be read; true when flagged.
  * While typing, unreadable text is not newly reported, so a half-typed "-" is not flagged.
- * The night fields count only while the night switch shows them.
- */
+ * The night fields count only while the night switch shows them; hidden, they keep their flag for later. */
 export function checkNumber(m: Messages, id: NumberFieldId, done: boolean): boolean {
   const input = byId<HTMLInputElement>(id);
   const msg = byId(`${id}-msg`);
-  const hidden = (id === 'ntemp' || id === 'nrh') && !byId<HTMLInputElement>('night').checked;
-  const check = hidden ? 'ok' : validateNumber(id, input.value);
+  const check = validateNumber(id, input.value);
   const invalid =
     check === 'range' || (check === 'nan' && (done || input.hasAttribute('aria-invalid')));
   msg.classList.toggle('hide', !invalid);
@@ -126,7 +124,8 @@ export function checkNumber(m: Messages, id: NumberFieldId, done: boolean): bool
     input.removeAttribute('aria-invalid');
     input.removeAttribute('aria-describedby');
   }
-  return invalid;
+  const hidden = (id === 'ntemp' || id === 'nrh') && !byId<HTMLInputElement>('night').checked;
+  return invalid && !hidden;
 }
 
 /** Checks every number field (see `checkNumber`); true when any is flagged. */
