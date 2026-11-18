@@ -23,12 +23,12 @@
     "node": ">=20"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.7",
+    "@biomejs/biome": "2.6.8",
     "@playwright/test": "^1.65.0",
     "@types/leaflet": "1.9.22",
     "@types/node": "^26.6.6",
     "typescript": "^7.0.2",
-    "vite": "^8.3.6",
+    "vite": "^8.3.8",
     "vitest": "^5.1.0"
   },
   "dependencies": {
