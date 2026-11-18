@@ -5,10 +5,11 @@ import { assessWeight, type WeightAssessment } from '../../../domain/weight';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, esc } from '../../dom';
-import { numberMessageMarkup, readPieceInput, readThrownMs, readWeightInputs } from '../../form';
+import { readPieceInput, readThrownMs, readWeightInputs } from '../../form';
 import { icon } from '../../icons';
 import { reveal } from '../../motion';
 import { coverLabel, type View } from '../../render';
+import { mountSteppers, numberField } from '../../stepper';
 
 export function markup(m: Messages, covers: readonly CoverDefinition[]): string {
   const f = m.fields;
@@ -16,7 +17,7 @@ export function markup(m: Messages, covers: readonly CoverDefinition[]): string 
     <h2><span class="n">4</span>${icon('scale')}${m.sections.weight}</h2>
     <p class="muted hint">${m.weightHint}</p>
     <div class="grid">
-      <div><label for="mnow">${f.massNow}</label><div class="unit"><input id="mnow" type="text" inputmode="decimal" autocomplete="off" placeholder="${f.massNowPlaceholder}"><span>${m.units.grams}</span></div>${numberMessageMarkup('mnow')}</div>
+      <div><label for="mnow">${f.massNow}</label>${numberField(m, 'mnow', f.massNow, m.units.grams, `placeholder="${f.massNowPlaceholder}"`)}</div>
       <div><label for="wnow">${f.coverSoFar}</label>
         <select id="wnow">${covers.map((c) => `<option value="${c.id}">${coverLabel(m, c)}</option>`).join('')}</select></div>
     </div>
@@ -66,8 +67,7 @@ export function update(ctx: AppContext, invalid: boolean): void {
 
 export function mount(root: HTMLElement, ctx: AppContext): void {
   // the mass and cover so far feed only the weight check, but an invalid mass now also blocks the recommendation
-  root
-    .querySelector('#wout')!
-    .closest('section')!
-    .addEventListener('input', () => ctx.compute());
+  const section = root.querySelector('#wout')!.closest('section')!;
+  section.addEventListener('input', () => ctx.compute());
+  mountSteppers(section, ctx.view.m);
 }

@@ -23,6 +23,9 @@ const ICONS = {
   },
   chevronLeft: { body: '<path d="M11 4 6 9l5 5"/>', stroke: 1.75 },
   chevronRight: { body: '<path d="m7 4 5 5-5 5"/>', stroke: 1.75 },
+  // number steppers
+  chevronUp: { body: '<path d="m3.5 9 3.5-3.5 3.5 3.5"/>', size: 14, stroke: 1.75 },
+  chevronDown: { body: '<path d="m3.5 5 3.5 3.5 3.5-3.5"/>', size: 14, stroke: 1.75 },
   // cover pills (ticked / unticked) and the save button
   pillOn: { body: '<path d="M2.5 7.5l3 3 6-7"/>', size: 14, stroke: 2 },
   pillOff: { body: '<path d="M3.5 3.5l7 7M10.5 3.5l-7 7"/>', size: 14, stroke: 2 },
