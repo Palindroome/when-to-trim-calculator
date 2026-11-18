@@ -853,7 +853,7 @@
     ],
     "save": true
   },
-  "rh above 100 unclamped in tips": {
+  "rh 100": {
     "kind": "Uwaga",
     "big": "Nawet odkryta będzie gotowa najwcześniej za 3 d 15 h. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.",
     "sub": "",
@@ -876,6 +876,18 @@
     "alts": [],
     "tips": [],
     "save": true
+  },
+  "rh 120 rejected": {
+    "kind": "Uwaga",
+    "big": "Popraw zaznaczone pola, żeby policzyć termin.",
+    "sub": "",
+    "win": "",
+    "bars": [],
+    "tracks": [],
+    "legend": "",
+    "alts": [],
+    "tips": [],
+    "save": false
   },
   "rh 0": {
     "kind": "Rekomendacja",

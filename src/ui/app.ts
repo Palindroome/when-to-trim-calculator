@@ -24,7 +24,16 @@ import * as weight from './features/weight/weight';
 import { createWelcome, shouldWelcome, trackActivity } from './features/welcome/welcome';
 import { createWizard } from './features/wizard/wizard';
 import { renderFooter } from './footer';
-import { readAllowedCovers, readName, readPieceInput, readThrownMs, readWhenMs } from './form';
+import {
+  checkNumber,
+  checkNumbers,
+  isNumberField,
+  readAllowedCovers,
+  readName,
+  readPieceInput,
+  readThrownMs,
+  readWhenMs,
+} from './form';
 import { captureForm, type FormState, restoreForm } from './form-state';
 import { slideIndicator, viewTransition } from './motion';
 import type { View } from './render';
@@ -113,6 +122,7 @@ export function startApp(deps: AppDeps): void {
 
   /** Recalculates the recommendation from the form, then the summaries and the weight check. */
   function compute(): void {
+    const invalid = checkNumbers(view.m, false);
     const input = readPieceInput();
     const piece = derivePiece(input, params);
     const startMs = readThrownMs(ctx.now());
@@ -123,31 +133,34 @@ export function startApp(deps: AppDeps): void {
     const rec = plan.recommendation;
 
     let window: { start: number; end: number } | undefined;
-    if (rec.status === 'onTarget') {
+    if (invalid || rec.status === 'invalidDeadline') {
+      saveable = null;
+    } else if (rec.status === 'onTarget') {
       const [ws, we] = simulate(rec.option.plan, dc, [piece.softPct, piece.hardPct]) as [
         number,
         number,
       ];
       window = { start: ws, end: we };
       saveable = { piece, startMs, option: rec.option, ws, we };
-    } else if (rec.status === 'invalidDeadline') {
-      saveable = null;
     } else {
       saveable = { piece, startMs, option: rec.option, ws: NaN, we: NaN };
     }
 
     const tips = tipsFor(rec, piece, dc.conditions, params, covers);
     const calibration = ctx.perCover();
-    result.update(view, {
-      piece,
-      startMs,
-      plan,
-      window,
-      tips,
-      calibration,
-      canSave: saveable !== null,
-      allowed,
-    });
+    // a flagged field gives no plan, only the request to fix it
+    if (invalid) result.showInvalid(view);
+    else
+      result.update(view, {
+        piece,
+        startMs,
+        plan,
+        window,
+        tips,
+        calibration,
+        canSave: saveable !== null,
+        allowed,
+      });
     explainer.update(view, explainCalculation(input, dc, plan, allowed), calibration);
     cards.update(
       renderSummaries(view, {
@@ -158,7 +171,7 @@ export function startApp(deps: AppDeps): void {
         whenMs,
       }),
     );
-    weight.update(ctx);
+    weight.update(ctx, invalid);
   }
 
   function switchLanguage(code: string): void {
@@ -202,6 +215,8 @@ export function startApp(deps: AppDeps): void {
     else datetime.reset(root, ctx);
     for (const feature of FEATURES) feature.mount(root, ctx);
     piecesSection.render(ctx);
+    // values restored after a language switch or from the tab's last visit are checked in full
+    checkNumbers(m, true);
     compute();
   }
 
@@ -234,6 +249,14 @@ export function startApp(deps: AppDeps): void {
   const snapshot = idle ? null : deps.session.load();
   if (!snapshot || !resume(snapshot)) render(deps.messages, null);
   conditions.subscribe?.(compute);
+  // a number that cannot be read is flagged once its field is left; only a new flag recalculates,
+  // so moving the focus on (e.g. to a number in the explainer) does not re-render what it lands on
+  root.addEventListener('change', (e) => {
+    const target = e.target as HTMLElement;
+    if (!isNumberField(target.id)) return;
+    const wasFlagged = target.hasAttribute('aria-invalid');
+    if (checkNumber(view.m, target.id, true) && !wasFlagged) compute();
+  });
   trackActivity(root, welcome, deps.activity, ctx.now, idleMs);
   for (const type of ['input', 'change', 'click']) root.addEventListener(type, saveSession);
   window.addEventListener('pagehide', saveSession);

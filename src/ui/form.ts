@@ -19,6 +19,124 @@ export function parseNumber(raw: string, fallback: number): number {
   return Number.isFinite(v) ? v : fallback;
 }
 
+/** The typed number fields; the ids of their inputs. */
+export type NumberFieldId =
+  | 'mass'
+  | 'wall'
+  | 'base'
+  | 'mnow'
+  | 'temp'
+  | 'rh'
+  | 'ntemp'
+  | 'nrh'
+  | 'dtemp'
+  | 'drh';
+
+interface NumberField {
+  /** the value used while the field is empty */
+  fallback: number;
+  min: number;
+  max: number;
+  /** the minimum itself is out of range */
+  minExclusive?: boolean;
+  /** the `validation` message shown for a value out of range */
+  message: 'positive' | 'percent' | 'tempRange';
+}
+
+const positive = (fallback: number): NumberField => ({
+  fallback,
+  min: 0,
+  max: Infinity,
+  minExclusive: true,
+  message: 'positive',
+});
+const percent = (fallback: number): NumberField => ({
+  fallback,
+  min: 0,
+  max: 100,
+  message: 'percent',
+});
+/** Not a realistic range: it only keeps the model defined (saturation pressure has a pole at −243.12 °C). */
+const temperature = (fallback: number): NumberField => ({
+  fallback,
+  min: -200,
+  max: 200,
+  message: 'tempRange',
+});
+
+/** Input rules of the number fields. The domain still clamps to its own minimums behind them. */
+export const NUMBER_FIELDS: Record<NumberFieldId, NumberField> = {
+  mass: positive(500),
+  wall: positive(6),
+  base: positive(NaN),
+  mnow: positive(NaN),
+  temp: temperature(20),
+  rh: percent(50),
+  ntemp: temperature(15),
+  nrh: percent(60),
+  dtemp: temperature(15),
+  drh: percent(88),
+};
+
+const NUMBER_IDS = Object.keys(NUMBER_FIELDS) as NumberFieldId[];
+
+export const isNumberField = (id: string): id is NumberFieldId => id in NUMBER_FIELDS;
+
+/** A plain decimal number, with a dot or a comma. */
+const NUMBER_PATTERN = /^[+-]?(\d+([.,]\d*)?|[.,]\d+)$/;
+
+export type NumberCheck = 'ok' | 'empty' | 'nan' | 'range';
+
+/** Checks a typed value against its field's rule; an empty field is not an error. */
+export function validateNumber(id: NumberFieldId, raw: string): NumberCheck {
+  const s = raw.trim();
+  if (s === '') return 'empty';
+  if (!NUMBER_PATTERN.test(s)) return 'nan';
+  const v = parseNumber(s, NaN);
+  const f = NUMBER_FIELDS[id];
+  const aboveMin = f.minExclusive ? v > f.min : v >= f.min;
+  return aboveMin && v <= f.max ? 'ok' : 'range';
+}
+
+function numberMessage(m: Messages, id: NumberFieldId, check: NumberCheck): string {
+  const f = NUMBER_FIELDS[id];
+  if (check === 'nan') return m.validation.notNumber;
+  return f.message === 'tempRange' ? m.validation.tempRange(f.min, f.max) : m.validation[f.message];
+}
+
+/**
+ * Flags a number field that is out of range or, once left (`done`), cannot be read; true when flagged.
+ * While typing, unreadable text is not newly reported, so a half-typed "-" is not flagged.
+ * The night fields count only while the night switch shows them.
+ */
+export function checkNumber(m: Messages, id: NumberFieldId, done: boolean): boolean {
+  const input = byId<HTMLInputElement>(id);
+  const msg = byId(`${id}-msg`);
+  const hidden = (id === 'ntemp' || id === 'nrh') && !byId<HTMLInputElement>('night').checked;
+  const check = hidden ? 'ok' : validateNumber(id, input.value);
+  const invalid =
+    check === 'range' || (check === 'nan' && (done || input.hasAttribute('aria-invalid')));
+  msg.classList.toggle('hide', !invalid);
+  if (invalid) {
+    msg.textContent = numberMessage(m, id, check);
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', `${id}-msg`);
+  } else {
+    msg.textContent = '';
+    input.removeAttribute('aria-invalid');
+    input.removeAttribute('aria-describedby');
+  }
+  return invalid;
+}
+
+/** Checks every number field (see `checkNumber`); true when any is flagged. */
+export const checkNumbers = (m: Messages, done: boolean): boolean =>
+  NUMBER_IDS.map((id) => checkNumber(m, id, done)).includes(true);
+
+/** The inline message under a number field, filled by `checkNumber`. */
+export const numberMessageMarkup = (id: NumberFieldId): string =>
+  `<p class="field-msg hide" id="${id}-msg"></p>`;
+
 const pad = (n: number): string => String(n).padStart(2, '0');
 
 /** Local calendar day as `YYYY-MM-DD`: the stored day of a picker and the calendar's value. */
@@ -63,13 +181,14 @@ export function dayLabel(m: Messages, fmt: Formatter, dayKey: string, nowMs: num
 }
 
 const value = (id: string): string => byId<HTMLInputElement | HTMLSelectElement>(id).value;
-const num = (id: string, fallback: number): number => parseNumber(value(id), fallback);
+const num = (id: NumberFieldId, fallback = NUMBER_FIELDS[id].fallback): number =>
+  parseNumber(value(id), fallback);
 
 export function readPieceInput(): PieceInput {
-  const wallMm = num('wall', 6);
-  const base = num('base', NaN);
+  const wallMm = num('wall');
+  const base = num('base');
   return {
-    massG: num('mass', 500),
+    massG: num('mass'),
     shape: value('shape') as ShapeId,
     wallMm,
     baseMm: Number.isFinite(base) ? base : undefined,
@@ -84,14 +203,14 @@ export function readPieceInput(): PieceInput {
 export const formConditionsSource: ConditionsSource = {
   read(): Conditions {
     return {
-      temp: num('temp', 20),
-      rh: num('rh', 50),
+      temp: num('temp'),
+      rh: num('rh'),
       airflow: value('air') as AirflowId,
       night: byId<HTMLInputElement>('night').checked,
-      nightTemp: num('ntemp', 15),
-      nightRh: num('nrh', 60),
-      dampTemp: num('dtemp', 15),
-      dampRh: num('drh', 88),
+      nightTemp: num('ntemp'),
+      nightRh: num('nrh'),
+      dampTemp: num('dtemp'),
+      dampRh: num('drh'),
     };
   },
 };
@@ -127,6 +246,6 @@ export const readWeightInputs = (): {
   cover: CoverId;
 } => ({
   thrownMassG: num('mass', 0),
-  currentMassG: num('mnow', NaN),
+  currentMassG: num('mnow'),
   cover: value('wnow') as CoverId,
 });

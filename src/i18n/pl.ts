@@ -245,6 +245,14 @@ export const pl = {
     },
   },
 
+  /** Inline messages under a number field that cannot be used. */
+  validation: {
+    notNumber: 'Wpisz liczbę, np. 6,5.',
+    positive: 'Wpisz wartość większą od zera.',
+    percent: 'Wilgotność musi mieścić się w zakresie 0–100%.',
+    tempRange: (min: number, max: number): string => `Podaj temperaturę od ${min} do ${max} °C.`,
+  },
+
   weightHint:
     'Zważ pracę (bez batu) przy toczeniu i teraz. Utracona masa mówi więcej niż dotyk, zwłaszcza przy grubym dnie.',
 
@@ -291,6 +299,7 @@ export const pl = {
 
   errors: {
     invalidDeadline: 'Termin trymowania musi być po toczeniu.',
+    invalidInput: 'Popraw zaznaczone pola, żeby policzyć termin.',
     tooFast: (duration: string): string =>
       `Nawet odkryta będzie gotowa najwcześniej za ${duration}. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.`,
     tooSlow: (duration: string): string =>

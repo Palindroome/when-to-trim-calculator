@@ -86,6 +86,10 @@ select {
 .unit input {
   padding-right: var(--space-7);
 }
+.unit input[aria-invalid="true"] {
+  border-color: var(--warn);
+  border-width: var(--line-strong);
+}
 /* night checkbox as a switch */
 .check {
   display: flex;

@@ -37,6 +37,10 @@ interface ResultModel {
   allowed: readonly CoverId[];
 }
 
+/** The warning card ("Uwaga") in place of a recommendation. */
+const warning = (m: Messages, text: string, extra = ''): string =>
+  `<div class="rec err"><div class="k">${icon('warning')}${m.result.warning}</div><div class="big" data-anim-text="big">${esc(text)}</div>${extra}</div>`;
+
 function renderResult(v: View, r: ResultModel): string {
   const { m, fmt } = v;
   const { piece, startMs: start, plan } = r;
@@ -84,7 +88,7 @@ function renderResult(v: View, r: ResultModel): string {
     const extra = plan.excludedWouldMeet
       ? `<div class="extra">${esc(m.errors.excludedWouldMeet)}</div>`
       : '';
-    html += `<div class="rec err"><div class="k">${icon('warning')}${m.result.warning}</div><div class="big" data-anim-text="big">${esc(err)}</div>${extra}</div>`;
+    html += warning(m, err, extra);
   }
 
   // comparison bars
@@ -123,12 +127,21 @@ function renderResult(v: View, r: ResultModel): string {
   return html;
 }
 
-export function update(v: View, r: ResultModel): void {
+function show(v: View, html: string): void {
   const el = byId('result');
   const before = captureRects(el);
-  el.innerHTML = renderResult(v, r);
+  el.innerHTML = html;
   playFrom(before, el);
   animateNumbers(el, v.fmt);
+}
+
+export function update(v: View, r: ResultModel): void {
+  show(v, renderResult(v, r));
+}
+
+/** Only the request to fix the flagged fields: no bars and no save button. */
+export function showInvalid(v: View): void {
+  show(v, warning(v.m, v.m.errors.invalidInput));
 }
 
 /** How long the save button says "saved" before its label returns. */
