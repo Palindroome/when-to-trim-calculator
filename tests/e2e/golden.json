@@ -946,6 +946,60 @@
     "tips": [],
     "save": true
   },
+  "studio 51 °C (hot joke)": {
+    "kind": "Uwaga",
+    "big": "Nawet w najszczelniejszym opatuleniu zajmie to 3 d 15 h lub mniej. Zawiń ją szczelnie i sprawdzaj wcześniej.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta 1 h",
+      "Worek częściowo 4 h",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h+",
+      "Cały worek 24 h",
+      "Pudełko 1 d 9 h"
+    ],
+    "tracks": [
+      "1.18044% | target 56.1544%",
+      "4.97715% | target 56.1544%",
+      "100% | target 56.1544%",
+      "26.9814% | target 56.1544%",
+      "37.7739% | target 56.1544%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [],
+    "save": true,
+    "jokes": [
+      "Ponad 50 °C? Jestem pod wrażeniem, że jeszcze nic się tu nie roztopiło."
+    ]
+  },
+  "studio −51 °C (cold joke)": {
+    "kind": "Uwaga",
+    "big": "Nawet odkryta będzie gotowa najwcześniej za 3 d 15 h. Postaw ją w cieplejszym miejscu z ruchem powietrza albo przesuń termin.",
+    "sub": "",
+    "win": "",
+    "bars": [
+      "Odkryta > 30 dni",
+      "Worek częściowo > 30 dni",
+      "Mokra przechowalnia tylko gdy ma być bardzo mokra lub przy czekaniu 4+ dni 3 d 15 h+",
+      "Cały worek > 30 dni",
+      "Pudełko > 30 dni"
+    ],
+    "tracks": [
+      "100% | target 56.1544%",
+      "100% | target 56.1544%",
+      "100% | target 56.1544%",
+      "100% | target 56.1544%",
+      "100% | target 56.1544%"
+    ],
+    "legend": "Pionowa kreska to Twój termin (2 d 1 h). Liczba przy nazwie to liczba prac, które skalibrowały ten wariant.",
+    "alts": [],
+    "tips": [],
+    "save": true,
+    "jokes": [
+      "Poniżej −50 °C? Glina zamarzła na kamień, a garncarz chyba razem z nią."
+    ]
+  },
   "thick base (slow tip)": {
     "kind": "Rekomendacja",
     "big": "Przykryj luźno workiem (dno lub brzeg odsłonięte) od razu.",

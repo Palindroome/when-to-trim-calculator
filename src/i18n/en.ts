@@ -271,6 +271,8 @@ export const en: Messages = {
     alternatives: 'Other ways to hit the same deadline:',
     save: 'Save this piece with its plan',
     saved: 'Saved',
+    hotJoke: "Over 50 °C? I'm impressed you haven't melted yet.",
+    coldJoke: 'Below −50 °C? The clay is frozen solid, and the potter probably too.',
   },
 
   errors: {

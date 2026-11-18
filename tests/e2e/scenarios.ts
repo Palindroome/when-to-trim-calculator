@@ -104,6 +104,8 @@ export const SCENARIOS: Scenario[] = [
   { name: 'rh 120 rejected', steps: [{ fill: 'Wilgotność powietrza', value: '120' }] },
   { name: 'rh 0', steps: [{ fill: 'Wilgotność powietrza', value: '0' }] },
   { name: 'cold room', steps: [{ fill: 'Temperatura w pracowni', value: '5' }] },
+  { name: 'studio 51 °C (hot joke)', steps: [{ fill: 'Temperatura w pracowni', value: '51' }] },
+  { name: 'studio −51 °C (cold joke)', steps: [{ fill: 'Temperatura w pracowni', value: '-51' }] },
   { name: 'thick base (slow tip)', steps: [{ fill: 'Grubość dna', value: '25' }] },
   { name: 'base thinner than wall', steps: [{ fill: 'Grubość dna', value: '3' }] },
   { name: 'base empty falls back to wall', steps: [{ fill: 'Grubość dna', value: '' }] },

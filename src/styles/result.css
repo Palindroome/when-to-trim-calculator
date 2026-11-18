@@ -62,6 +62,12 @@
   font-size: var(--text-md);
   color: var(--warn);
 }
+.rec .joke {
+  flex-basis: 100%;
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-muted);
+}
 
 .bars {
   margin-top: var(--space-2);
