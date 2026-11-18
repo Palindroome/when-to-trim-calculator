@@ -234,6 +234,31 @@ test.describe('weather forecast fill', () => {
       await expect(tooltip(page)).toContainText(/OpenStreetMap servers.*next 12 h/);
     });
 
+    test('"Zapomnij miejsce" also drops the hint and the town search, and keeps the values', async ({
+      page,
+    }) => {
+      await stubNetwork(page);
+      await open(page);
+      await openDialog(page);
+      const town = page.getByLabel('Miejscowość', { exact: true });
+      await town.fill('Krak');
+      await town.press('Enter');
+      await expect(page.getByRole('button', { name: 'Kraków, Małopolskie' })).toBeVisible();
+      await expect(pinText(page)).toHaveText('Pinezka: 52,2° N, 21,0° E');
+      await confirmButton(page).click();
+      await expect(status(page)).toHaveText('≈ z prognozy (na zewnątrz), śr 4.03 09:00');
+      await expect(page.getByText('Miejsce: 52,2° N, 21,0° E')).toBeVisible();
+
+      await page.getByRole('button', { name: 'Zapomnij miejsce' }).click();
+      await expect(page.getByText('Miejsce: 52,2° N, 21,0° E')).toBeHidden();
+      await expect(status(page)).toHaveText('');
+      expect(await storedPlace(page)).toBeNull();
+      expect(await values(page, ['temp', 'rh'])).toEqual(['4', '70']);
+      await expect(conditionsSummary(page)).toHaveText(/^4 °C, 70%/);
+      await expect(town).toHaveValue('');
+      await expect(dialog(page).locator('.wx-results li')).toHaveCount(0);
+    });
+
     test('shows a service error and leaves the values', async ({ page }) => {
       await stubNetwork(page, 'error');
       await open(page);

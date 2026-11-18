@@ -270,8 +270,14 @@ function wire(root: HTMLElement, ctx: AppContext, provider: WeatherProvider): vo
   box.addEventListener('click', (e) => {
     if (closest(e, '#wx-fetch')) void openDialog();
     else if (closest(e, '#wx-forget')) {
+      // back to the initial state: no place, no forecast hint, no town search; the values stay
       clearPlace();
       showPlace();
+      filled = null;
+      say('');
+      el<HTMLInputElement>('#wx-q').value = '';
+      el('.wx-results').innerHTML = '';
+      places = [];
     } else if (closest(e, '#wx-find')) void search();
     else if (closest(e, '#wx-centre')) picker?.pinAtCentre();
     else if (closest(e, '#wx-ok')) confirm();
