@@ -6,6 +6,7 @@ import { clearPlace, loadPlace, savePlace } from '../../../storage/preferences';
 import { roundCoord, WeatherError, type WeatherProvider } from '../../../weather/provider';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
+import { icon } from '../../icons';
 import type { MapPicker, Point } from './map-picker';
 
 const GEOLOCATION: PositionOptions = { timeout: 10_000, maximumAge: 30 * 60 * 1000 };
@@ -18,13 +19,21 @@ let filled: { at: number; values: Record<string, string>; kept: Kept | null } | 
 /** true while the fill dispatches its own `input` events */
 let filling = false;
 
-/** `hours`: the forecast window, named in the privacy note. */
+/**
+ * `hours`: the forecast window, named in the privacy note. The note and the attribution sit in a tooltip
+ * on the info icon, which describes the icon for screen readers.
+ */
 export function markup(m: Messages, hours: number): string {
   const w = m.weather;
   return `<div class="full weather">
-        <button type="button" class="ghost" id="wx-fetch" aria-haspopup="dialog" aria-controls="wx-dialog">${w.fetch}</button>
-        <p class="muted">${w.note(hours)}</p>
-        <p class="muted">${w.attribution} <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a></p>
+        <div class="wx-head">
+          <button type="button" class="ghost" id="wx-fetch" aria-haspopup="dialog" aria-controls="wx-dialog">${w.fetch}</button>
+          <button type="button" class="ghost wx-info" id="wx-info" aria-label="${esc(w.info)}" aria-describedby="wx-tip">${icon('info')}</button>
+          <div class="wx-tip" id="wx-tip" hidden>
+            <p>${w.note(hours)}</p>
+            <p>${w.attribution} <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a></p>
+          </div>
+        </div>
         <p class="wx-place hide"><span></span> <button type="button" class="ghost" id="wx-forget">${w.forget}</button></p>
         <p class="wx-status" role="status" aria-live="polite"></p>
         <dialog class="wx-dialog" id="wx-dialog" aria-labelledby="wx-title">
@@ -46,7 +55,57 @@ export function markup(m: Messages, hours: number): string {
 }
 
 export function mount(root: HTMLElement, ctx: AppContext): void {
-  if (ctx.weather) wire(root, ctx, ctx.weather);
+  if (ctx.weather) {
+    wireTip(root);
+    wire(root, ctx, ctx.weather);
+  }
+}
+
+/** Escape anywhere and a tap or click outside close the tooltip (WCAG 1.4.13: dismissible); added once. */
+let closingTip = false;
+function closeTipOutside(): void {
+  if (closingTip) return;
+  closingTip = true;
+  const close = (): void => {
+    const tip = document.getElementById('wx-tip');
+    if (tip) tip.hidden = true;
+  };
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+  });
+  document.addEventListener('pointerdown', (e) => {
+    if (!(e.target instanceof Element && e.target.closest('#wx-info, #wx-tip'))) close();
+  });
+}
+
+/**
+ * The info tooltip shows on mouse hover, keyboard focus and tap (a tap focuses the icon in most browsers;
+ * the click covers the rest). It stays while the pointer or the focus is on the icon or on the tooltip,
+ * so its link can be reached.
+ */
+function wireTip(root: HTMLElement): void {
+  closeTipOutside();
+  const info = root.querySelector<HTMLElement>('#wx-info')!;
+  const tip = root.querySelector<HTMLElement>('#wx-tip')!;
+  const inside = (t: EventTarget | null): boolean =>
+    t instanceof Node && (info.contains(t) || tip.contains(t));
+  const show = (on: boolean): void => {
+    tip.hidden = !on;
+  };
+  for (const target of [info, tip]) {
+    target.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse') show(true);
+    });
+    target.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse' && !inside(e.relatedTarget) && !inside(document.activeElement))
+        show(false);
+    });
+    target.addEventListener('focusout', (e) => {
+      if (!inside(e.relatedTarget)) show(false);
+    });
+  }
+  info.addEventListener('focus', () => show(true));
+  info.addEventListener('click', () => show(true));
 }
 
 function wire(root: HTMLElement, ctx: AppContext, provider: WeatherProvider): void {

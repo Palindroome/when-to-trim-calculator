@@ -145,6 +145,8 @@ export const pl = {
   /** optional fill of temperature and humidity in "Warunki" from a weather forecast */
   weather: {
     fetch: 'Pobierz z prognozy pogody',
+    /** name of the info icon next to the button, whose tooltip holds the privacy note and the attribution */
+    info: 'Prywatność i źródło danych pogodowych',
     note: (hours: number): string =>
       `Po kliknięciu otwieramy mapę – jej kafelki pobieramy z serwerów OpenStreetMap, które widzą Twój adres IP i oglądany obszar. Wpisana nazwa miejscowości trafia do Open-Meteo.com, a po zatwierdzeniu wysyłamy tam wskazany punkt zaokrąglony do ok. 10 km, żeby pobrać prognozę na najbliższe ${hours} h. Lokalizację z przeglądarki pokazujemy tylko na mapie. Twoich prac nie wysyłamy nigdzie.`,
     attribution: 'Dane pogodowe:',

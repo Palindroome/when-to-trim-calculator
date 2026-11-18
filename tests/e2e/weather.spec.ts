@@ -72,6 +72,25 @@ const confirmButton = (page: Page) => page.getByRole('button', { name: 'Zatwierd
 const pinText = (page: Page) => page.locator('.wx-pin');
 const conditionsSummary = (page: Page) => page.locator('[data-step]').nth(1).locator('.summary');
 const status = (page: Page) => page.locator('.wx-status');
+const INFO = 'Prywatność i źródło danych pogodowych';
+const infoButton = (page: Page) => page.getByRole('button', { name: INFO });
+const tooltip = (page: Page) => page.locator('#wx-tip');
+const TIP_TEXT =
+  'Po kliknięciu otwieramy mapę – jej kafelki pobieramy z serwerów OpenStreetMap, które widzą Twój adres IP i oglądany obszar. Wpisana nazwa miejscowości trafia do Open-Meteo.com, a po zatwierdzeniu wysyłamy tam wskazany punkt zaokrąglony do ok. 10 km, żeby pobrać prognozę na najbliższe 12 h. Lokalizację z przeglądarki pokazujemy tylko na mapie. Twoich prac nie wysyłamy nigdzie.';
+/** the tooltip is shown, fits the 320 px screen and links the attribution */
+async function expectTip(page: Page): Promise<void> {
+  await expect(tooltip(page)).toBeVisible();
+  await expect(tooltip(page).locator('p').first()).toHaveText(TIP_TEXT);
+  await expect(tooltip(page).locator('p').nth(1)).toHaveText('Dane pogodowe: Open-Meteo.com');
+  await expect(tooltip(page).getByRole('link', { name: 'Open-Meteo.com' })).toHaveAttribute(
+    'href',
+    'https://open-meteo.com/',
+  );
+  const box = (await tooltip(page).boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(320);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+}
 const values = (page: Page, ids: string[]) =>
   page.evaluate(
     (list) => list.map((id) => (document.getElementById(id) as HTMLInputElement).value),
@@ -98,10 +117,6 @@ test.describe('weather forecast fill', () => {
     test('loads no map, tile or forecast before the click', async ({ page }) => {
       const traffic = await stubNetwork(page);
       await open(page);
-      await expect(page.getByText('Dane pogodowe:')).toBeVisible();
-      await expect(
-        page.getByText(/kafelki pobieramy z serwerów OpenStreetMap.*najbliższe 12 h/),
-      ).toBeVisible();
       await field(page, 'Temperatura w pracowni').fill('21');
       expect(traffic.weather).toEqual([]);
       expect(traffic.tiles).toEqual([]);
@@ -214,8 +229,9 @@ test.describe('weather forecast fill', () => {
       await expect(page.locator('html')).toHaveAttribute('lang', 'en');
       expect(await values(page, ['temp', 'rh'])).toEqual(['4', '70']);
       await expect(status(page)).toHaveText('≈ from the forecast (outdoors), Wed 4 Mar 09:00');
-      await expect(page.getByText('Weather data:')).toBeVisible();
-      await expect(page.getByText(/OpenStreetMap servers.*next 12 h/)).toBeVisible();
+      await page.getByRole('button', { name: 'Privacy and weather data source' }).hover();
+      await expect(tooltip(page)).toContainText('Weather data: Open-Meteo.com');
+      await expect(tooltip(page)).toContainText(/OpenStreetMap servers.*next 12 h/);
     });
 
     test('shows a service error and leaves the values', async ({ page }) => {
@@ -387,6 +403,58 @@ test.describe('weather forecast fill', () => {
       // Poland is centred near 19.2° E; two 80 px steps east move the map by about 3.5°
       const [q] = forecastQuery(traffic);
       expect(Number(q?.get('longitude'))).toBeGreaterThan(20.5);
+    });
+
+    test.describe('the info tooltip at 320 px', () => {
+      test.use({ viewport: { width: 320, height: 640 } });
+
+      test('shows on hover, stays on the tooltip and closes on leave and Escape', async ({
+        page,
+      }) => {
+        const traffic = await stubNetwork(page);
+        await open(page);
+        // the note and the attribution are no longer shown under the button
+        await expect(tooltip(page)).toBeHidden();
+        await expect(page.getByText('Dane pogodowe:')).toBeHidden();
+        await infoButton(page).hover();
+        await expectTip(page);
+        await tooltip(page).hover();
+        await expect(tooltip(page)).toBeVisible();
+        await page.locator('h1').hover();
+        await expect(tooltip(page)).toBeHidden();
+        await infoButton(page).hover();
+        await expect(tooltip(page)).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(tooltip(page)).toBeHidden();
+        expect(traffic.weather).toEqual([]);
+      });
+
+      test('shows on keyboard focus and keeps its link reachable', async ({ page }) => {
+        await stubNetwork(page);
+        await open(page);
+        await page.getByRole('button', { name: FETCH }).focus();
+        await page.keyboard.press('Tab');
+        await expect(infoButton(page)).toBeFocused();
+        await expectTip(page);
+        await page.keyboard.press('Tab');
+        await expect(tooltip(page).getByRole('link', { name: 'Open-Meteo.com' })).toBeFocused();
+        await expect(tooltip(page)).toBeVisible();
+        await page.keyboard.press('Tab');
+        await expect(tooltip(page)).toBeHidden();
+      });
+
+      test.describe('on a touch screen', () => {
+        test.use({ hasTouch: true });
+
+        test('shows on tap and closes on a tap elsewhere', async ({ page }) => {
+          await stubNetwork(page);
+          await open(page);
+          await infoButton(page).tap();
+          await expectTip(page);
+          await page.locator('h1').tap();
+          await expect(tooltip(page)).toBeHidden();
+        });
+      });
     });
 
     test('fits a 320 px screen with the dialog open', async ({ page }) => {

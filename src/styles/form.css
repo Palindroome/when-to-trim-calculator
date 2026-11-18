@@ -147,6 +147,48 @@ select {
 .weather a {
   color: inherit;
 }
+/* the button and its info icon; the tooltip spans the block's width below them, so it fits any screen */
+.wx-head {
+  position: relative;
+  justify-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+/* a small borderless icon, so the button and the icon share one line on a 320 px phone */
+.weather button.wx-info {
+  display: inline-grid;
+  place-items: center;
+  min-width: calc(var(--control-h-sm) - var(--space-1));
+  padding: 0;
+  border-color: transparent;
+  color: var(--text-muted);
+}
+.wx-tip {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  right: 0;
+  max-width: 32rem;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--text);
+  color: var(--surface);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
+}
+/* bridges the gap to the icon, so the pointer can move onto the tooltip */
+.wx-tip::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--space-1)) 0 100%;
+}
+.wx-tip p + p {
+  margin-top: var(--space-2);
+}
 /* the map dialog: like the calendar dialog, a bottom sheet on phones */
 dialog.wx-dialog {
   box-sizing: border-box;

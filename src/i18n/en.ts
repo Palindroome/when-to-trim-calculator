@@ -129,6 +129,7 @@ export const en: Messages = {
 
   weather: {
     fetch: 'Fill from the weather forecast',
+    info: 'Privacy and weather data source',
     note: (hours: number): string =>
       `When you click, a map opens. Its tiles come from the OpenStreetMap servers, which see your IP address and the area you view. A town name you type goes to Open-Meteo.com, and after you confirm, the chosen point, rounded to about 10 km, is sent there to get the forecast for the next ${hours} h. Your browser location is only shown on the map. Your pieces are not sent anywhere.`,
     attribution: 'Weather data:',
