@@ -104,16 +104,17 @@ test.describe('language switch', () => {
 
     await toEnglish(page);
     await expect(page.getByLabel('Name (optional)')).toHaveValue('kubki');
-    await expect(page.getByLabel('Mass after throwing')).toHaveValue('720,5');
+    // exact: the stepper buttons' names contain the field labels
+    await expect(page.getByLabel('Mass after throwing', { exact: true })).toHaveValue('720,5');
     await expect(page.getByLabel('Shape')).toHaveValue('bowl');
-    await expect(page.getByLabel('Studio temperature')).toHaveValue('23');
+    await expect(page.getByLabel('Studio temperature', { exact: true })).toHaveValue('23');
     await expect(page.getByLabel('Cooler at night (e.g. heating off)')).toBeChecked();
-    await expect(page.getByLabel('Night temperature (22–7)')).toBeVisible();
-    await expect(page.getByLabel('Night temperature (22–7)')).toHaveValue('12');
+    await expect(page.getByLabel('Night temperature (22–7)', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Night temperature (22–7)', { exact: true })).toHaveValue('12');
     await expectDateTime(page, 'Chcę trymować', '2026-03-07T10:00');
     await expect(page.locator('#quick .chip.on')).toHaveText(['in 3 days']);
     await expect(page.locator('#quick .chip[aria-pressed="true"]')).toHaveText(['in 3 days']);
-    await expect(page.getByLabel('Mass now')).toHaveValue('690');
+    await expect(page.getByLabel('Mass now', { exact: true })).toHaveValue('690');
     await expect(page.getByLabel('Covering so far')).toHaveValue('partial');
     const english = await snapshot(page, SAVE_EN);
     expect(english.tracks).toEqual(polish.tracks);

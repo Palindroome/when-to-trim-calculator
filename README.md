@@ -85,7 +85,10 @@ src/
     context.ts        AppDeps (what startApp gets) and AppContext (what the features get from the app)
     shell.ts          the page's sections in order, each from its feature
     form.ts           reads inputs (including the day + 24 h time pickers of "Termin"); formConditionsSource;
-                      NUMBER_FIELDS, the input rules that flag out-of-range numbers inline
+                      NUMBER_FIELDS, the input rules that flag out-of-range numbers inline and the step
+                      sizes the steppers keep within those rules (stepNumber)
+    stepper.ts        numberField: a numeric input with its unit, up/down buttons and inline message;
+                      mountSteppers wires the buttons and arrow keys
     form-state.ts     captures and restores the form around a language switch and a reload
     render.ts         View, and the cover and plan wording several features share
     calibration.ts    perCoverCalibration: the calibration of every cover, for the bars and the calibration table

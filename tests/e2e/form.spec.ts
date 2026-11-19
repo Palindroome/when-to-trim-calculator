@@ -589,6 +589,151 @@ test.describe('decimal comma', () => {
   }
 });
 
+test.describe('number steppers', () => {
+  const NUMBER_FIELDS = [
+    'Masa po toczeniu',
+    'Grubość ścianki',
+    'Grubość dna',
+    'Temperatura w pracowni',
+    'Wilgotność powietrza',
+    'Temperatura nocą (22–7)',
+    'Wilgotność nocą',
+    'Mokra przechowalnia: temp.',
+    'Mokra przechowalnia: wilg.',
+    'Masa teraz',
+  ] as const;
+  const up = (page: Page, label: string): Locator =>
+    page.getByRole('button', { name: `Zwiększ: ${label}`, exact: true });
+  const down = (page: Page, label: string): Locator =>
+    page.getByRole('button', { name: `Zmniejsz: ${label}`, exact: true });
+
+  test('every numeric field has an up and a down button outside the tab order', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await setNight(page, true);
+    for (const label of NUMBER_FIELDS) {
+      const input = field(page, label);
+      const id = await input.getAttribute('id');
+      await expect(input).toHaveAttribute('type', 'text');
+      await expect(input).toHaveAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown');
+      for (const button of [up(page, label), down(page, label)]) {
+        await expect(button).toHaveAttribute('type', 'button');
+        await expect(button).toHaveAttribute('tabindex', '-1');
+        await expect(button).toHaveAttribute('aria-controls', id!);
+        const box = (await button.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(24);
+        expect(box.height).toBeGreaterThanOrEqual(24);
+      }
+    }
+  });
+
+  test('clicking "Zwiększ: Masa po toczeniu" steps 500 to 510 and recalculates', async ({
+    page,
+  }) => {
+    await openApp(page);
+    const before = await snapshot(page);
+    await up(page, 'Masa po toczeniu').click();
+    await expect(field(page, 'Masa po toczeniu')).toHaveValue('510');
+    await expect.poll(() => snapshot(page)).not.toEqual(before);
+    await down(page, 'Masa po toczeniu').click();
+    await expect(field(page, 'Masa po toczeniu')).toHaveValue('500');
+    await expect.poll(() => snapshot(page)).toEqual(before);
+  });
+
+  test('arrow keys step the focused field; Shift and Page Up/Down take ten steps', async ({
+    page,
+  }) => {
+    await openApp(page);
+    const wall = field(page, 'Grubość ścianki');
+    await wall.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(wall).toHaveValue('5,5');
+    await page.keyboard.press('Shift+ArrowUp');
+    await expect(wall).toHaveValue('10,5');
+    await page.keyboard.press('PageDown');
+    await expect(wall).toHaveValue('5,5');
+    await page.keyboard.press('PageUp');
+    await expect(wall).toHaveValue('10,5');
+    await page.keyboard.press('ArrowUp');
+    await expect(wall).toHaveValue('11');
+    // other keys still edit the text as usual
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('Home');
+    await page.keyboard.type('1');
+    await expect(wall).toHaveValue('111');
+    await expect(wall).toBeFocused();
+  });
+
+  test('the mouse wheel does not change a value', async ({ page }) => {
+    await openApp(page);
+    const temp = field(page, 'Temperatura w pracowni');
+    await temp.focus();
+    await temp.hover();
+    await page.mouse.wheel(0, -200);
+    await page.mouse.wheel(0, 200);
+    await expect(temp).toHaveValue('20');
+  });
+
+  test('humidity stays within 0–100 and the wall never steps to 0', async ({ page }) => {
+    await openApp(page);
+    await fill(page, 'Wilgotność powietrza', '99');
+    await up(page, 'Wilgotność powietrza').click();
+    await up(page, 'Wilgotność powietrza').click();
+    await expect(field(page, 'Wilgotność powietrza')).toHaveValue('100');
+    await fill(page, 'Wilgotność powietrza', '5');
+    await field(page, 'Wilgotność powietrza').press('PageDown');
+    await expect(field(page, 'Wilgotność powietrza')).toHaveValue('0');
+    await fill(page, 'Grubość ścianki', '0,5');
+    await down(page, 'Grubość ścianki').click();
+    await expect(field(page, 'Grubość ścianki')).toHaveValue('0,5');
+  });
+
+  test('empty fields step from their fallback: the base from the wall', async ({ page }) => {
+    await openApp(page);
+    await fill(page, 'Masa po toczeniu', '');
+    await up(page, 'Masa po toczeniu').click();
+    await expect(field(page, 'Masa po toczeniu')).toHaveValue('510');
+    await fill(page, 'Grubość ścianki', '7');
+    await fill(page, 'Grubość dna', '');
+    await up(page, 'Grubość dna').click();
+    await expect(field(page, 'Grubość dna')).toHaveValue('7,5');
+  });
+
+  test('stepping the empty "Masa teraz" starts from the thrown mass and updates "Sprawdź wagą"', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await expect(page.locator('#wout')).toBeEmpty();
+    await down(page, 'Masa teraz').click();
+    await expect(field(page, 'Masa teraz')).toHaveValue('499');
+    await expect(page.locator('#wout .state')).toBeVisible();
+    const before = await page.locator('#wout').innerText();
+    await field(page, 'Masa teraz').press('Shift+ArrowDown');
+    await expect(field(page, 'Masa teraz')).toHaveValue('489');
+    await expect(page.locator('#wout')).not.toHaveText(before);
+  });
+
+  test('in English the buttons are labelled in English and write a decimal point', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await page.getByRole('button', { name: 'English', exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('button', { name: /^Zwiększ|^Zmniejsz/ })).toHaveCount(0);
+    for (const label of ['Mass after throwing', 'Night humidity', 'Mass now']) {
+      await expect(
+        page.getByRole('button', { name: `Increase ${label}`, exact: true, includeHidden: true }),
+      ).toHaveCount(1);
+      await expect(
+        page.getByRole('button', { name: `Decrease ${label}`, exact: true, includeHidden: true }),
+      ).toHaveCount(1);
+    }
+    await page.getByRole('button', { name: 'Increase Wall thickness', exact: true }).click();
+    await expect(page.getByLabel('Wall thickness', { exact: true })).toHaveValue('6.5');
+  });
+});
+
 test.describe('night mode', () => {
   test('night fields are shown only when the checkbox is ticked', async ({ page }) => {
     await openApp(page);
@@ -1131,6 +1276,27 @@ test.describe('number validation', () => {
     await expect(input).toHaveValue('abc');
     await expectFlagged(page, input, 'Wpisz liczbę, np. 6,5.');
     await expectBlocked(page);
+  });
+
+  test('the steppers move a flagged value only towards the range, and clear the flag once in it', async ({
+    page,
+  }) => {
+    await openApp(page);
+    const mass = field(page, 'Masa po toczeniu');
+    await fill(page, 'Masa po toczeniu', '-5');
+    await expectFlagged(page, mass, POSITIVE);
+    await page.getByRole('button', { name: 'Zmniejsz: Masa po toczeniu', exact: true }).click();
+    await expect(mass).toHaveValue('-5');
+    await expectFlagged(page, mass, POSITIVE);
+    await page.getByRole('button', { name: 'Zwiększ: Masa po toczeniu', exact: true }).click();
+    await expect(mass).toHaveValue('10');
+    await expectClear(page, mass);
+    const rh = field(page, 'Wilgotność powietrza');
+    await fill(page, 'Wilgotność powietrza', '101');
+    await expectFlagged(page, rh, PERCENT);
+    await rh.press('ArrowDown');
+    await expect(rh).toHaveValue('100');
+    await expectClear(page, rh);
   });
 });
 

@@ -138,6 +138,9 @@ export const pl = {
     massNow: 'Masa teraz',
     massNowPlaceholder: 'np. 470',
     coverSoFar: 'Przez ten czas była',
+    /** stepper buttons next to a numeric field; `label` is the field's label */
+    stepUp: (label: string): string => `Zwiększ: ${label}`,
+    stepDown: (label: string): string => `Zmniejsz: ${label}`,
   },
 
   units: { grams: 'g', millimetres: 'mm', celsius: '°C', percent: '%' },

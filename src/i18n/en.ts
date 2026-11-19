@@ -123,6 +123,8 @@ export const en: Messages = {
     massNow: 'Mass now',
     massNowPlaceholder: 'e.g. 470',
     coverSoFar: 'Covering so far',
+    stepUp: (label: string): string => `Increase ${label}`,
+    stepDown: (label: string): string => `Decrease ${label}`,
   },
 
   units: { grams: 'g', millimetres: 'mm', celsius: '°C', percent: '%' },

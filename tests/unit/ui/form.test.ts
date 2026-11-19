@@ -8,9 +8,12 @@ import {
   combineLocalDateTime,
   dayLabel,
   extremeTemp,
+  LARGE_STEP,
+  NUMBER_FIELDS,
   normalizeTime,
   parseNumber,
   readAllowedCovers,
+  stepNumber,
   toDayKey,
   toTime,
   validateNumber,
@@ -87,6 +90,76 @@ describe('validateNumber', () => {
       expect(validateNumber('mass', raw)).toBe('nan');
     },
   );
+});
+
+describe('stepNumber', () => {
+  const F = NUMBER_FIELDS;
+  it('steps by the field step and writes the locale separator without a trailing zero', () => {
+    expect(stepNumber('6,5', F.wall, 1, 6, ',')).toBe('7');
+    expect(stepNumber('6', F.wall, -1, 6, ',')).toBe('5,5');
+    expect(stepNumber('6', F.wall, -1, 6, '.')).toBe('5.5');
+    expect(stepNumber('500', F.mass, 1, 500, ',')).toBe('510');
+  });
+  it('steps an empty or unreadable field from its fallback', () => {
+    expect(stepNumber('', F.mass, 1, 500, ',')).toBe('510');
+    expect(stepNumber('abc', F.base, 1, 6, ',')).toBe('6,5');
+  });
+  it('keeps within the bounds', () => {
+    expect(stepNumber('100', F.rh, 1, 50, ',')).toBe('100');
+    expect(stepNumber('0', F.rh, -1, 50, ',')).toBe('0');
+    expect(stepNumber('100', F.drh, LARGE_STEP, 88, ',')).toBe('100');
+    expect(stepNumber('0,5', F.wall, -1, 6, ',')).toBe('0,5');
+    expect(stepNumber('0,5', F.base, -1, 6, ',')).toBe('0,5');
+    expect(stepNumber('10', F.mass, -1, 500, ',')).toBe('10');
+    expect(stepNumber('50', F.mass, -LARGE_STEP, 500, ',')).toBe('10');
+    expect(stepNumber('1', F.mnow, -1, 500, ',')).toBe('1');
+  });
+  it('temperatures go below zero and keep to their valid range', () => {
+    expect(stepNumber('0', F.temp, -1, 20, ',')).toBe('-1');
+    expect(stepNumber('-3,5', F.temp, -LARGE_STEP, 20, ',')).toBe('-13,5');
+    expect(stepNumber('-195', F.ntemp, -LARGE_STEP, 15, ',')).toBe('-200');
+    expect(stepNumber('200', F.dtemp, 1, 15, ',')).toBe('200');
+  });
+  it('never steps against its direction: a value outside the range only moves towards it', () => {
+    // valid, but below the lowest stepped mass: Down leaves it instead of jumping up to 10
+    expect(stepNumber('5', F.mass, -1, 500, ',')).toBe('5');
+    expect(stepNumber('0,2', F.wall, -1, 6, ',')).toBe('0,2');
+    // out of range: a step away leaves it, a step towards the range lands within it
+    expect(stepNumber('-5', F.mass, -1, 500, ',')).toBe('-5');
+    expect(stepNumber('-5', F.mass, 1, 500, ',')).toBe('10');
+    expect(stepNumber('150', F.rh, 1, 50, ',')).toBe('150');
+    expect(stepNumber('150', F.rh, -1, 50, ',')).toBe('100');
+    expect(stepNumber('-300', F.temp, 1, 20, ',')).toBe('-200');
+  });
+  it('an empty field stepping from an out-of-range fallback lands within the range', () => {
+    // e.g. an empty base below a wall of -3 mm, an empty mass now below a thrown mass of 0 g
+    expect(stepNumber('', F.base, -1, -3, ',')).toBe('0,5');
+    expect(stepNumber('', F.mnow, -1, 0, ',')).toBe('1');
+    expect(stepNumber('abc', F.rh, 1, 150, ',')).toBe('100');
+  });
+  it('never turns a valid value into one the validator flags', () => {
+    for (const id of Object.keys(F) as (keyof typeof F)[]) {
+      const f = F[id];
+      const lowest = f.minExclusive ? f.min + f.step : f.min;
+      const highest = Number.isFinite(f.max) ? f.max : 1000;
+      for (const raw of [lowest, f.step / 2, highest, (lowest + highest) / 2].map(String))
+        for (const steps of [1, -1, LARGE_STEP, -LARGE_STEP]) {
+          if (validateNumber(id, raw) !== 'ok') continue;
+          expect(validateNumber(id, stepNumber(raw, f, steps, 0, '.'))).toBe('ok');
+        }
+    }
+  });
+  it('takes a large step of ten steps', () => {
+    expect(stepNumber('500', F.mass, LARGE_STEP, 500, ',')).toBe('600');
+    expect(stepNumber('6', F.wall, -LARGE_STEP, 6, ',')).toBe('1');
+    expect(stepNumber('50', F.rh, LARGE_STEP, 50, ',')).toBe('60');
+  });
+  it('leaves no float noise', () => {
+    const tenth = { ...F.rh, step: 0.1 };
+    expect(stepNumber('0,2', tenth, 1, 0, ',')).toBe('0,3');
+    expect(stepNumber('0,7', tenth, LARGE_STEP, 0, '.')).toBe('1.7');
+    expect(stepNumber('6,37', F.wall, 1, 6, ',')).toBe('6,87');
+  });
 });
 
 describe('toDayKey / toTime', () => {

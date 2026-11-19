@@ -32,29 +32,35 @@ export type NumberFieldId =
   | 'dtemp'
   | 'drh';
 
-interface NumberField {
+export interface NumberField {
   /** the value used while the field is empty */
   fallback: number;
+  /** the field an empty one steps from, when its own fallback is not a number */
+  stepFrom?: NumberFieldId;
   min: number;
   max: number;
-  /** the minimum itself is out of range */
+  /** the minimum itself is out of range; the steppers then stop one step above it */
   minExclusive?: boolean;
   /** the `validation` message shown for a value out of range */
   message: 'positive' | 'percent' | 'tempRange';
+  /** one stepper press or arrow key; Shift+Arrow and PageUp/PageDown step ten times as far */
+  step: number;
 }
 
-const positive = (fallback: number): NumberField => ({
+const positive = (fallback: number, step: number): NumberField => ({
   fallback,
   min: 0,
   max: Infinity,
   minExclusive: true,
   message: 'positive',
+  step,
 });
 const percent = (fallback: number): NumberField => ({
   fallback,
   min: 0,
   max: 100,
   message: 'percent',
+  step: 1,
 });
 /** Not a realistic range: it only keeps the model defined (saturation pressure has a pole at −243.12 °C). */
 const temperature = (fallback: number): NumberField => ({
@@ -62,14 +68,18 @@ const temperature = (fallback: number): NumberField => ({
   min: -200,
   max: 200,
   message: 'tempRange',
+  step: 1,
 });
 
-/** Input rules of the number fields. The domain still clamps to its own minimums behind them. */
+/**
+ * Input rules and steps of the number fields; the steppers keep to the same range the inputs are
+ * checked against. The domain still clamps to its own minimums behind them.
+ */
 export const NUMBER_FIELDS: Record<NumberFieldId, NumberField> = {
-  mass: positive(500),
-  wall: positive(6),
-  base: positive(NaN),
-  mnow: positive(NaN),
+  mass: positive(500, 10),
+  wall: positive(6, 0.5),
+  base: { ...positive(NaN, 0.5), stepFrom: 'wall' },
+  mnow: { ...positive(NaN, 1), stepFrom: 'mass' },
   temp: temperature(20),
   rh: percent(50),
   ntemp: temperature(15),
@@ -135,6 +145,37 @@ export const checkNumbers = (m: Messages, done: boolean): boolean =>
 /** The inline message under a number field, filled by `checkNumber`. */
 export const numberMessageMarkup = (id: NumberFieldId): string =>
   `<p class="field-msg hide" id="${id}-msg"></p>`;
+
+/** Large step (Shift+Arrow, PageUp/PageDown) in steps. */
+export const LARGE_STEP = 10;
+
+const decimals = (x: number): number => (String(x).split('.')[1] ?? '').length;
+
+/**
+ * A field's text after `steps` steps (negative: down): parsed with a decimal comma, an empty or
+ * unreadable field taken as `fallback`, kept within the field's valid range (one step above an
+ * exclusive minimum) and written back without float noise or trailing zeros, with `separator` as the
+ * decimal separator. A typed value is never stepped against the step's direction: outside that range
+ * it stays put when stepped away from it and lands within it when stepped towards it, so stepping
+ * never makes a valid value invalid. A field stepped from its fallback always lands within the range.
+ */
+export function stepNumber(
+  raw: string,
+  field: NumberField,
+  steps: number,
+  fallback: number,
+  separator: string,
+): string {
+  const typed = parseNumber(raw, NaN);
+  const v = Number.isFinite(typed) ? typed : fallback;
+  const digits = Math.max(decimals(field.step), decimals(v));
+  const low = field.minExclusive ? field.min + field.step : field.min;
+  const stepped = Number((v + steps * field.step).toFixed(digits));
+  const clamped = Math.min(field.max, Math.max(low, stepped));
+  let next = clamped;
+  if (Number.isFinite(typed)) next = steps < 0 ? Math.min(v, clamped) : Math.max(v, clamped);
+  return String(next).replace('.', separator);
+}
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 

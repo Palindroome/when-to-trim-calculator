@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page, test } from '@playwright/test';
-import { fill, openApp, setDateTime } from './helpers';
+import { fill, openApp, setDateTime, setNight } from './helpers';
 
 test.describe('layout', () => {
   test.describe('page columns', () => {
@@ -123,6 +123,41 @@ test.describe('layout', () => {
         await expectInside(await rects(targets), clientWidth, height);
         await page.keyboard.press('Escape');
         await expect(dialog).toBeHidden();
+      }
+    });
+  }
+
+  for (const width of [320, 375, 1280]) {
+    test(`${width}px: numeric fields with night mode on keep the steppers and unit inside the input`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openApp(page);
+      await setNight(page, true);
+      await expect(page.locator('.night').first()).toBeVisible();
+      const clientWidth = await pageFits(page);
+      const fields = page.locator('.stepper');
+      expect(await fields.count()).toBe(10);
+      for (const f of await fields.all()) {
+        const [input] = await rects(f.locator('input'));
+        const [unit] = await rects(f.locator('span'));
+        const buttons = await rects(f.locator('button'));
+        expect(input!.x + input!.width).toBeLessThanOrEqual(clientWidth);
+        for (const b of buttons) {
+          expect(b.width).toBeGreaterThanOrEqual(24);
+          expect(b.height).toBeGreaterThanOrEqual(24);
+          expect(b.x + b.width).toBeLessThanOrEqual(input!.x + input!.width);
+          // the unit badge sits left of the buttons
+          expect(unit!.x + unit!.width).toBeLessThanOrEqual(b.x);
+        }
+        // the typed text stops before the unit badge
+        const textEnd = await f
+          .locator('input')
+          .evaluate(
+            (el) =>
+              el.getBoundingClientRect().right - parseFloat(getComputedStyle(el).paddingRight),
+          );
+        expect(textEnd).toBeLessThanOrEqual(unit!.x);
       }
     });
   }
