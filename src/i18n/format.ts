@@ -9,6 +9,8 @@ export interface Formatter {
   date(ms: number): string;
   /** Fixed decimals with the locale's separator. */
   decimal(x: number, digits: number): string;
+  /** A point to 0.1° with the locale's separator, such as "50,1° N, 19,9° E". */
+  coords(lat: number, lon: number): string;
 }
 
 const pad = (n: number): string => String(n).padStart(2, '0');
@@ -47,6 +49,11 @@ export function createFormatter(m: Messages, horizonDays: number): Formatter {
     },
     decimal(x, digits) {
       return x.toFixed(digits).replace('.', f.decimalSeparator);
+    },
+    coords(lat, lon) {
+      const part = (x: number, plus: string, minus: string): string =>
+        `${Math.abs(x).toFixed(1).replace('.', f.decimalSeparator)}° ${x < 0 ? minus : plus}`;
+      return `${part(lat, 'N', 'S')}, ${part(lon, 'E', 'W')}`;
     },
   };
 }

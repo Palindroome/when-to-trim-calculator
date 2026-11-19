@@ -135,3 +135,158 @@ select {
   background: var(--accent-contrast);
   transform: translateX(var(--space-4));
 }
+/* "Warunki": fill from the weather forecast */
+.weather {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+}
+.weather p {
+  margin: 0;
+}
+.weather a {
+  color: inherit;
+}
+/* the button and its info icon; the tooltip spans the block's width below them, so it fits any screen */
+.wx-head {
+  position: relative;
+  justify-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+/* a small borderless icon, so the button and the icon share one line on a 320 px phone */
+.weather button.wx-info {
+  display: inline-grid;
+  place-items: center;
+  min-width: calc(var(--control-h-sm) - var(--space-1));
+  padding: 0;
+  border-color: transparent;
+  color: var(--text-muted);
+}
+.wx-tip {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  right: 0;
+  max-width: 32rem;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--text);
+  color: var(--surface);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
+}
+/* bridges the gap to the icon, so the pointer can move onto the tooltip */
+.wx-tip::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--space-1)) 0 100%;
+}
+.wx-tip p + p {
+  margin-top: var(--space-2);
+}
+/* the map dialog: like the calendar dialog, a bottom sheet on phones */
+dialog.wx-dialog {
+  box-sizing: border-box;
+  width: min(36rem, calc(100% - 2 * var(--space-4)));
+  max-width: none;
+  max-height: calc(100% - 2 * var(--space-4));
+  padding: var(--space-4);
+  overflow-y: auto;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+dialog.wx-dialog[open] {
+  display: grid;
+  gap: var(--space-2);
+}
+dialog.wx-dialog::backdrop {
+  background: var(--scrim);
+}
+@media (max-width: 479px) {
+  dialog.wx-dialog {
+    width: 100%;
+    max-height: 100%;
+    margin: auto 0 0;
+    padding: var(--space-3);
+    border-width: 1px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+}
+.wx-dialog h3 {
+  margin: 0;
+  font-size: var(--text-md);
+}
+.wx-dialog label {
+  margin: 0;
+}
+/* 44 px touch targets, above button.ghost */
+dialog.wx-dialog button {
+  min-height: var(--control-h);
+}
+.wx-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.wx-row input {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+.wx-map {
+  height: min(55vh, 24rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.wx-map:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: var(--ring-width);
+}
+/* the pin: a CSS teardrop whose tip is the point (Leaflet moves the element itself with a transform) */
+.wx-marker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  background: var(--accent);
+  border: 2px solid var(--accent-contrast);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: var(--shadow-2);
+}
+.wx-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.wx-actions button {
+  flex: 1 1 auto;
+}
+.wx-actions button.main {
+  width: auto;
+}
+.wx-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.wx-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.wx-results:empty {
+  display: none;
+}
+.wx-status {
+  font-size: var(--text-sm);
+}

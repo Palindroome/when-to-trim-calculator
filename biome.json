@@ -57,7 +57,8 @@
                 "deniedGlobals": {
                   "document": "src/domain stays pure: no DOM access.",
                   "window": "src/domain stays pure: no DOM access.",
-                  "localStorage": "src/domain stays pure: no storage access."
+                  "localStorage": "src/domain stays pure: no storage access.",
+                  "fetch": "src/domain stays pure: no network access."
                 }
               }
             }

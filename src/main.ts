@@ -25,6 +25,7 @@ import { SessionStorageSessionStore } from './storage/session';
 import { LocalStorageWizardStore } from './storage/wizard';
 import { startApp } from './ui/app';
 import { formConditionsSource } from './ui/form';
+import { openMeteoProvider } from './weather/open-meteo';
 
 // Composition root: swap any of these for another implementation
 // (language, fitted parameters, trained calibrator / rate model, sensor-backed conditions).
@@ -55,6 +56,7 @@ startApp({
   activity: new LocalStorageActivityStore(),
   session: new SessionStorageSessionStore(),
   conditions: formConditionsSource,
+  weather: openMeteoProvider(),
   rateModel: physicalRateModel(params),
   calibrator: geometricMeanCalibrator,
 });

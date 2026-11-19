@@ -20,6 +20,8 @@ export interface ModelParams {
   rhClamp: { min: number; max: number };
   /** night hours [from, to) when night conditions apply */
   night: { fromHour: number; toHour: number };
+  /** h; a weather forecast is averaged over this many hours from now to fill the conditions */
+  forecastHours: number;
   /**
    * Built-in covers, from fastest to slowest drying. The list order is the canonical order
    * (bars, weight-check select, calibration table, two-phase ranking).
@@ -83,6 +85,8 @@ export const DEFAULT_PARAMS: ModelParams = {
   minVpd: 0.05,
   rhClamp: { min: 1, max: 99 },
   night: { fromHour: 22, toHour: 7 },
+  // longer than the 9 h night (22–7), so the window always has day hours
+  forecastHours: 12,
   covers: [
     { id: 'open', factor: 1, airflow: 'full', environment: 'room' },
     { id: 'partial', factor: 0.3, airflow: 'damped', environment: 'room' },

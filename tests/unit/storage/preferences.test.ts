@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
+  clearPlace,
   LANGUAGE_KEY,
   loadLanguage,
+  loadPlace,
   loadTheme,
   saveLanguage,
+  savePlace,
   saveTheme,
   THEME_KEY,
+  WEATHER_PLACE_KEY,
 } from '../../../src/storage/preferences';
 
 class MemoryStorage {
@@ -83,5 +87,48 @@ describe('theme preference', () => {
     expect(loadTheme(failing)).toBeNull();
     expect(() => saveTheme('dark', failing)).not.toThrow();
     expect(() => saveTheme(null, failing)).not.toThrow();
+  });
+});
+
+describe('weather place', () => {
+  const place = { name: 'Kraków, Małopolskie', lat: 50.1, lon: 19.9 };
+
+  it('saves under its own key, loads it back and clears it', () => {
+    const s = new MemoryStorage();
+    s.setItem(LANGUAGE_KEY, 'pl');
+    expect(loadPlace(s)).toBeNull();
+    savePlace(place, s);
+    expect(WEATHER_PLACE_KEY).toBe('kiedy-trymowac-weather-place');
+    expect(JSON.parse(s.data.get(WEATHER_PLACE_KEY)!)).toEqual(place);
+    expect(loadPlace(s)).toEqual(place);
+    clearPlace(s);
+    expect([...s.data]).toEqual([[LANGUAGE_KEY, 'pl']]);
+    expect(loadPlace(s)).toBeNull();
+  });
+
+  it('still loads a town stored by the first version, named after the search result', () => {
+    const s = new MemoryStorage();
+    s.setItem(WEATHER_PLACE_KEY, '{"name":"Kraków","lat":50.1,"lon":19.9}');
+    expect(loadPlace(s)).toEqual({ name: 'Kraków', lat: 50.1, lon: 19.9 });
+  });
+
+  it.each([
+    '',
+    '{',
+    'null',
+    '"Kraków"',
+    '[]',
+    '{"name":"Kraków","lat":"50.1","lon":19.9}',
+    '{"lat":50.1,"lon":19.9}',
+  ])('ignores the broken value %j', (raw) => {
+    const s = new MemoryStorage();
+    s.setItem(WEATHER_PLACE_KEY, raw);
+    expect(loadPlace(s)).toBeNull();
+  });
+
+  it('swallows storage errors', () => {
+    expect(loadPlace(failing)).toBeNull();
+    expect(() => savePlace(place, failing)).not.toThrow();
+    expect(() => clearPlace(failing)).not.toThrow();
   });
 });

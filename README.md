@@ -21,7 +21,7 @@ npm run test:e2e          # Playwright e2e against the production build
 npm run validate          # lint, format check, typecheck, unit tests, build
 ```
 
-Biome is configured in `biome.json`. Besides the recommended rules, it rejects UI, i18n and storage imports and `document`/`window`/`localStorage` in `src/domain`. The CSS is linted but not reformatted. Reformat commits are listed in `.git-blame-ignore-revs`.
+Biome is configured in `biome.json`. Besides the recommended rules, it rejects UI, i18n and storage imports and `document`/`window`/`localStorage`/`fetch` in `src/domain`. The CSS is linted but not reformatted. Reformat commits are listed in `.git-blame-ignore-revs`.
 
 The first Playwright run needs a browser: `npx playwright install chromium`. On Linux it also needs the system libraries: `sudo npx playwright install-deps chromium`.
 
@@ -67,6 +67,8 @@ src/
     weight.ts         weight check (loss vs. window, time remaining)
     tips.ts           which practical tips apply
     conditions.ts     ConditionsSource interface
+    weather.ts        forecastConditions: hourly forecast → day / night temperature and humidity for the form
+  weather/            the only network code: WeatherProvider interface, WeatherError, Open-Meteo implementation
   i18n/
     pl.ts             Polish catalog: the source of truth; exports the `Messages` type
     en.ts             English catalog
@@ -74,7 +76,7 @@ src/
     index.ts          locale registry, getMessages(), resolveLocale() (initial language)
   storage/
     pieces.ts         StoredPiece (v1 format), PieceRepository, LocalStoragePieceRepository
-    preferences.ts    chosen UI language (`kiedy-trymowac-lang`) and theme (`kiedy-trymowac-theme`)
+    preferences.ts    chosen UI language (`kiedy-trymowac-lang`), theme (`kiedy-trymowac-theme`) and weather place (`kiedy-trymowac-weather-place`)
     wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
     activity.ts       ActivityStore: time of the last interaction, for the welcome screen (own key, `kiedy-trymowac-last-active`)
     session.ts        SessionStore: this tab's page state (screen, form, wizard step, scroll), restored by a reload within the idle window (sessionStorage, `kiedy-trymowac-session`)
@@ -94,7 +96,7 @@ src/
     features/         one folder per feature; each keeps its markup next to its wiring and exports mount(root, ctx)
       header/         heading, language switch, theme switch
       piece/          section 1 "Praca"
-      conditions/     section 2 "Warunki", night switch
+      conditions/     section 2 "Warunki", night switch, optional fill from the weather forecast (map dialog, lazy Leaflet chunk)
       datetime/       section 3 day + time pickers: calendar dialog (Cally), quick choices
       covers/         section 3 cover filter
       result/         recommendation, comparison bars, alternatives, tips, save button
@@ -105,7 +107,7 @@ src/
       cards/          sections 1-3 collapse to one-line summaries that open on click (collapsed after the wizard)
       welcome/        welcome screen on the first visit and after `idleResetMs` (AppDeps, default 1 h) without interaction
 tests/
-  unit/               Vitest unit tests, laid out like src/ (domain, i18n, storage, ui)
+  unit/               Vitest unit tests, laid out like src/ (domain, i18n, storage, ui, weather)
   e2e/                Playwright suite (runs against the production build), golden.json
 scripts/agent/        helper scripts for the agent workflow (issue, worktree, checks, viewport, hygiene, labels); see CLAUDE.md
 ```
@@ -138,5 +140,6 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
   2. Fill them in `save` (`ui/features/pieces/pieces.ts`).
   3. Keep the key `kiedy-trymowac-v1`, or introduce a v2 repository that migrates from v1.
 - **Sensors.** Implement `ConditionsSource` (`domain/conditions.ts`): `read()` returns `Conditions`, and the optional `subscribe(onChange)` triggers a recalculation. `formConditionsSource` in `ui/form.ts` is the current implementation. A sensor source can wrap it and override, for example, `temp` and `rh`.
+- **Weather forecast.** The "Pobierz z prognozy pogody" button in "Warunki" exists only when `startApp` gets `AppDeps.weather`, a `WeatherProvider` (`src/weather/provider.ts`: `forecast(lat, lon)`, `searchPlace(name, language)`); `main.ts` passes `openMeteoProvider()`. Nothing is requested before the click. The click opens a map dialog (`conditions/map-picker.ts`, Leaflet with OpenStreetMap tiles; loaded with `import()`, so Leaflet is a separate chunk and no tile is requested before the click). The user places the pin by clicking, dragging or the "pin at the centre" button; the browser location, when allowed, only centres the map and places the pin, and a town search only pans the map. Only the confirmed point is sent to `forecast`, rounded to 0.1°, and stored under `kiedy-trymowac-weather-place`. The tile URL and attribution are the `TILES` constant in `map-picker.ts`. `forecastConditions` (`domain/weather.ts`) averages the next `ModelParams.forecastHours` (12) hours: night hours (`params.night`) go to the night fields while night mode is on, every hour goes to the day fields while it is off. A field group with no hours in the window keeps its values, and the hint says so. The values are written into the form as raw outdoor values, so `formConditionsSource` keeps reading them. Another forecast service is another `WeatherProvider`.
 - **Motion.** Animations are subtle (120–320 ms, springs without overshoot) and only make changes easier to follow. Only `src/ui/motion.ts` animates; features call its helpers (`captureRects`/`playFrom` around a re-render, `animateNumbers`, `captureSlides`/`slideNumbers` around a re-render (changed digits roll to their new value), `enter`/`exit`, `reveal`, `stagger`, `toggleHeight`, `slideIndicator`, `viewTransition`). Durations and easings are tokens in `tokens.css`; the JS spring is `SPRING` in `motion.ts`. Under `prefers-reduced-motion: reduce` nothing moves, and the settled page is always identical to the reduced-motion one. The e2e suite runs with reduced motion (`playwright.config.ts`); `tests/e2e/motion.spec.ts` turns it off and waits on `window.__motionIdle()`.
 - **Storage.** `PieceRepository` hides localStorage. The localStorage implementation keeps the prototype's v1 format byte-for-byte, so existing data keeps working.
