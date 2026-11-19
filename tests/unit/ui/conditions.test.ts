@@ -9,12 +9,14 @@ describe('"Warunki" markup', () => {
     const plain = markup(pl, null);
     expect(plain).not.toMatch(/weather|wx-|open-meteo|openstreetmap/i);
     // with one, the fill is the only addition, right after the humidity field
-    expect(markup(pl, 12)).toBe(
-      plain.replace(
-        '<span>%</span></div></div>',
-        `<span>%</span></div></div>\n      ${weatherMarkup(pl, 12)}`,
-      ),
-    );
+    const fill = `\n      ${weatherMarkup(pl, 12)}`;
+    const full = markup(pl, 12);
+    expect(full.replace(fill, '')).toBe(plain);
+    // anchored on the humidity input, not on its wrapper markup, which other features extend
+    const at = full.indexOf(fill);
+    const afterRh = full.slice(full.lastIndexOf('id="rh"', at), at);
+    expect(afterRh).not.toContain('<label');
+    expect(afterRh).toMatch(/<\/div>$/);
   });
 
   it('puts the privacy note with the window length and the attribution in a hidden tooltip', () => {
