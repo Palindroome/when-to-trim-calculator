@@ -295,6 +295,9 @@ export const pl = {
     save: 'Zapisz tę pracę z planem',
     /** the save button's label for a moment after saving, also announced in a status region */
     saved: 'Zapisano',
+    /** a light-hearted extra line when a temperature is above 50 °C or below −50 °C */
+    hotJoke: 'Ponad 50 °C? Jestem pod wrażeniem, że jeszcze nic się tu nie roztopiło.',
+    coldJoke: 'Poniżej −50 °C? Glina zamarzła na kamień, a garncarz chyba razem z nią.',
   },
 
   errors: {

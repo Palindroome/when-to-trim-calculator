@@ -142,6 +142,8 @@ export interface Snapshot {
   alts: string[];
   tips: string[];
   save: boolean;
+  /** Extreme-temperature jokes; only present when there are any, so normal scenarios keep their shape. */
+  jokes?: string[];
 }
 
 const norm = (s: string): string => s.replace(/\s+/g, ' ').trim();
@@ -163,6 +165,7 @@ export async function snapshot(
   };
   const all = async (sel: string): Promise<string[]> =>
     (await result.locator(sel).allInnerTexts()).map(norm);
+  const jokes = await all('.rec .joke');
   return {
     kind: await raw('.rec .k'),
     big: await text('.rec .big'),
@@ -183,6 +186,7 @@ export async function snapshot(
     alts: await all('.alt li'),
     tips: await all('.tip'),
     save: (await page.getByRole('button', { name: saveLabel }).count()) === 1,
+    ...(jokes.length ? { jokes } : {}),
   };
 }
 

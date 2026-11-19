@@ -214,6 +214,23 @@ export const formConditionsSource: ConditionsSource = {
   },
 };
 
+/** Temperatures (°C) strictly beyond which the result adds a joke; presentation, not a model constant. */
+export const JOKE_TEMP = { hot: 50, cold: -50 } as const;
+
+export interface ExtremeTemp {
+  hot: boolean;
+  cold: boolean;
+}
+
+/** Whether a temperature that applies (studio, night only while on, damp room) is beyond `JOKE_TEMP`. */
+export function extremeTemp(c: Conditions): ExtremeTemp {
+  const temps = [c.temp, c.dampTemp, ...(c.night ? [c.nightTemp] : [])];
+  return {
+    hot: temps.some((t) => t > JOKE_TEMP.hot),
+    cold: temps.some((t) => t < JOKE_TEMP.cold),
+  };
+}
+
 /** The two day + time pickers in section 3: the day key is kept in `<id>-day`, the typed time in `<id>-time`. */
 export type DateTimeId = 'thrown' | 'when';
 

@@ -1,11 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_PARAMS } from '../../../src/domain/params';
+import type { Conditions } from '../../../src/domain/types';
 import { createFormatter } from '../../../src/i18n';
 import { en } from '../../../src/i18n/en';
 import { pl } from '../../../src/i18n/pl';
 import {
   combineLocalDateTime,
   dayLabel,
+  extremeTemp,
   normalizeTime,
   parseNumber,
   readAllowedCovers,
@@ -184,6 +186,43 @@ describe('dayLabel', () => {
       'wczoraj · sob 28.03',
     );
     expect(dayLabel(pl, fmt, '', now)).toBe('');
+  });
+});
+
+describe('extremeTemp', () => {
+  const base: Conditions = {
+    temp: 20,
+    rh: 50,
+    airflow: 'light',
+    night: false,
+    nightTemp: 15,
+    nightRh: 60,
+    dampTemp: 15,
+    dampRh: 88,
+  };
+  const none = { hot: false, cold: false };
+
+  it('is none at exactly ±50 and just beyond is hot or cold', () => {
+    expect(extremeTemp({ ...base, temp: 50 })).toEqual(none);
+    expect(extremeTemp({ ...base, temp: -50 })).toEqual(none);
+    expect(extremeTemp({ ...base, temp: 50.1 })).toEqual({ hot: true, cold: false });
+    expect(extremeTemp({ ...base, temp: -50.1 })).toEqual({ hot: false, cold: true });
+  });
+
+  it('counts the night temperature only while night is on', () => {
+    expect(extremeTemp({ ...base, nightTemp: 60 })).toEqual(none);
+    expect(extremeTemp({ ...base, night: true, nightTemp: 60 })).toEqual({
+      hot: true,
+      cold: false,
+    });
+  });
+
+  it('always counts the damp-room temperature', () => {
+    expect(extremeTemp({ ...base, dampTemp: -60 })).toEqual({ hot: false, cold: true });
+  });
+
+  it('can be hot and cold together', () => {
+    expect(extremeTemp({ ...base, temp: 60, dampTemp: -60 })).toEqual({ hot: true, cold: true });
   });
 });
 

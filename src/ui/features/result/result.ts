@@ -8,6 +8,7 @@ import type { Piece } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
+import type { ExtremeTemp } from '../../form';
 import { coverIcon, icon } from '../../icons';
 import { animateNumbers, captureRects, playFrom } from '../../motion';
 import { num } from '../../numbers';
@@ -35,6 +36,13 @@ interface ResultModel {
   canSave: boolean;
   /** covers the user left ticked; the others get a muted "excluded" bar */
   allowed: readonly CoverId[];
+  /** a temperature beyond `JOKE_TEMP` adds a joke to the recommendation or warning */
+  extremeTemp: ExtremeTemp;
+}
+
+function jokes(m: Messages, t: ExtremeTemp): string {
+  const lines = [...(t.hot ? [m.result.hotJoke] : []), ...(t.cold ? [m.result.coldJoke] : [])];
+  return lines.map((s) => `<div class="joke">${esc(s)}</div>`).join('');
 }
 
 /** The warning card ("Uwaga") in place of a recommendation. */
@@ -63,6 +71,7 @@ function renderResult(v: View, r: ResultModel): string {
         <div class="big" data-anim-text="big">${esc(planText(v, rec.option, start))}</div>
         <div class="sub" data-anim-text="sub">${m.result.ready(ready, loss, grams)}</div>
         <div class="win" data-anim-text="win">${m.result.window(num(fmt, 'win-start', { kind: 'dateTime', value: start + ws * MS_PER_HOUR }), winEnd)}</div>
+        ${jokes(m, r.extremeTemp)}
       </div>`;
   } else if (rec.status !== 'onTarget') {
     let err: string;
@@ -88,7 +97,7 @@ function renderResult(v: View, r: ResultModel): string {
     const extra = plan.excludedWouldMeet
       ? `<div class="extra">${esc(m.errors.excludedWouldMeet)}</div>`
       : '';
-    html += warning(m, err, extra);
+    html += warning(m, err, extra + jokes(m, r.extremeTemp));
   }
 
   // comparison bars

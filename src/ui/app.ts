@@ -27,6 +27,7 @@ import { renderFooter } from './footer';
 import {
   checkNumber,
   checkNumbers,
+  extremeTemp,
   isNumberField,
   readAllowedCovers,
   readName,
@@ -160,6 +161,7 @@ export function startApp(deps: AppDeps): void {
         calibration,
         canSave: saveable !== null,
         allowed,
+        extremeTemp: extremeTemp(dc.conditions),
       });
     explainer.update(view, explainCalculation(input, dc, plan, allowed), calibration);
     cards.update(
