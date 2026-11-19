@@ -11,6 +11,7 @@ import {
   readAllowedCovers,
   toDayKey,
   toTime,
+  validateNumber,
 } from '../../../src/ui/form';
 
 describe('parseNumber', () => {
@@ -29,6 +30,61 @@ describe('parseNumber', () => {
   it.each(['', 'abc', 'Infinity', '-Infinity'])('%j falls back', (raw) => {
     expect(parseNumber(raw, 42)).toBe(42);
   });
+});
+
+describe('validateNumber', () => {
+  it.each([
+    ['mass', '0', 'range'],
+    ['mass', '-0,1', 'range'],
+    ['mass', '-500', 'range'],
+    ['mass', '0,1', 'ok'],
+    ['mass', '5', 'ok'],
+    ['wall', '0', 'range'],
+    ['wall', '-0,1', 'range'],
+    ['wall', '0,1', 'ok'],
+    ['base', '0', 'range'],
+    ['base', '0.1', 'ok'],
+    ['mnow', '-100', 'range'],
+    ['mnow', '480', 'ok'],
+    ['rh', '0', 'ok'],
+    ['rh', '-0', 'ok'],
+    ['rh', '100', 'ok'],
+    ['rh', '100,1', 'range'],
+    ['rh', '-1', 'range'],
+    ['nrh', '150', 'range'],
+    ['drh', '100', 'ok'],
+    ['temp', '-200', 'ok'],
+    ['temp', '200', 'ok'],
+    ['temp', '200,1', 'range'],
+    ['temp', '-200,1', 'range'],
+    ['temp', '-51', 'ok'],
+    ['temp', '51', 'ok'],
+    ['ntemp', '-300', 'range'],
+    ['dtemp', '1000', 'range'],
+  ] as const)('%s %j -> %s', (id, raw, check) => {
+    expect(validateNumber(id, raw)).toBe(check);
+  });
+
+  it('reads a decimal comma or dot, with surrounding spaces', () => {
+    for (const raw of ['6,5', '6.5', ' 6,5 ', ',5', '6,', '+6'])
+      expect(validateNumber('wall', raw)).toBe('ok');
+    expect(validateNumber('rh', '100,0')).toBe('ok');
+    expect(validateNumber('rh', '99,99')).toBe('ok');
+  });
+
+  it('an empty field is not an error', () => {
+    for (const id of ['mass', 'base', 'mnow', 'temp', 'rh'] as const) {
+      expect(validateNumber(id, '')).toBe('empty');
+      expect(validateNumber(id, '  ')).toBe('empty');
+    }
+  });
+
+  it.each(['abc', '-', ',', '12abc', '1,2,3', 'Infinity', '1e3', '6 g'])(
+    '%j is not a number',
+    (raw) => {
+      expect(validateNumber('mass', raw)).toBe('nan');
+    },
+  );
 });
 
 describe('toDayKey / toTime', () => {

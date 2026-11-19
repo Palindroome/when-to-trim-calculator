@@ -223,6 +223,14 @@ export const en: Messages = {
     },
   },
 
+  validation: {
+    notNumber: 'Enter a number, e.g. 6.5.',
+    positive: 'Enter a value greater than zero.',
+    percent: 'Humidity must be between 0 and 100%.',
+    tempRange: (min: number, max: number): string =>
+      `Enter a temperature from ${min} to ${max} °C.`,
+  },
+
   weightHint:
     'Weigh the piece (without the bat) when thrown and now. The mass lost tells you more than touch, especially with a thick base.',
 
@@ -267,6 +275,7 @@ export const en: Messages = {
 
   errors: {
     invalidDeadline: 'The trimming time must be after throwing.',
+    invalidInput: 'Fix the highlighted fields to calculate the date.',
     tooFast: (duration: string): string =>
       `Even uncovered it will be ready in ${duration} at the earliest. Put it somewhere warmer with moving air, or move the deadline.`,
     tooSlow: (duration: string): string =>

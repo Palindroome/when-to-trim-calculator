@@ -5,7 +5,7 @@ import { assessWeight, type WeightAssessment } from '../../../domain/weight';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, esc } from '../../dom';
-import { readPieceInput, readThrownMs, readWeightInputs } from '../../form';
+import { numberMessageMarkup, readPieceInput, readThrownMs, readWeightInputs } from '../../form';
 import { icon } from '../../icons';
 import { reveal } from '../../motion';
 import { coverLabel, type View } from '../../render';
@@ -16,7 +16,7 @@ export function markup(m: Messages, covers: readonly CoverDefinition[]): string 
     <h2><span class="n">4</span>${icon('scale')}${m.sections.weight}</h2>
     <p class="muted hint">${m.weightHint}</p>
     <div class="grid">
-      <div><label for="mnow">${f.massNow}</label><div class="unit"><input id="mnow" type="text" inputmode="decimal" autocomplete="off" placeholder="${f.massNowPlaceholder}"><span>${m.units.grams}</span></div></div>
+      <div><label for="mnow">${f.massNow}</label><div class="unit"><input id="mnow" type="text" inputmode="decimal" autocomplete="off" placeholder="${f.massNowPlaceholder}"><span>${m.units.grams}</span></div>${numberMessageMarkup('mnow')}</div>
       <div><label for="wnow">${f.coverSoFar}</label>
         <select id="wnow">${covers.map((c) => `<option value="${c.id}">${coverLabel(m, c)}</option>`).join('')}</select></div>
     </div>
@@ -44,11 +44,11 @@ function renderWeight(v: View, a: WeightAssessment | null): string {
   return `<div class="state ${a.state}">${esc(msg)}</div>`;
 }
 
-/** Re-renders the weight check; empty while the mass now or the thrown mass is missing. */
-export function update(ctx: AppContext): void {
+/** Re-renders the weight check; empty while the mass now or the thrown mass is missing, or a field is `invalid`. */
+export function update(ctx: AppContext, invalid: boolean): void {
   const w = readWeightInputs();
   const out = byId('wout');
-  if (!(w.currentMassG > 0) || !(w.thrownMassG > 0)) {
+  if (invalid || !(w.currentMassG > 0) || !(w.thrownMassG > 0)) {
     out.innerHTML = '';
     return;
   }
@@ -65,9 +65,9 @@ export function update(ctx: AppContext): void {
 }
 
 export function mount(root: HTMLElement, ctx: AppContext): void {
-  // the mass and cover so far only feed the weight check, not the recommendation
+  // the mass and cover so far feed only the weight check, but an invalid mass now also blocks the recommendation
   root
     .querySelector('#wout')!
     .closest('section')!
-    .addEventListener('input', () => update(ctx));
+    .addEventListener('input', () => ctx.compute());
 }

@@ -3,6 +3,7 @@ import { AIRFLOWS } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { byId, options } from '../../dom';
+import { numberMessageMarkup } from '../../form';
 import { toggleHeight } from '../../motion';
 import { stepCard } from '../cards/cards';
 import * as weatherFill from './weather';
@@ -16,8 +17,8 @@ export function markup(m: Messages, weatherHours: number | null): string {
     'climate',
     m.sections.conditions,
     `<div class="grid">
-      <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="text" inputmode="decimal" autocomplete="off" value="20"><span>${u.celsius}</span></div></div>
-      <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="text" inputmode="decimal" autocomplete="off" value="50"><span>${u.percent}</span></div></div>${weatherHours === null ? '' : `\n      ${weatherFill.markup(m, weatherHours)}`}
+      <div><label for="temp">${f.temp}</label><div class="unit"><input id="temp" type="text" inputmode="decimal" autocomplete="off" value="20"><span>${u.celsius}</span></div>${numberMessageMarkup('temp')}</div>
+      <div><label for="rh">${f.rh}</label><div class="unit"><input id="rh" type="text" inputmode="decimal" autocomplete="off" value="50"><span>${u.percent}</span></div>${numberMessageMarkup('rh')}</div>${weatherHours === null ? '' : `\n      ${weatherFill.markup(m, weatherHours)}`}
       <div class="full"><label for="air">${f.airflow}</label>
         <select id="air">
           ${options(AIRFLOWS, m.options.airflow, 'light')}
@@ -25,10 +26,10 @@ export function markup(m: Messages, weatherHours: number | null): string {
       <div class="full">
         <label class="check"><input type="checkbox" id="night" role="switch"> ${f.night}</label>
       </div>
-      <div class="night"><label for="ntemp">${f.nightTemp}</label><div class="unit"><input id="ntemp" type="text" inputmode="decimal" autocomplete="off" value="15"><span>${u.celsius}</span></div></div>
-      <div class="night"><label for="nrh">${f.nightRh}</label><div class="unit"><input id="nrh" type="text" inputmode="decimal" autocomplete="off" value="60"><span>${u.percent}</span></div></div>
-      <div><label for="dtemp">${f.dampTemp}</label><div class="unit"><input id="dtemp" type="text" inputmode="decimal" autocomplete="off" value="15"><span>${u.celsius}</span></div></div>
-      <div><label for="drh">${f.dampRh}</label><div class="unit"><input id="drh" type="text" inputmode="decimal" autocomplete="off" value="88"><span>${u.percent}</span></div></div>
+      <div class="night"><label for="ntemp">${f.nightTemp}</label><div class="unit"><input id="ntemp" type="text" inputmode="decimal" autocomplete="off" value="15"><span>${u.celsius}</span></div>${numberMessageMarkup('ntemp')}</div>
+      <div class="night"><label for="nrh">${f.nightRh}</label><div class="unit"><input id="nrh" type="text" inputmode="decimal" autocomplete="off" value="60"><span>${u.percent}</span></div>${numberMessageMarkup('nrh')}</div>
+      <div><label for="dtemp">${f.dampTemp}</label><div class="unit"><input id="dtemp" type="text" inputmode="decimal" autocomplete="off" value="15"><span>${u.celsius}</span></div>${numberMessageMarkup('dtemp')}</div>
+      <div><label for="drh">${f.dampRh}</label><div class="unit"><input id="drh" type="text" inputmode="decimal" autocomplete="off" value="88"><span>${u.percent}</span></div>${numberMessageMarkup('drh')}</div>
     </div>`,
   );
 }

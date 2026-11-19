@@ -8,15 +8,17 @@ import { test } from '@playwright/test';
 import { openApp, snapshot } from './helpers';
 import { applySteps, SCENARIOS } from './scenarios';
 
-test('record golden snapshots', async ({ page }) => {
+test('record golden snapshots', async ({ context }) => {
   test.skip(!process.env.RECORD_GOLDEN, 'set RECORD_GOLDEN=1 to re-record');
   test.setTimeout(300_000);
   const out: Record<string, unknown> = {};
   for (const s of SCENARIOS) {
-    await page.unrouteAll();
+    // a new tab each time, as in golden.spec: one tab would restore the previous scenario's form
+    const page = await context.newPage();
     await openApp(page);
     await applySteps(page, s.steps);
     out[s.name] = await snapshot(page);
+    await page.close();
   }
   writeFileSync(
     fileURLToPath(new URL('./golden.json', import.meta.url)),

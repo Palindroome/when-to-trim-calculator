@@ -984,6 +984,156 @@ test.describe('time field', () => {
   });
 });
 
+test.describe('number validation', () => {
+  const POSITIVE = 'Wpisz wartość większą od zera.';
+  const PERCENT = 'Wilgotność musi mieścić się w zakresie 0–100%.';
+  const TEMP = 'Podaj temperaturę od -200 do 200 °C.';
+  const FIX = 'Popraw zaznaczone pola, żeby policzyć termin.';
+
+  /** Only the request to fix the flagged fields: no bars, no save button, no weight check. */
+  async function expectBlocked(page: Page, text = FIX): Promise<void> {
+    await expect(page.locator('#result .rec.err .big')).toHaveText(text);
+    await expect(page.locator('#result .bar')).toHaveCount(0);
+    await expect(page.locator('#savebtn')).toHaveCount(0);
+    await expect(page.locator('#wout')).toBeEmpty();
+  }
+
+  async function expectFlagged(page: Page, input: Locator, message: string): Promise<void> {
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(input).toHaveAccessibleDescription(message);
+    const id = await input.getAttribute('id');
+    await expect(page.locator(`#${id}-msg`)).toBeVisible();
+  }
+
+  async function expectClear(page: Page, input: Locator): Promise<void> {
+    await expect(input).not.toHaveAttribute('aria-invalid');
+    await expect(input).not.toHaveAttribute('aria-describedby');
+    const id = await input.getAttribute('id');
+    await expect(page.locator(`#${id}-msg`)).toBeHidden();
+    await expect(page.locator('#result .bar')).toHaveCount(5);
+  }
+
+  for (const [label, bad, message, good, night] of [
+    ['Masa po toczeniu', '-500', POSITIVE, '500'],
+    ['Masa po toczeniu', '0', POSITIVE, '0,1'],
+    ['Grubość ścianki', '-6', POSITIVE, '6'],
+    ['Grubość ścianki', '0', POSITIVE, '0,1'],
+    ['Grubość dna', '0', POSITIVE, '9'],
+    ['Masa teraz', '-100', POSITIVE, '480'],
+    ['Wilgotność powietrza', '150', PERCENT, '100'],
+    ['Wilgotność powietrza', '-20', PERCENT, '0'],
+    ['Wilgotność nocą', '100,1', PERCENT, '100', true],
+    ['Mokra przechowalnia: wilg.', '150', PERCENT, '88'],
+    ['Temperatura w pracowni', '-300', TEMP, '-200'],
+    ['Temperatura w pracowni', '1000', TEMP, '200'],
+    ['Temperatura nocą (22–7)', '-200,1', TEMP, '-51', true],
+    ['Mokra przechowalnia: temp.', '200,1', TEMP, '51'],
+  ] as const satisfies readonly (readonly [Field, string, string, string, boolean?])[]) {
+    test(`${label} "${bad}" is flagged and blocks the result; "${good}" clears it`, async ({
+      page,
+    }) => {
+      await openApp(page);
+      if (night) await setNight(page, true);
+      const input = field(page, label);
+      await input.fill(bad);
+      await expectFlagged(page, input, message);
+      await expectBlocked(page);
+      await input.fill(good);
+      await expectClear(page, input);
+      await expect(page.getByRole('button', { name: 'Zapisz tę pracę z planem' })).toBeVisible();
+    });
+  }
+
+  test('text that is not a number is flagged on leaving the field, not while typing', async ({
+    page,
+  }) => {
+    await openApp(page);
+    const input = field(page, 'Grubość ścianki');
+    await input.fill('');
+    await input.pressSequentially('-');
+    await expect(input).not.toHaveAttribute('aria-invalid');
+    await expect(page.locator('#result .bar')).toHaveCount(5);
+    await input.fill('abc');
+    await input.press('Tab');
+    await expectFlagged(page, input, 'Wpisz liczbę, np. 6,5.');
+    await expectBlocked(page);
+    await input.fill('6,5');
+    await expectClear(page, input);
+  });
+
+  test('an invalid field empties the weight check', async ({ page }) => {
+    await openApp(page);
+    await fill(page, 'Masa teraz', '480');
+    await expect(page.locator('#wout .state')).toHaveCount(1);
+    await fill(page, 'Masa po toczeniu', '-500');
+    await expectBlocked(page);
+    await fill(page, 'Masa po toczeniu', '500');
+    await expect(page.locator('#wout .state')).toHaveCount(1);
+  });
+
+  for (const [label, bad, message] of [
+    ['Wilgotność nocą', '150', PERCENT],
+    ['Temperatura nocą (22–7)', 'abc', 'Wpisz liczbę, np. 6,5.'],
+  ] as const) {
+    test(`a flagged night field "${bad}" stops counting while the night switch is off`, async ({
+      page,
+    }) => {
+      await openApp(page);
+      await setNight(page, true);
+      const input = field(page, label);
+      await input.fill(bad);
+      await input.press('Tab');
+      await expectFlagged(page, input, message);
+      await expectBlocked(page);
+      await setNight(page, false);
+      await expect(page.locator('#result .bar')).toHaveCount(5);
+      await expect(page.locator('#savebtn')).toHaveCount(1);
+      // flagged again when shown, also after a language switch while it was hidden
+      await page.getByRole('button', { name: 'English' }).click();
+      await expect(page.locator('#result .bar')).toHaveCount(5);
+      await page.getByRole('button', { name: 'Polski' }).click();
+      await setNight(page, true);
+      await expectFlagged(page, input, message);
+      await expectBlocked(page);
+    });
+  }
+
+  test('empty fields fall back as before and are not flagged', async ({ page }) => {
+    await openApp(page);
+    for (const label of ['Masa po toczeniu', 'Grubość dna', 'Temperatura w pracowni'] as const) {
+      await fill(page, label, '');
+      await expect(field(page, label)).not.toHaveAttribute('aria-invalid');
+    }
+    await expect(page.locator('#result .bar')).toHaveCount(5);
+    await expect(page.locator('[aria-invalid]')).toHaveCount(0);
+  });
+
+  test('the message follows the language switch', async ({ page }) => {
+    await openApp(page);
+    await fill(page, 'Masa po toczeniu', '-500');
+    await fill(page, 'Temperatura w pracowni', 'abc');
+    await field(page, 'Temperatura w pracowni').press('Tab');
+    await page.getByRole('button', { name: 'English' }).click();
+    await expectFlagged(page, page.locator('#mass'), 'Enter a value greater than zero.');
+    await expectFlagged(page, page.locator('#temp'), 'Enter a number, e.g. 6.5.');
+    await expectBlocked(page, 'Fix the highlighted fields to calculate the date.');
+    await page.locator('#temp').fill('250');
+    await expectFlagged(page, page.locator('#temp'), 'Enter a temperature from -200 to 200 °C.');
+  });
+
+  test('an invalid value present on load is flagged', async ({ page }) => {
+    await openApp(page);
+    // unreadable text is not flagged while typing; the tab's snapshot keeps it across the reload
+    await fill(page, 'Wilgotność powietrza', 'abc');
+    await expect(field(page, 'Wilgotność powietrza')).not.toHaveAttribute('aria-invalid');
+    await page.reload();
+    const input = field(page, 'Wilgotność powietrza');
+    await expect(input).toHaveValue('abc');
+    await expectFlagged(page, input, 'Wpisz liczbę, np. 6,5.');
+    await expectBlocked(page);
+  });
+});
+
 test.describe('date-time keyboard use', () => {
   test('Tab goes day → time → presets in each picker, and a value can be set without a mouse', async ({
     page,

@@ -99,10 +99,9 @@ export const SCENARIOS: Scenario[] = [
       { fill: 'Wilgotność powietrza', value: '30' },
     ],
   },
-  {
-    name: 'rh above 100 unclamped in tips',
-    steps: [{ fill: 'Wilgotność powietrza', value: '120' }],
-  },
+  { name: 'rh 100', steps: [{ fill: 'Wilgotność powietrza', value: '100' }] },
+  // out of range (#68): only the request to fix the field, no bars
+  { name: 'rh 120 rejected', steps: [{ fill: 'Wilgotność powietrza', value: '120' }] },
   { name: 'rh 0', steps: [{ fill: 'Wilgotność powietrza', value: '0' }] },
   { name: 'cold room', steps: [{ fill: 'Temperatura w pracowni', value: '5' }] },
   { name: 'thick base (slow tip)', steps: [{ fill: 'Grubość dna', value: '25' }] },
