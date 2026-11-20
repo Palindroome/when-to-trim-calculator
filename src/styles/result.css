@@ -25,6 +25,8 @@
 }
 .rec .big {
   flex-basis: 100%;
+  /* a custom cover's name can be one long word */
+  overflow-wrap: anywhere;
   font-size: var(--text-xl);
   font-weight: 600;
   line-height: var(--leading-tight);
@@ -84,6 +86,10 @@
 }
 .bar:last-child {
   border-bottom: 0;
+}
+/* the cover's name: a custom one can be a long word */
+.bar > :first-child {
+  overflow-wrap: anywhere;
 }
 .bar .ico {
   width: 1.15em;
@@ -164,6 +170,7 @@
 }
 .alt li {
   margin: var(--space-1) 0;
+  overflow-wrap: anywhere;
 }
 .actions {
   margin-top: var(--space-4);

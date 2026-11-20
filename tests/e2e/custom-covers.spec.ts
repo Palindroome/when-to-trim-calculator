@@ -171,7 +171,7 @@ test.describe('custom covers', () => {
       void d.accept();
     });
     await page.getByRole('button', { name: 'usuń: Ściereczka', exact: true }).click();
-    expect(message).toContain('„Ściereczka”: 1');
+    expect(message).toContain('„Ściereczka”: 1. Usunąć to opatulenie?');
     await expect(bars(page)).toHaveCount(5);
     await expect(page.locator('#wnow option')).toHaveText(LABELS);
     await expect(pill(page, 'Ściereczka')).toHaveCount(0);
@@ -368,6 +368,22 @@ test.describe('custom covers', () => {
     await addBtn(page).click();
     await presetField(page).selectOption({ label: 'Własna wartość…' });
     await saveCoverBtn(page).click();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+  });
+
+  test('320 px: a 40-character name without spaces wraps in the bars, recommendation, saved piece and calibration', async ({
+    page,
+  }) => {
+    const name = 'W'.repeat(40);
+    await page.setViewportSize({ width: 320, height: 800 });
+    await openApp(page);
+    await openCovers(page);
+    await addCover(page, name, { percent: '20' });
+    await expect(page.locator('.rec .big')).toHaveText(`Użyj opatulenia „${name}” od razu.`);
+    await savePieceBtn(page).click();
+    await page.clock.setFixedTime(new Date('2026-03-06T10:00:00+01:00'));
+    await page.locator('#pieces .piece').getByRole('button', { name: 'w sam raz' }).click();
+    await expect(page.locator('#calib tr').nth(1)).toContainText(name);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
   });
 

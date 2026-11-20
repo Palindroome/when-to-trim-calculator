@@ -322,7 +322,7 @@ export const pl = {
       removeLabel: (name: string): string => `usuń: ${name}`,
       speedSummary: (pct: string): string => `≈ ${pct}% tempa odkrytej`,
       confirmRemove: (name: string, n: number): string =>
-        `Zapisane prace z opatuleniem „${name}”: ${n}. Usunąć je? Prace zachowają opis planu, a ich oceny przestaną kalibrować.`,
+        `Zapisane prace z opatuleniem „${name}”: ${n}. Usunąć to opatulenie? Prace zachowają opis planu, a ich oceny przestaną kalibrować.`,
       nameEmpty: 'Podaj nazwę.',
       nameTooLong: (max: number): string => `Nazwa może mieć najwyżej ${max} znaków.`,
       nameTaken: 'Takie opatulenie już jest.',
