@@ -83,6 +83,8 @@ test.describe('page shell', () => {
       '%',
       '°C',
       '%',
+      // "Moje opatulenia": a custom cover's speed
+      '%',
       'g',
     ]);
   });

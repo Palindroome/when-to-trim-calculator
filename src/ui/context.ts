@@ -9,6 +9,7 @@ import type { DryingContext } from '../domain/simulate';
 import type { Piece } from '../domain/types';
 import type { Messages } from '../i18n';
 import type { ActivityStore } from '../storage/activity';
+import type { CoverRepository, StoredCover } from '../storage/covers';
 import type { PieceRepository, StoredPiece } from '../storage/pieces';
 import type { Theme } from '../storage/preferences';
 import type { SessionStore } from '../storage/session';
@@ -32,6 +33,8 @@ export interface AppDeps {
   onThemeChange: (theme: Theme | null) => void;
   params: ModelParams;
   repository: PieceRepository;
+  /** the user-defined covers ("Moje opatulenia") */
+  coverRepository: CoverRepository;
   wizard: WizardStore;
   /** time of the last interaction, for the welcome screen */
   activity: ActivityStore;
@@ -66,6 +69,10 @@ export interface AppContext {
   readonly pieces: StoredPiece[];
   /** replaces the saved pieces and writes them to the repository */
   storePieces(pieces: StoredPiece[]): void;
+  /** the user-defined covers, in the order they were added */
+  readonly customCovers: readonly StoredCover[];
+  /** replaces the user-defined covers, writes them to the repository and rebuilds what lists covers */
+  storeCovers(covers: StoredCover[]): void;
   /** plan of the last recalculation, null when it cannot be saved */
   readonly saveable: Saveable | null;
   /** calibrator built from the rated pieces */

@@ -66,6 +66,14 @@ const ICONS = {
     body: '<path d="M2.5 8 9 2.5 15.5 8v7.5h-13z"/><path d="M9 8.5s-2 2.2-2 3.5a2 2 0 0 0 4 0c0-1.3-2-3.5-2-3.5z"/>',
   },
   cover: { body: '<path d="M9 2.5 2 6.5l7 4 7-4zM2 10l7 4 7-4"/>' },
+  // extra shapes for user-defined covers
+  paperBag: {
+    body: '<path d="M4 5.5h10l-1 10h-8zM6.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5M4 5.5l1.5 2M14 5.5l-1.5 2"/>',
+  },
+  newspaper: {
+    body: '<path d="M2.5 4.5h10v10a1.5 1.5 0 0 1-1.5 1.5H4a1.5 1.5 0 0 1-1.5-1.5zM12.5 7.5h3v7a1.5 1.5 0 0 1-3 0M5 7.5h5M5 10.5h5M5 13h3"/>',
+  },
+  bucket: { body: '<path d="M2.5 13.5h13l-1.5-8h-10zM5.5 5.5a3.5 3.5 0 0 1 7 0M1.5 16h15"/>' },
 } satisfies Record<string, IconDef>;
 
 export type IconName = keyof typeof ICONS;
@@ -89,5 +97,23 @@ const COVER_ICONS: Partial<Record<CoverId, IconName>> = {
   damp: 'dampRoom',
 };
 
-export const coverIcon = (id: CoverId, cls?: string): string =>
-  icon(COVER_ICONS[id] ?? 'cover', cls);
+/** Icons a user-defined cover can pick, in picker order; the first is the default. */
+export const CUSTOM_COVER_ICONS = [
+  'cover',
+  'bowl',
+  'bagLoose',
+  'bag',
+  'box',
+  'dampRoom',
+  'paperBag',
+  'newspaper',
+  'bucket',
+] as const satisfies readonly IconName[];
+export type CustomCoverIcon = (typeof CUSTOM_COVER_ICONS)[number];
+
+export const isCustomCoverIcon = (s: string): s is CustomCoverIcon =>
+  (CUSTOM_COVER_ICONS as readonly string[]).includes(s);
+
+/** A cover's icon: its own (user-defined covers), the built-in one, or the neutral `cover` icon. */
+export const coverIcon = (cover: { id: CoverId; icon?: IconName }, cls?: string): string =>
+  icon(cover.icon ?? COVER_ICONS[cover.id] ?? 'cover', cls);

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PARAMS } from '../../../src/domain/params';
-import { coverIcon, ICON_NAMES, icon } from '../../../src/ui/icons';
+import {
+  CUSTOM_COVER_ICONS,
+  coverIcon,
+  ICON_NAMES,
+  icon,
+  isCustomCoverIcon,
+} from '../../../src/ui/icons';
 
 describe('icon', () => {
   it('returns one decorative stroke SVG for every name', () => {
@@ -40,11 +46,22 @@ describe('icon', () => {
 describe('coverIcon', () => {
   it('has its own icon for every cover in the catalog', () => {
     const fallback = icon('cover');
-    for (const c of DEFAULT_PARAMS.covers) expect(coverIcon(c.id)).not.toBe(fallback);
+    for (const c of DEFAULT_PARAMS.covers) expect(coverIcon(c)).not.toBe(fallback);
   });
 
   it('falls back to the neutral cover icon for a cover without one', () => {
-    expect(coverIcon('custom:shelf')).toBe(icon('cover'));
-    expect(coverIcon('custom:shelf', 'ico')).toBe(icon('cover', 'ico'));
+    expect(coverIcon({ id: 'custom:shelf' })).toBe(icon('cover'));
+    expect(coverIcon({ id: 'custom:shelf' }, 'ico')).toBe(icon('cover', 'ico'));
+  });
+
+  it("uses a user-defined cover's own icon", () => {
+    expect(coverIcon({ id: 'custom:shelf', icon: 'bucket' }, 'ico')).toBe(icon('bucket', 'ico'));
+  });
+});
+
+describe('isCustomCoverIcon', () => {
+  it('accepts only the icons offered to user-defined covers', () => {
+    for (const name of CUSTOM_COVER_ICONS) expect(isCustomCoverIcon(name)).toBe(true);
+    for (const name of ['', 'plus', 'warning', 'nope']) expect(isCustomCoverIcon(name)).toBe(false);
   });
 });

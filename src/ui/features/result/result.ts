@@ -117,7 +117,7 @@ function renderResult(v: View, r: ResultModel): string {
       Number.isFinite(t) &&
       Math.abs(t - H) / H <= v.params.planner.targetTolerance;
     const n = r.calibration[c.id]!.samples;
-    html += `<div class="bar${off ? ' off' : ''}"><div>${coverIcon(c.id, 'ico')}${coverLabel(m, c)}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c.environment === 'dampRoom' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
+    html += `<div class="bar${off ? ' off' : ''}"><div>${coverIcon(c, 'ico')}${esc(coverLabel(m, c))}${n ? ` <span class="muted">·${n}</span>` : ''}${off ? ` <span class="muted">· ${m.result.excludedBar}</span>` : ''}${c.environment === 'dampRoom' ? `<br><span class="muted note">${m.result.dampNote}</span>` : ''}</div>
         <div class="track"><div class="fill ${good ? 'good' : ''}" data-anim-key="fill-${c.id}" style="width:${pct}%"></div>${H > 0 ? `<div class="target" data-anim-key="target-${c.id}" style="left:${Math.min(100, (H / maxShown) * 100)}%"></div>` : ''}</div>
         <div class="t">${num(fmt, `bar-${c.id}`, { kind: 'duration', value: t, suffix: pct >= 100 && Number.isFinite(t) ? '+' : '' })}</div></div>`;
   }

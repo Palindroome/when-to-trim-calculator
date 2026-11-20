@@ -250,6 +250,58 @@ export const en: Messages = {
     filterHint:
       "Untick what you can't or don't want to use this time. It applies only to this piece and its saved plan.",
     filterLastOne: 'Keep at least one method ticked.',
+    customPhrase: (name: string): string => `use the cover “${name}”`,
+    custom: {
+      title: 'My covers',
+      intro:
+        'Your own ways of covering a piece, e.g. a paper bag, newspaper or an upturned bucket. They count in the comparison, the recommendation and the calibration just like the built-in ones.',
+      empty: 'You have no covers of your own yet.',
+      add: 'Add a cover',
+      limit: (max: number): string =>
+        `You already have ${max} covers of your own – no more can be added.`,
+      formNew: 'New cover',
+      formEdit: (name: string): string => `Editing: ${name}`,
+      name: 'Name',
+      namePlaceholder: 'e.g. paper bag',
+      icon: 'Icon',
+      icons: {
+        cover: 'layers',
+        bowl: 'bowl',
+        bagLoose: 'loose bag',
+        bag: 'bag',
+        box: 'box',
+        dampRoom: 'house with a drop',
+        paperBag: 'paper bag',
+        newspaper: 'newspaper',
+        bucket: 'bucket',
+      },
+      speed: 'How much does it slow drying?',
+      presets: {
+        slight: 'Slows it a little (e.g. paper bag, newspaper)',
+        likePartial: 'Like a loose bag',
+        likeDampCloth: 'Like a damp cloth',
+        likeFull: 'Like a full bag / plastic wrap',
+        likeBox: 'Like a sealed box',
+        custom: 'Own value…',
+      },
+      percent: 'Drying speed compared with uncovered',
+      airflow: 'Lets moving air through',
+      presetNote:
+        'These are starting values, not measurements. Rating your saved pieces (“too wet / just right / too dry”) corrects each cover over time.',
+      save: 'Save',
+      cancel: 'Cancel',
+      edit: 'edit',
+      remove: 'remove',
+      editLabel: (name: string): string => `edit: ${name}`,
+      removeLabel: (name: string): string => `remove: ${name}`,
+      speedSummary: (pct: string): string => `≈ ${pct}% of the uncovered speed`,
+      confirmRemove: (name: string, n: number): string =>
+        `Saved pieces with the cover “${name}”: ${n}. Remove it? The pieces keep their plan text, and their ratings stop calibrating.`,
+      nameEmpty: 'Enter a name.',
+      nameTooLong: (max: number): string => `The name can have at most ${max} characters.`,
+      nameTaken: 'There is already a cover with this name.',
+      percentRange: 'Enter a value from 1 to 100%.',
+    },
   },
 
   plan: {
