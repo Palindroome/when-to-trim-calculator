@@ -30,7 +30,7 @@ function themeSwitch(m: Messages, current: ThemeChoice): string {
 
 export function markup(m: Messages, locales: readonly string[], theme: ThemeChoice): string {
   return `<header class="masthead">
-    <h1>${m.heading}</h1>
+    <h1><a href="./" class="brand" title="${m.home}">${icon('wheel')}${m.heading}</a></h1>
     <div class="toolbar">${languageSwitch(m, locales)}${themeSwitch(m, theme)}</div>
   </header>`;
 }

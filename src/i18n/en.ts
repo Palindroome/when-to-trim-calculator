@@ -18,6 +18,7 @@ export const en: Messages = {
   lang: 'en',
   title: 'When to trim? – prototype',
   heading: 'When to trim?',
+  home: 'Back to the start screen',
   lead: 'Enter the piece, the conditions and when you want to trim. The calculator suggests how to cover it, and learns your studio from every piece you save.',
 
   language: {

@@ -329,6 +329,105 @@ test.describe('welcome screen', () => {
   });
 });
 
+test.describe('header title', () => {
+  const title = (page: Page) => page.locator('.masthead h1 a');
+
+  /** Dispatches a click on the title as described by `init`; returns whether the page intercepted it (a navigation is blocked either way). */
+  async function intercepted(
+    page: Page,
+    init: Pick<MouseEventInit, 'button' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'altKey'>,
+  ): Promise<boolean> {
+    return page.evaluate((init) => {
+      let prevented = false;
+      // document runs after the app's listener on <main>
+      const record = (e: Event): void => {
+        prevented = e.defaultPrevented;
+        e.preventDefault();
+      };
+      document.addEventListener('click', record, { once: true });
+      const a = document.querySelector('.masthead h1 a')!;
+      a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ...init }));
+      return prevented;
+    }, init);
+  }
+
+  test('is a link home with a decorative icon; its name stays the heading text', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('Kiedy trymować?');
+    await expect(title(page)).toHaveAttribute('href', './');
+    await expect(title(page)).toHaveAccessibleName('Kiedy trymować?');
+    await expect(title(page)).toHaveAttribute('title', 'Wróć do ekranu startowego');
+    await expect(title(page).locator('svg[aria-hidden="true"]')).toHaveCount(1);
+    await expect(title(page).locator('svg')).toHaveAttribute('stroke', 'currentColor');
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(title(page)).toHaveAccessibleName('When to trim?');
+    await expect(title(page)).toHaveAttribute('title', 'Back to the start screen');
+  });
+
+  test('from the form, a click shows the welcome screen; pieces and preferences are untouched', async ({
+    page,
+  }) => {
+    await openApp(page, { storage: DATA });
+    await page.getByRole('button', { name: 'Ciemny' }).click();
+    const prefs = await page.evaluate(() => ({ ...localStorage }));
+    await page.evaluate(() => Object.assign(window, { notReloaded: true }));
+    await title(page).click();
+    await expectWelcome(page);
+    expect(await page.evaluate(() => 'notReloaded' in window)).toBe(true);
+    expect(await page.evaluate(() => ({ ...localStorage }))).toEqual(prefs);
+    expect(await stored(page, STORAGE_KEY)).toBe(DATA);
+    await expect(myPieces(page)).toHaveText('Moje prace (1)');
+  });
+
+  test('from the wizard, a click shows the welcome screen', async ({ page }) => {
+    await openApp(page, { wizard: true });
+    await expect(page.locator('#wizard-progress')).toHaveText('Krok 1 z 3: Praca');
+    await title(page).click();
+    await expectWelcome(page);
+  });
+
+  test('is reachable by keyboard, has a focus ring and activates with Enter', async ({ page }) => {
+    await openApp(page);
+    await page.keyboard.press('Tab');
+    await expect(title(page)).toBeFocused();
+    const outline = await title(page).evaluate((a) => getComputedStyle(a).outlineStyle);
+    expect(outline).not.toBe('none');
+    await page.keyboard.press('Enter');
+    await expectWelcome(page);
+  });
+
+  test('on the welcome screen a click keeps it as it is, without navigating', async ({ page }) => {
+    await openApp(page, { welcome: true, storage: DATA });
+    await myPieces(page).click();
+    await page.evaluate(() => Object.assign(window, { notReloaded: true }));
+    expect(await intercepted(page, { button: 0 })).toBe(true);
+    await title(page).click();
+    await expect(screen(page)).toBeVisible();
+    await expect(myPieces(page)).toHaveAttribute('aria-expanded', 'true');
+    expect(await page.evaluate(() => 'notReloaded' in window)).toBe(true);
+  });
+
+  test('a modified or non-primary click is left to the browser (new tab, new window)', async ({
+    page,
+  }) => {
+    await openApp(page);
+    for (const init of [
+      { ctrlKey: true },
+      { metaKey: true },
+      { shiftKey: true },
+      { altKey: true },
+      { button: 1 },
+    ]) {
+      expect(await intercepted(page, init)).toBe(false);
+    }
+    await expectNoWelcome(page);
+    expect(await intercepted(page, { button: 0 })).toBe(true);
+    await expectWelcome(page);
+  });
+});
+
 const noOverflow = async (page: Page): Promise<void> => {
   const { scrollWidth, clientWidth } = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
