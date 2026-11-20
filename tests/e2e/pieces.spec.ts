@@ -405,6 +405,38 @@ test.describe('renaming a piece', () => {
     expect((await stored(page)).pieces[0].name).toBe(`x${typed}`.slice(0, 80));
   });
 
+  const oddNames: [string, string][] = [
+    ['emoji and ZWJ sequences', '🏺 👩‍👩‍👧‍👦 🧑🏽‍🎨 🏳️‍🌈 ❤️‍🔥'],
+    ['Polish diacritics', 'Żółć gęślą jaźń ĄĆĘŁŃÓŚŹŻ'],
+    ['right-to-left and other scripts', 'كوب الشاي · כוס תה · 茶碗 · Ваза · गमला'],
+    ['an SQL-like string', "'; DROP TABLE pieces; --"],
+    ['quotes, backslashes and template syntax', `"a" 'b' \`c\` \\n \\\\ \${x} {{y}} %s`],
+    ['tabs and invisible characters', 'a\tb c​d‍e‮f⁦g⁩'],
+  ];
+  for (const [what, name] of oddNames) {
+    test(`a name with ${what} round-trips through storage and a reload as text`, async ({
+      page,
+    }) => {
+      const nameText = () =>
+        pieces(page)
+          .locator('.top b')
+          .evaluate((b) => ({ text: b.textContent, elements: b.childElementCount }));
+      await openApp(page);
+      await saveBtn(page).click();
+      await renameBtn(page).click();
+      await renameInput(page).fill(name);
+      await expect(renameInput(page)).toHaveValue(name);
+      await page.keyboard.press('Enter');
+      expect(await nameText()).toEqual({ text: name, elements: 0 });
+      expect((await stored(page)).pieces[0].name).toBe(name);
+      expect(await renameBtn(page).getAttribute('aria-label')).toBe(`Zmień nazwę: ${name}`);
+      await page.reload();
+      expect(await nameText()).toEqual({ text: name, elements: 0 });
+      await renameBtn(page).click();
+      await expect(renameInput(page)).toHaveValue(name);
+    });
+  }
+
   test('switching the language with a rename open does not throw', async ({ page }) => {
     const errors: Error[] = [];
     page.on('pageerror', (e) => errors.push(e));
