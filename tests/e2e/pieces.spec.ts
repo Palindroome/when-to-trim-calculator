@@ -33,7 +33,13 @@ test.describe('saved pieces', () => {
     await expect(p.locator('.meta')).toHaveText(
       `${DEFAULT_PLAN}Toczona śr 4.03 09:00 · prognoza pt 6.03 09:59`,
     );
-    await expect(p.getByRole('button')).toHaveText(['za mokra', 'w sam raz', 'za sucha', 'usuń']);
+    await expect(p.getByRole('button')).toHaveText([
+      'za mokra',
+      'w sam raz',
+      'za sucha',
+      'zmień nazwę',
+      'usuń',
+    ]);
     await expect(p.getByText('Trymuję teraz i jest:')).toBeVisible();
 
     const data = await stored(page);
@@ -131,7 +137,7 @@ test.describe('saved pieces', () => {
       const p = pieces(page).first();
       await expect(p.locator('.badge')).toHaveText(badge);
       await expect(p.locator('.badge')).toHaveClass('badge ok');
-      await expect(p.getByRole('button')).toHaveText(['usuń']);
+      await expect(p.getByRole('button')).toHaveText(['zmień nazwę', 'usuń']);
       await expect(p.getByText('Trymuję teraz i jest:')).toHaveCount(0);
       await expect(page.locator('#calib tr')).toHaveText([
         'WariantMnożnik czasuPrace',
@@ -262,6 +268,219 @@ test.describe('saved pieces', () => {
     await openApp(page);
     await saveBtn(page).click();
     await expect(page.locator('#pieces')).toBeInViewport();
+  });
+});
+
+test.describe('renaming a piece', () => {
+  const renameBtn = (page: Page) => page.getByRole('button', { name: /^Zmień nazwę:/ });
+  const renameInput = (page: Page) => page.getByRole('textbox', { name: 'Nowa nazwa' });
+
+  test('renaming a piece updates the list and storage only in name', async ({ page }) => {
+    await openApp(page);
+    await fill(page, 'Nazwa (opcjonalnie)', 'kubki');
+    await saveBtn(page).click();
+    const before = (await stored(page)).pieces[0];
+    await expect(renameBtn(page)).toHaveAccessibleName('Zmień nazwę: kubki');
+    await renameBtn(page).click();
+    await expect(renameInput(page)).toBeFocused();
+    await expect(renameInput(page)).toHaveValue('kubki');
+    // the whole name is selected, so typing replaces it
+    await page.keyboard.type('talerze');
+    await page.keyboard.press('Enter');
+    await expect(pieces(page).locator('b')).toHaveText('talerze');
+    await expect(page.locator('#pieces form')).toHaveCount(0);
+    await expect(renameBtn(page)).toBeFocused();
+    await expect(renameBtn(page)).toHaveAccessibleName('Zmień nazwę: talerze');
+    const after = (await stored(page)).pieces[0];
+    expect(Object.keys(after).sort()).toEqual(Object.keys(before).sort());
+    expect(after).toEqual({ ...before, name: 'talerze' });
+    await page.reload();
+    await expect(pieces(page).locator('b')).toHaveText('talerze');
+  });
+
+  test('the Zapisz button saves and trims the new name', async ({ page }) => {
+    await openApp(page);
+    await saveBtn(page).click();
+    await renameBtn(page).click();
+    await renameInput(page).fill('  miski  ');
+    await page.locator('#pieces').getByRole('button', { name: 'Zapisz' }).click();
+    await expect(pieces(page).locator('b')).toHaveText('miski');
+    await expect(renameBtn(page)).toBeFocused();
+    expect((await stored(page)).pieces[0].name).toBe('miski');
+  });
+
+  test('Escape, Anuluj and an empty name keep the old name', async ({ page }) => {
+    await openApp(page);
+    await saveBtn(page).click();
+    const before = await stored(page);
+
+    await renameBtn(page).click();
+    await renameInput(page).fill('nowa');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#pieces form')).toHaveCount(0);
+    await expect(pieces(page).locator('b')).toHaveText('Praca 1');
+    await expect(renameBtn(page)).toBeFocused();
+
+    await renameBtn(page).click();
+    await renameInput(page).fill('nowa');
+    await page.getByRole('button', { name: 'Anuluj' }).click();
+    await expect(pieces(page).locator('b')).toHaveText('Praca 1');
+    await expect(renameBtn(page)).toBeFocused();
+
+    for (const blank of ['', '   ']) {
+      await renameBtn(page).click();
+      await renameInput(page).fill(blank);
+      await page.keyboard.press('Enter');
+      await expect(pieces(page).locator('b')).toHaveText('Praca 1');
+      await expect(renameBtn(page)).toBeFocused();
+    }
+    expect(await stored(page)).toEqual(before);
+  });
+
+  test('only one piece is renamed at a time', async ({ page }) => {
+    await openApp(page);
+    await saveBtn(page).click();
+    await at(page, '2026-03-04T09:01:00+01:00');
+    await saveBtn(page).click();
+    await renameBtn(page).nth(0).click();
+    await renameInput(page).fill('pierwsza');
+    await renameBtn(page).nth(1).click();
+    await expect(page.locator('#pieces form.rename')).toHaveCount(1);
+    await expect(renameInput(page)).toHaveValue('Praca 1');
+    await expect(pieces(page).nth(0).locator('b')).toHaveText('Praca 2');
+  });
+
+  test('renaming a rated piece keeps its feedback, the calibration and the recommendation', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await saveBtn(page).click();
+    await at(page, '2026-03-06T11:00:00+01:00');
+    await page.getByRole('button', { name: 'w sam raz' }).click();
+    const calib = await page.locator('#calib').innerHTML();
+    const badge = await pieces(page).locator('.badge').textContent();
+    const rec = await snapshot(page);
+    const before = (await stored(page)).pieces[0];
+    await renameBtn(page).click();
+    await renameInput(page).fill('oceniona');
+    await page.keyboard.press('Enter');
+    await expect(pieces(page).locator('b')).toHaveText('oceniona');
+    await expect(pieces(page).locator('.badge')).toHaveText(badge!);
+    expect(await page.locator('#calib').innerHTML()).toBe(calib);
+    expect(await snapshot(page)).toEqual(rec);
+    expect((await stored(page)).pieces[0]).toEqual({ ...before, name: 'oceniona' });
+  });
+
+  test('a new name is HTML-escaped in the text and the aria-label', async ({ page }) => {
+    const name = '<img src=x onerror=alert(1)> & "x"';
+    await openApp(page);
+    await saveBtn(page).click();
+    await renameBtn(page).click();
+    await renameInput(page).fill(name);
+    await page.keyboard.press('Enter');
+    await expect(pieces(page).locator('b')).toHaveText(name);
+    await expect(renameBtn(page)).toHaveAccessibleName(`Zmień nazwę: ${name}`);
+    await expect(page.locator('#pieces img')).toHaveCount(0);
+    // the input is prefilled with the escaped name too
+    await renameBtn(page).click();
+    await expect(renameInput(page)).toHaveValue(name);
+    await expect(page.locator('#pieces img')).toHaveCount(0);
+  });
+
+  test('the save and rename name fields stop at 80 characters', async ({ page }) => {
+    const typed = `${'0123456789'.repeat(9)}abcde`; // 95 characters
+    await openApp(page);
+    const nameField = page.getByRole('textbox', { name: 'Nazwa (opcjonalnie)' });
+    await nameField.pressSequentially(typed);
+    await expect(nameField).toHaveValue(typed.slice(0, 80));
+    await saveBtn(page).click();
+    expect((await stored(page)).pieces[0].name).toBe(typed.slice(0, 80));
+
+    await renameBtn(page).click();
+    await renameInput(page).press('Delete');
+    await renameInput(page).pressSequentially(`x${typed}`);
+    await expect(renameInput(page)).toHaveValue(`x${typed}`.slice(0, 80));
+    await page.keyboard.press('Enter');
+    await expect(pieces(page).locator('b')).toHaveText(`x${typed}`.slice(0, 80));
+    expect((await stored(page)).pieces[0].name).toBe(`x${typed}`.slice(0, 80));
+  });
+
+  test('a name stored before the limit opens cut to 80 characters and can be renamed', async ({
+    page,
+  }) => {
+    const long = 'abcdefghij'.repeat(12); // 120 characters
+    await openApp(page);
+    await saveBtn(page).click();
+    await page.evaluate(
+      ([k, name]) => {
+        const data = JSON.parse(localStorage.getItem(k!)!);
+        data.pieces[0].name = name;
+        localStorage.setItem(k!, JSON.stringify(data));
+      },
+      [STORAGE_KEY, long],
+    );
+    await page.reload();
+    await expect(pieces(page).locator('b')).toHaveText(long);
+    // Escape keeps the full stored name
+    await renameBtn(page).click();
+    await expect(renameInput(page)).toHaveValue(long.slice(0, 80));
+    await page.keyboard.press('Escape');
+    expect((await stored(page)).pieces[0].name).toBe(long);
+    // editing the cut name saves it
+    await renameBtn(page).click();
+    await page.keyboard.press('End');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#pieces form')).toHaveCount(0);
+    expect((await stored(page)).pieces[0].name).toBe(long.slice(0, 79));
+  });
+
+  const oddNames: [string, string][] = [
+    ['emoji and ZWJ sequences', '🏺 👩‍👩‍👧‍👦 🧑🏽‍🎨 🏳️‍🌈 ❤️‍🔥'],
+    ['Polish diacritics', 'Żółć gęślą jaźń ĄĆĘŁŃÓŚŹŻ'],
+    ['right-to-left and other scripts', 'كوب الشاي · כוס תה · 茶碗 · Ваза · गमला'],
+    ['an SQL-like string', "'; DROP TABLE pieces; --"],
+    ['quotes, backslashes and template syntax', `"a" 'b' \`c\` \\n \\\\ \${x} {{y}} %s`],
+    ['tabs and invisible characters', 'a\tb\u00a0c\u200bd\u200de\u202ef\u2066g\u2069'],
+  ];
+  for (const [what, name] of oddNames) {
+    test(`a name with ${what} round-trips through storage and a reload as text`, async ({
+      page,
+    }) => {
+      const nameText = () =>
+        pieces(page)
+          .locator('.top b')
+          .evaluate((b) => ({ text: b.textContent, elements: b.childElementCount }));
+      await openApp(page);
+      await saveBtn(page).click();
+      await renameBtn(page).click();
+      await renameInput(page).fill(name);
+      await expect(renameInput(page)).toHaveValue(name);
+      await page.keyboard.press('Enter');
+      expect(await nameText()).toEqual({ text: name, elements: 0 });
+      expect((await stored(page)).pieces[0].name).toBe(name);
+      expect(await renameBtn(page).getAttribute('aria-label')).toBe(`Zmień nazwę: ${name}`);
+      await page.reload();
+      expect(await nameText()).toEqual({ text: name, elements: 0 });
+      await renameBtn(page).click();
+      await expect(renameInput(page)).toHaveValue(name);
+    });
+  }
+
+  test('switching the language with a rename open does not throw', async ({ page }) => {
+    const errors: Error[] = [];
+    page.on('pageerror', (e) => errors.push(e));
+    await openApp(page);
+    await saveBtn(page).click();
+    await renameBtn(page).click();
+    await renameInput(page).fill('niezapisana');
+    await page.getByRole('button', { name: 'English', exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('button', { name: 'Rename: Praca 1' })).toBeVisible();
+    await expect(pieces(page).locator('b')).toHaveText('Praca 1');
+    await expect(page.locator('#pieces form')).toHaveCount(0);
+    expect(errors).toEqual([]);
+    expect((await stored(page)).pieces[0].name).toBe('Praca 1');
   });
 });
 

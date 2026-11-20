@@ -232,6 +232,7 @@ test.describe('language switch', () => {
       'too wet',
       'just right',
       'too dry',
+      'rename',
       'delete',
     ]);
     // the stored label stays in the language it was saved in

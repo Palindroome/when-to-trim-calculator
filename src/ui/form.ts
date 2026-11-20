@@ -284,6 +284,9 @@ export const readThrownMs = (nowMs: number): number => readDateTime('thrown') ||
 /** Wanted trim time (NaN when empty or invalid). */
 export const readWhenMs = (): number => readDateTime('when');
 
+/** The longest piece name the save and rename fields accept. */
+export const NAME_MAX_LENGTH = 80;
+
 export const readName = (): string => value('name').trim();
 
 /** Covers ticked in "Sposoby okrycia, których mogę użyć", in catalog order. */

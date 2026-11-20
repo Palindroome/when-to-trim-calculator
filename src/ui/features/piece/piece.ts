@@ -3,6 +3,7 @@ import { BATS, CLAYS, SHAPES, STAGES, WETNESS } from '../../../domain/types';
 import type { Messages } from '../../../i18n';
 import type { AppContext } from '../../context';
 import { options } from '../../dom';
+import { NAME_MAX_LENGTH } from '../../form';
 import { mountSteppers, numberField } from '../../stepper';
 import { stepCard } from '../cards/cards';
 
@@ -15,7 +16,7 @@ export function markup(m: Messages): string {
     'vessel',
     m.sections.piece,
     `<div class="grid">
-      <div class="full"><label for="name">${f.name}</label><input id="name" placeholder="${f.namePlaceholder}"></div>
+      <div class="full"><label for="name">${f.name}</label><input id="name" maxlength="${NAME_MAX_LENGTH}" placeholder="${f.namePlaceholder}"></div>
       <div><label for="mass">${f.mass}</label>${numberField(m, 'mass', f.mass, u.grams, 'value="500"')}</div>
       <div><label for="shape">${f.shape}</label>
         <select id="shape">

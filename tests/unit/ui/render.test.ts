@@ -97,6 +97,21 @@ describe('renderPieceList plan sentence', () => {
   });
 });
 
+describe('renderPieceList rename button', () => {
+  it('has one data-rename button per piece, with the escaped name in its aria-label', () => {
+    const html = renderPieceList(
+      view(pl),
+      [piece({ id: 'a', name: '<i>"x" & y' }), piece({ id: 'b', name: 'talerze', fb: null })],
+      start,
+    );
+    expect(html.match(/data-rename="/g)).toHaveLength(2);
+    expect(html).toContain(
+      '<button class="ghost ren" data-rename="a" aria-label="Zmień nazwę: &lt;i&gt;&quot;x&quot; &amp; y">zmień nazwę</button>',
+    );
+    expect(html).toContain('aria-label="Zmień nazwę: talerze"');
+  });
+});
+
 describe('renderSummaries', () => {
   const input: SummaryInput = {
     name: '',
