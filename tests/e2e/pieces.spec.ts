@@ -411,7 +411,7 @@ test.describe('renaming a piece', () => {
     ['right-to-left and other scripts', 'كوب الشاي · כוס תה · 茶碗 · Ваза · गमला'],
     ['an SQL-like string', "'; DROP TABLE pieces; --"],
     ['quotes, backslashes and template syntax', `"a" 'b' \`c\` \\n \\\\ \${x} {{y}} %s`],
-    ['tabs and invisible characters', 'a\tb c​d‍e‮f⁦g⁩'],
+    ['tabs and invisible characters', 'a\tb\u00a0c\u200bd\u200de\u202ef\u2066g\u2069'],
   ];
   for (const [what, name] of oddNames) {
     test(`a name with ${what} round-trips through storage and a reload as text`, async ({
