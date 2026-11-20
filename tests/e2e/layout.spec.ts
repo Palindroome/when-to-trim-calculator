@@ -247,6 +247,22 @@ test.describe('layout', () => {
     expect(badge.x).toBeGreaterThanOrEqual(name.x + name.width);
   });
 
+  test('phone: renaming a piece with a long name does not scroll sideways', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 700 });
+    await openApp(page);
+    await fill(page, 'Nazwa (opcjonalnie)', 'Bardzo długa nazwa pracy na czwartkowe kubki z uchem');
+    await page.getByRole('button', { name: 'Zapisz tę pracę z planem' }).click();
+    await page.getByRole('button', { name: /^Zmień nazwę:/ }).click();
+    const form = page.locator('#pieces form.rename');
+    await expect(form).toBeVisible();
+    const clientWidth = await pageFits(page);
+    for (const el of await form.locator('input, button').all()) {
+      const box = (await el.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
+    }
+  });
+
   test('on-target bars are highlighted', async ({ page }) => {
     await openApp(page);
     await page.locator('#quick').getByRole('button', { name: 'jutro' }).click();

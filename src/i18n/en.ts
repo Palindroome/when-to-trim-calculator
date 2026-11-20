@@ -325,6 +325,11 @@ export const en: Messages = {
     due: 'should be ready',
     meta: (thrown: string, forecast: string): string => `Thrown ${thrown} · forecast ${forecast}`,
     remove: 'delete',
+    rename: 'rename',
+    renameLabel: (name: string): string => `Rename: ${name}`,
+    renameInput: 'New name',
+    renameSave: 'Save',
+    renameCancel: 'Cancel',
   },
 
   calibration: {
