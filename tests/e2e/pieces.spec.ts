@@ -405,6 +405,36 @@ test.describe('renaming a piece', () => {
     expect((await stored(page)).pieces[0].name).toBe(`x${typed}`.slice(0, 80));
   });
 
+  test('a name stored before the limit opens cut to 80 characters and can be renamed', async ({
+    page,
+  }) => {
+    const long = 'abcdefghij'.repeat(12); // 120 characters
+    await openApp(page);
+    await saveBtn(page).click();
+    await page.evaluate(
+      ([k, name]) => {
+        const data = JSON.parse(localStorage.getItem(k!)!);
+        data.pieces[0].name = name;
+        localStorage.setItem(k!, JSON.stringify(data));
+      },
+      [STORAGE_KEY, long],
+    );
+    await page.reload();
+    await expect(pieces(page).locator('b')).toHaveText(long);
+    // Escape keeps the full stored name
+    await renameBtn(page).click();
+    await expect(renameInput(page)).toHaveValue(long.slice(0, 80));
+    await page.keyboard.press('Escape');
+    expect((await stored(page)).pieces[0].name).toBe(long);
+    // editing the cut name saves it
+    await renameBtn(page).click();
+    await page.keyboard.press('End');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#pieces form')).toHaveCount(0);
+    expect((await stored(page)).pieces[0].name).toBe(long.slice(0, 79));
+  });
+
   const oddNames: [string, string][] = [
     ['emoji and ZWJ sequences', '🏺 👩‍👩‍👧‍👦 🧑🏽‍🎨 🏳️‍🌈 ❤️‍🔥'],
     ['Polish diacritics', 'Żółć gęślą jaźń ĄĆĘŁŃÓŚŹŻ'],

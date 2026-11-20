@@ -195,9 +195,10 @@ function openRename(ctx: AppContext, id: string): void {
   const { m } = ctx.view;
   render(ctx);
   const row = byId('pieces').querySelector<HTMLElement>(`[data-piece="${CSS.escape(id)}"]`)!;
-  // no id on the input: a language switch captures and restores only inputs with an id
+  // no id on the input: a language switch captures and restores only inputs with an id.
+  // A name stored before the limit is cut to it, or the browser would block submitting an edit.
   row.querySelector('.top b')!.outerHTML = `<form class="rename" data-id="${esc(id)}">
-      <input type="text" maxlength="${NAME_MAX_LENGTH}" aria-label="${esc(m.pieces.renameInput)}" value="${esc(p.name)}">
+      <input type="text" maxlength="${NAME_MAX_LENGTH}" aria-label="${esc(m.pieces.renameInput)}" value="${esc(p.name.slice(0, NAME_MAX_LENGTH))}">
       <button class="ghost">${m.pieces.renameSave}</button>
       <button type="button" class="ghost" data-cancel>${m.pieces.renameCancel}</button>
     </form>`;
