@@ -30,6 +30,7 @@ test.describe('page shell', () => {
       'Ile to potrwa w każdym wariancie',
       '4Sprawdź wagą',
       '5Moje prace i kalibracja',
+      'Moje opatulenia',
     ]);
   });
 
@@ -45,6 +46,7 @@ test.describe('page shell', () => {
       'Ile to potrwa w każdym wariancie',
       '4 Sprawdź wagą',
       '5 Moje prace i kalibracja',
+      'Moje opatulenia',
     ];
     const h2 = page.getByRole('heading', { level: 2 });
     await expect(h2).toHaveCount(names.length);
@@ -83,9 +85,9 @@ test.describe('page shell', () => {
       '%',
       '°C',
       '%',
+      'g',
       // "Moje opatulenia": a custom cover's speed
       '%',
-      'g',
     ]);
   });
 

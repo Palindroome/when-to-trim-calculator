@@ -26,7 +26,9 @@ const iconPath = (scope: ReturnType<Page['locator']>) =>
 const radioIcon = (page: Page, name: string) =>
   page.locator('.cc-icon').filter({ has: page.getByRole('radio', { name, exact: true }) });
 
-const toggle = (page: Page) => page.getByRole('button', { name: 'Moje opatulenia' });
+const toggle = (page: Page) => page.getByRole('button', { name: 'Moje opatulenia', exact: true });
+const jump = (page: Page) =>
+  page.locator('#covers').getByRole('button', { name: /^Moje opatulenia/ });
 
 async function openCovers(page: Page): Promise<void> {
   await toggle(page).click();
@@ -190,7 +192,10 @@ test.describe('custom covers', () => {
     await page.locator('[data-lang="en"]').click();
     await expect(page.locator('.rec .big')).toHaveText('Use the cover “Szmatka” straight away.');
     await expect(bar(page, 'Szmatka')).toHaveCount(1);
-    await page.getByRole('button', { name: 'My covers' }).click();
+    await expect(
+      page.locator('#covers').getByRole('button', { name: 'My covers (1)' }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'My covers', exact: true }).click();
     await expect(page.locator('#cc-list li')).toContainText('≈ 20% of the uncovered speed');
     await expect(page.getByRole('button', { name: 'Add a cover' })).toBeVisible();
   });
@@ -386,6 +391,99 @@ test.describe('custom covers', () => {
     await expect(page.locator('#calib tr').nth(1)).toContainText(name);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
   });
+
+  test('the card sits folded between "Moje prace" and "Jak to liczy", not in "Warunki"', async ({
+    page,
+  }) => {
+    await openApp(page);
+    const card = page.locator('main > section').filter({ has: toggle(page) });
+    await expect(card).toHaveClass(/\bcard\b/);
+    await expect(card.locator('xpath=preceding-sibling::section[1]')).toContainText(
+      'Moje prace i kalibracja',
+    );
+    await expect(card.locator('xpath=following-sibling::section[1]')).toHaveClass(/explainer/);
+    await expect(page.locator('[data-step]').filter({ has: toggle(page) })).toHaveCount(0);
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(addBtn(page)).toBeHidden();
+    await openCovers(page);
+    await expect(addBtn(page)).toBeVisible();
+    await toggle(page).click();
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(addBtn(page)).toBeHidden();
+  });
+
+  test('"Moje opatulenia (N)" beside the cover filter counts the covers, opens the card and moves focus there', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 700 });
+    await openApp(page);
+    await expect(jump(page)).toHaveText('Moje opatulenia (0)');
+    // on the legend's row
+    const legend = (await page.locator('#covers legend').boundingBox())!;
+    const button = (await jump(page).boundingBox())!;
+    expect(button.y).toBeLessThan(legend.y + legend.height);
+    expect(button.x).toBeGreaterThan(legend.x + legend.width);
+
+    await jump(page).click();
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await expect(toggle(page)).toBeFocused();
+    await expect(addBtn(page)).toBeInViewport();
+    await addCover(page, 'Szmatka', { percent: '20' });
+    await expect(jump(page)).toHaveText('Moje opatulenia (1)');
+
+    // a second use leaves the open card open
+    await jump(page).click();
+    await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
+    await expect(toggle(page)).toBeFocused();
+    await page.getByRole('button', { name: 'usuń: Szmatka', exact: true }).click();
+    await expect(jump(page)).toHaveText('Moje opatulenia (0)');
+  });
+
+  test('the first-run wizard does not offer the button to a card it hides', async ({ page }) => {
+    await openApp(page, { wizard: true });
+    await expect(page.locator('main.wizard')).toHaveCount(1);
+    await expect(jump(page)).toBeHidden();
+  });
+
+  test('the icon picker offers 17 icons, each with its own name and drawing', async ({ page }) => {
+    await openApp(page);
+    await openCovers(page);
+    await addBtn(page).click();
+    const radios = page.locator('.cc-icons').getByRole('radio');
+    await expect(radios).toHaveCount(17);
+    const names = await radios.evaluateAll((els) =>
+      els.map((e) => e.closest('label')!.textContent!.trim()),
+    );
+    expect(new Set(names).size).toBe(17);
+    for (const name of ['folia spożywcza', 'ręcznik', 'odwrócona miska', 'gąbka', 'karton'])
+      await expect(page.getByRole('radio', { name, exact: true })).toHaveCount(1);
+    const drawings = await page
+      .locator('.cc-icon svg')
+      .evaluateAll((els) => els.map((e) => e.innerHTML));
+    expect(new Set(drawings).size).toBe(17);
+    await fillCover(page, 'Folia', { icon: 'folia spożywcza' });
+    expect((await storedCovers(page)).covers[0].icon).toBe('clingFilm');
+  });
+
+  for (const width of [320, 375, 1280]) {
+    test(`${width} px: "Anuluj" sits on the same row as "Zapisz" while editing`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await openApp(page);
+      await openCovers(page);
+      await addCover(page, 'Szmatka', { percent: '20' });
+      await page.getByRole('button', { name: 'edytuj: Szmatka', exact: true }).click();
+      const save = (await saveCoverBtn(page).boundingBox())!;
+      const cancel = (await page.getByRole('button', { name: 'Anuluj' }).boundingBox())!;
+      expect(Math.abs(cancel.y - save.y)).toBeLessThan(1);
+      expect(cancel.height).toBeCloseTo(save.height, 0);
+      expect(cancel.x).toBeGreaterThanOrEqual(save.x + save.width);
+      const form = (await page.locator('#cc-form').boundingBox())!;
+      expect(cancel.x + cancel.width).toBeLessThanOrEqual(form.x + form.width);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    });
+  }
 
   test('a garbage covers key means no custom covers', async ({ page }) => {
     await openApp(page, { covers: '{not json' });

@@ -253,6 +253,7 @@ export const en: Messages = {
     customPhrase: (name: string): string => `use the cover “${name}”`,
     custom: {
       title: 'My covers',
+      jump: (n: number): string => `My covers (${n})`,
       intro:
         'Your own ways of covering a piece, e.g. a paper bag, newspaper or an upturned bucket. They count in the comparison, the recommendation and the calibration just like the built-in ones.',
       empty: 'You have no covers of your own yet.',
@@ -274,6 +275,14 @@ export const en: Messages = {
         paperBag: 'paper bag',
         newspaper: 'newspaper',
         bucket: 'bucket',
+        clingFilm: 'cling film',
+        towel: 'towel',
+        dome: 'upturned bowl',
+        sheet: 'sheet',
+        board: 'ware board',
+        sponge: 'sponge',
+        jar: 'jar',
+        carton: 'cardboard box',
       },
       speed: 'How much does it slow drying?',
       presets: {

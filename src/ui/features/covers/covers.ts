@@ -5,6 +5,7 @@ import type { AppContext } from '../../context';
 import { byId, esc } from '../../dom';
 import { coverIcon, icon } from '../../icons';
 import { type CatalogCover, coverLabel } from '../../render';
+import * as customCovers from '../custom-covers/custom-covers';
 
 /**
  * Check (ticked) and cross (unticked) icons of a cover pill, drawn as a badge on the cover's icon;
@@ -23,6 +24,7 @@ const pills = (m: Messages, covers: readonly CatalogCover[]): string =>
 export function markup(m: Messages, covers: readonly CatalogCover[]): string {
   return `<fieldset class="covers" id="covers">
       <legend>${m.covers.filterTitle}</legend>
+      ${customCovers.jumpMarkup}
       <div class="opts">
         ${pills(m, covers)}
       </div>

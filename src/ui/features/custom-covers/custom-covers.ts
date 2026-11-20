@@ -1,4 +1,4 @@
-// "Moje opatulenia" at the end of section 2: the user's own covers, and the form that adds or edits one.
+// "Moje opatulenia", a folded card after "Moje prace": the user's own covers, and the form that adds or edits one.
 import { COVER_PRESETS, type CoverPresetId } from '../../../domain/covers';
 import type { Formatter, Messages } from '../../../i18n';
 import type { StoredCover } from '../../../storage/covers';
@@ -6,7 +6,7 @@ import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
 import { NUMBER_PATTERN, parseNumber } from '../../form';
 import { CUSTOM_COVER_ICONS, coverIcon, icon, isCustomCoverIcon } from '../../icons';
-import { toggleHeight } from '../../motion';
+import { scrollBehavior, toggleHeight } from '../../motion';
 import type { CatalogCover } from '../../render';
 
 /** Keeps the comparison bars readable and the two-phase search (pairs of covers) fast. */
@@ -67,8 +67,8 @@ export function markup(m: Messages): string {
     (name, i) =>
       `<label class="cc-icon" title="${t.icons[name]}"><input type="radio" name="cc-icon" value="${name}"${i === 0 ? ' checked' : ''}><span class="face">${icon(name)}<span class="vh">${t.icons[name]}</span></span></label>`,
   ).join('');
-  return `<div class="cc" id="cc">
-      <button type="button" class="cc-toggle" id="cc-toggle" aria-expanded="false" aria-controls="cc-body">${t.title}${icon('chevronDown')}</button>
+  return `<section class="card cc">
+      <h2 class="cc-head"><button type="button" class="cc-toggle" id="cc-toggle" aria-expanded="false" aria-controls="cc-body">${icon('cover')}${t.title}</button></h2>
       <div class="hide" id="cc-body">
       <p class="muted">${t.intro}</p>
       <div id="cc-list"></div>
@@ -87,8 +87,11 @@ export function markup(m: Messages): string {
         <div class="cc-actions"><button type="submit" class="main">${t.save}</button><button type="button" class="ghost" id="cc-cancel">${t.cancel}</button></div>
       </form>
       </div>
-    </div>`;
+    </section>`;
 }
+
+/** The button beside the cover filter in "Termin" that opens the card; `render` writes its count. */
+export const jumpMarkup = `<button type="button" class="ghost cc-jump" id="cc-jump" aria-controls="cc-body"></button>`;
 
 /** Re-renders the list of the user's covers and the limit state of the add button. */
 export function render(ctx: AppContext): void {
@@ -109,6 +112,7 @@ export function render(ctx: AppContext): void {
   if (full) add.setAttribute('aria-describedby', 'cc-limit');
   else add.removeAttribute('aria-describedby');
   byId('cc-limit').classList.toggle('hide', !full);
+  byId('cc-jump').textContent = t.jump(covers.length);
 }
 
 /** Shows or clears the inline message of a form field, tied to it with `aria-describedby`. */
@@ -235,20 +239,30 @@ export function mount(root: HTMLElement, ctx: AppContext): void {
     add.focus();
   }
 
+  const toggle = byId('cc-toggle');
+  const card = toggle.closest<HTMLElement>('section')!;
+  const expand = (on: boolean): void => {
+    toggle.setAttribute('aria-expanded', String(on));
+    toggleHeight(byId('cc-body'), on);
+  };
+
   render(ctx);
   preset.addEventListener('change', syncOwn);
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     save();
   });
-  byId('cc').addEventListener('click', (e) => {
+  // from "Termin": open the card and move there, focus on its toggle
+  byId('cc-jump').addEventListener('click', () => {
+    if (toggle.getAttribute('aria-expanded') !== 'true') expand(true);
+    card.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+    toggle.focus({ preventScroll: true });
+  });
+  card.addEventListener('click', (e) => {
     const b = closest(e, '#cc-toggle, #cc-add, #cc-cancel, [data-cc-edit], [data-cc-del]');
     if (!b) return;
-    if (b.id === 'cc-toggle') {
-      const expand = b.getAttribute('aria-expanded') !== 'true';
-      b.setAttribute('aria-expanded', String(expand));
-      toggleHeight(byId('cc-body'), expand);
-    } else if (b.id === 'cc-add') open(null);
+    if (b.id === 'cc-toggle') expand(b.getAttribute('aria-expanded') !== 'true');
+    else if (b.id === 'cc-add') open(null);
     else if (b.id === 'cc-cancel') close(editing ? editButton(editing.id) : null);
     else if (b.dataset.ccEdit)
       open(ctx.customCovers.find((c) => c.id === b.dataset.ccEdit) ?? null);

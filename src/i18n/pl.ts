@@ -279,6 +279,8 @@ export const pl = {
     /** "Moje opatulenia": the user's own covers */
     custom: {
       title: 'Moje opatulenia',
+      /** the button beside the cover filter in "Termin" that opens the card; n = the user's covers */
+      jump: (n: number): string => `Moje opatulenia (${n})`,
       intro:
         'Własne sposoby okrycia, np. papierowa torba, gazeta albo odwrócone wiadro. Liczą się w porównaniu, rekomendacji i kalibracji tak jak wbudowane.',
       empty: 'Nie masz jeszcze własnych opatuleń.',
@@ -300,6 +302,14 @@ export const pl = {
         paperBag: 'papierowa torba',
         newspaper: 'gazeta',
         bucket: 'wiadro',
+        clingFilm: 'folia spożywcza',
+        towel: 'ręcznik',
+        dome: 'odwrócona miska',
+        sheet: 'płachta',
+        board: 'deska z pracami',
+        sponge: 'gąbka',
+        jar: 'słoik',
+        carton: 'karton',
       },
       speed: 'Jak bardzo spowalnia schnięcie?',
       presets: {

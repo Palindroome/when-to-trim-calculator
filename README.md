@@ -104,9 +104,10 @@ src/
       header/         heading (a link back to the welcome screen), language switch, theme switch
       piece/          section 1 "Praca"
       conditions/     section 2 "Warunki", night switch, optional fill from the weather forecast (map dialog, lazy Leaflet chunk)
-      custom-covers/  "Moje opatulenia" at the end of section 2: add, edit and remove the user's own covers
+      custom-covers/  "Moje opatulenia", a folded card between section 5 and the explainer: add, edit and remove the user's own covers;
+                      a "Moje opatulenia (N)" button beside the section 3 cover filter opens it (not offered in the wizard)
       datetime/       section 3 day + time pickers: calendar dialog (Cally), quick choices
-      covers/         section 3 cover filter
+      covers/         section 3 cover filter (built-in and user-defined covers as pills)
       result/         recommendation, comparison bars, alternatives, tips, save button
       weight/         section 4 weight check
       pieces/         section 5: saved pieces, feedback, calibration table

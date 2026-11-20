@@ -6,7 +6,6 @@ import { byId, options } from '../../dom';
 import { toggleHeight } from '../../motion';
 import { mountSteppers, numberField } from '../../stepper';
 import { stepCard } from '../cards/cards';
-import * as customCovers from '../custom-covers/custom-covers';
 import * as weatherFill from './weather';
 
 /** `weatherHours`: the forecast window of the weather fill offered below the temperature and humidity; null for none. */
@@ -31,8 +30,7 @@ export function markup(m: Messages, weatherHours: number | null): string {
       <div class="night"><label for="nrh">${f.nightRh}</label>${numberField(m, 'nrh', f.nightRh, u.percent, 'value="60"')}</div>
       <div><label for="dtemp">${f.dampTemp}</label>${numberField(m, 'dtemp', f.dampTemp, u.celsius, 'value="15"')}</div>
       <div><label for="drh">${f.dampRh}</label>${numberField(m, 'drh', f.dampRh, u.percent, 'value="88"')}</div>
-    </div>
-    ${customCovers.markup(m)}`,
+    </div>`,
   );
 }
 

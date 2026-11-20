@@ -3,6 +3,7 @@ import type { Messages } from '../i18n';
 import { stepCard } from './features/cards/cards';
 import * as conditions from './features/conditions/conditions';
 import * as coverFilter from './features/covers/covers';
+import * as customCovers from './features/custom-covers/custom-covers';
 import * as datetime from './features/datetime/datetime';
 import * as explainer from './features/explainer/explainer';
 import * as header from './features/header/header';
@@ -40,6 +41,7 @@ export function renderShell(
     wizard.navMarkup(m),
     weight.markup(m, covers),
     pieces.markup(m),
+    customCovers.markup(m),
     explainer.markup(m),
   ].join('\n  ');
 }
