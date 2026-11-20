@@ -9,7 +9,7 @@ import type { Messages } from '../../../i18n';
 import type { StoredPiece } from '../../../storage/pieces';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
-import { readName } from '../../form';
+import { NAME_MAX_LENGTH, readName } from '../../form';
 import { icon } from '../../icons';
 import { enter, exit, scrollBehavior } from '../../motion';
 import { coverLabel, coverPhrase, planText, type View } from '../../render';
@@ -89,6 +89,7 @@ export function renderPieceList(v: View, pieces: readonly StoredPiece[], nowMs: 
           <div class="meta">${esc(storedPlanText(v, p))}<br>${h.times}</div>
           <div class="fb">
             ${p.fb ? '' : `<span class="muted">${m.pieces.feedbackPrompt}</span>${buttons}`}
+            <button class="ghost ren" data-rename="${esc(p.id)}" aria-label="${esc(m.pieces.renameLabel(p.name))}">${m.pieces.rename}</button>
             <button class="ghost del" data-del="${p.id}">${m.pieces.remove}</button>
           </div></div>`;
     })
@@ -168,10 +169,63 @@ function remove(ctx: AppContext, id: string, row: HTMLElement): void {
   });
 }
 
+/** Re-renders the list, closing an open rename, and focuses the piece's rename button. */
+function closeRename(ctx: AppContext, id: string): void {
+  render(ctx);
+  byId('pieces')
+    .querySelector<HTMLElement>(`[data-rename="${CSS.escape(id)}"]`)
+    ?.focus();
+}
+
+/** Stores the trimmed new name; an empty or unchanged one keeps the old name. */
+function rename(ctx: AppContext, id: string, name: string): void {
+  const p = ctx.pieces.find((x) => x.id === id);
+  const next = name.trim();
+  if (p && next && next !== p.name) {
+    p.name = next;
+    ctx.storePieces(ctx.pieces);
+  }
+  closeRename(ctx, id);
+}
+
+/** Swaps the piece's name for an inline form; an open rename on another piece is dropped. */
+function openRename(ctx: AppContext, id: string): void {
+  const p = ctx.pieces.find((x) => x.id === id);
+  if (!p) return;
+  const { m } = ctx.view;
+  render(ctx);
+  const row = byId('pieces').querySelector<HTMLElement>(`[data-piece="${CSS.escape(id)}"]`)!;
+  // no id on the input: a language switch captures and restores only inputs with an id.
+  // A name stored before the limit is cut to it, or the browser would block submitting an edit.
+  row.querySelector('.top b')!.outerHTML = `<form class="rename" data-id="${esc(id)}">
+      <input type="text" maxlength="${NAME_MAX_LENGTH}" aria-label="${esc(m.pieces.renameInput)}" value="${esc(p.name.slice(0, NAME_MAX_LENGTH))}">
+      <button class="ghost">${m.pieces.renameSave}</button>
+      <button type="button" class="ghost" data-cancel>${m.pieces.renameCancel}</button>
+    </form>`;
+  const input = row.querySelector<HTMLInputElement>('.rename input')!;
+  input.focus();
+  input.select();
+}
+
 export function mount(root: HTMLElement, ctx: AppContext): void {
-  root.querySelector('#pieces')!.addEventListener('click', (e) => {
-    const b = closest(e, '[data-fb], [data-del]');
+  const list = root.querySelector<HTMLElement>('#pieces')!;
+  list.addEventListener('click', (e) => {
+    const b = closest(e, '[data-fb], [data-del], [data-rename], [data-cancel]');
     if (b?.dataset.fb) feedback(ctx, b.dataset.id ?? '', b.dataset.fb as FeedbackKind);
+    else if (b?.dataset.rename !== undefined) openRename(ctx, b.dataset.rename);
+    else if (b?.hasAttribute('data-cancel'))
+      closeRename(ctx, b.closest<HTMLElement>('form')!.dataset.id ?? '');
     else if (b) remove(ctx, b.dataset.del ?? '', b.closest<HTMLElement>('.piece')!);
+  });
+  list.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    rename(ctx, form.dataset.id ?? '', form.querySelector('input')!.value);
+  });
+  list.addEventListener('keydown', (e) => {
+    const form = (e.target as HTMLElement).closest<HTMLElement>('form.rename');
+    if (e.key !== 'Escape' || !form) return;
+    e.preventDefault();
+    closeRename(ctx, form.dataset.id ?? '');
   });
 }

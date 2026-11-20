@@ -20,6 +20,8 @@
 }
 .piece b {
   font-weight: 600;
+  /* a long name without spaces breaks inside the row instead of widening the page */
+  overflow-wrap: anywhere;
 }
 .piece .meta {
   font-size: var(--text-sm);
@@ -33,8 +35,20 @@
   flex-wrap: wrap;
   align-items: center;
 }
-.piece .del {
+/* rename and delete sit together at the end of the row */
+.piece .ren {
   margin-left: auto;
+}
+.piece .rename {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.piece .rename input {
+  flex: 1 1 10rem;
+  min-width: 0;
 }
 .badge {
   font-size: var(--text-xs);

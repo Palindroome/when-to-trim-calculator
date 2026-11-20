@@ -360,6 +360,11 @@ export const pl = {
     due: 'powinna być gotowa',
     meta: (thrown: string, forecast: string): string => `Toczona ${thrown} · prognoza ${forecast}`,
     remove: 'usuń',
+    rename: 'zmień nazwę',
+    renameLabel: (name: string): string => `Zmień nazwę: ${name}`,
+    renameInput: 'Nowa nazwa',
+    renameSave: 'Zapisz',
+    renameCancel: 'Anuluj',
   },
 
   calibration: {
