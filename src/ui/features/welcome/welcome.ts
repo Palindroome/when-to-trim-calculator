@@ -109,6 +109,13 @@ export function createWelcome(
 
   // root outlives every render, so one listener serves every shell
   root.addEventListener('click', (e) => {
+    // the heading links home; a modified or non-primary click is left to the browser (new tab, new window)
+    if (closest(e, 'a.brand') && e instanceof MouseEvent) {
+      if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      if (!open) show();
+      return;
+    }
     const b = closest(e, 'button');
     if (!b) return;
     if (b.id === 'welcome-new') close(actions.onNew);

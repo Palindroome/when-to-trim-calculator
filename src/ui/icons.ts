@@ -11,6 +11,11 @@ interface IconDef {
 }
 
 const ICONS = {
+  // page heading: a bowl with a trimmed foot ring on the wheel head
+  wheel: {
+    body: '<ellipse cx="12" cy="6" rx="7" ry="1.5"/><path d="M5 6a7 7 0 0 0 14 0M9.5 12.5V14h5v-1.5"/><ellipse cx="12" cy="16.5" rx="9" ry="2.5"/><path d="M12 19v2.5"/>',
+    size: 24,
+  },
   // theme switch
   system: { body: '<rect x="2" y="3" width="14" height="10" rx="1"/><path d="M6 16h6M9 13v3"/>' },
   light: {

@@ -28,6 +28,8 @@ export const pl = {
   lang: 'pl',
   title: 'Kiedy trymować? – prototyp',
   heading: 'Kiedy trymować?',
+  /** hint on the heading, which links back to the welcome screen */
+  home: 'Wróć do ekranu startowego',
   lead: 'Podaj pracę, warunki i termin trymowania. Kalkulator podpowie, jak ją opatulić, i z każdą zapisaną pracą uczy się Twojej pracowni.',
 
   /** Language switch; `names` are endonyms, keyed by locale code. */

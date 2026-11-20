@@ -98,7 +98,7 @@ src/
     numbers.ts        counting numbers in the result: their markup, per-frame wording and when they snap
     dom.ts            byId, esc, options, closest (event delegation)
     features/         one folder per feature; each keeps its markup next to its wiring and exports mount(root, ctx)
-      header/         heading, language switch, theme switch
+      header/         heading (a link back to the welcome screen), language switch, theme switch
       piece/          section 1 "Praca"
       conditions/     section 2 "Warunki", night switch, optional fill from the weather forecast (map dialog, lazy Leaflet chunk)
       datetime/       section 3 day + time pickers: calendar dialog (Cally), quick choices

@@ -1,4 +1,32 @@
 /* page header */
+/* the heading links back to the welcome screen; it looks like plain heading text with the wheel icon */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+.brand svg {
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+  color: var(--accent);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.brand:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+.brand:hover svg {
+  transform: translateY(-2px);
+}
+.brand:focus-visible {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: var(--ring-width);
+}
 /* language and theme switches: small segmented controls */
 .seg {
   display: flex;
