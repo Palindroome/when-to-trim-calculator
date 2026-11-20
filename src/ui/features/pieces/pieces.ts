@@ -9,7 +9,7 @@ import type { Messages } from '../../../i18n';
 import type { StoredPiece } from '../../../storage/pieces';
 import type { AppContext } from '../../context';
 import { byId, closest, esc } from '../../dom';
-import { readName } from '../../form';
+import { NAME_MAX_LENGTH, readName } from '../../form';
 import { icon } from '../../icons';
 import { enter, exit, scrollBehavior } from '../../motion';
 import { coverLabel, coverPhrase, planText, type View } from '../../render';
@@ -197,7 +197,7 @@ function openRename(ctx: AppContext, id: string): void {
   const row = byId('pieces').querySelector<HTMLElement>(`[data-piece="${CSS.escape(id)}"]`)!;
   // no id on the input: a language switch captures and restores only inputs with an id
   row.querySelector('.top b')!.outerHTML = `<form class="rename" data-id="${esc(id)}">
-      <input type="text" aria-label="${esc(m.pieces.renameInput)}" value="${esc(p.name)}">
+      <input type="text" maxlength="${NAME_MAX_LENGTH}" aria-label="${esc(m.pieces.renameInput)}" value="${esc(p.name)}">
       <button class="ghost">${m.pieces.renameSave}</button>
       <button type="button" class="ghost" data-cancel>${m.pieces.renameCancel}</button>
     </form>`;

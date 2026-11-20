@@ -387,6 +387,24 @@ test.describe('renaming a piece', () => {
     await expect(page.locator('#pieces img')).toHaveCount(0);
   });
 
+  test('the save and rename name fields stop at 80 characters', async ({ page }) => {
+    const typed = `${'0123456789'.repeat(9)}abcde`; // 95 characters
+    await openApp(page);
+    const nameField = page.getByRole('textbox', { name: 'Nazwa (opcjonalnie)' });
+    await nameField.pressSequentially(typed);
+    await expect(nameField).toHaveValue(typed.slice(0, 80));
+    await saveBtn(page).click();
+    expect((await stored(page)).pieces[0].name).toBe(typed.slice(0, 80));
+
+    await renameBtn(page).click();
+    await renameInput(page).press('Delete');
+    await renameInput(page).pressSequentially(`x${typed}`);
+    await expect(renameInput(page)).toHaveValue(`x${typed}`.slice(0, 80));
+    await page.keyboard.press('Enter');
+    await expect(pieces(page).locator('b')).toHaveText(`x${typed}`.slice(0, 80));
+    expect((await stored(page)).pieces[0].name).toBe(`x${typed}`.slice(0, 80));
+  });
+
   test('switching the language with a rename open does not throw', async ({ page }) => {
     const errors: Error[] = [];
     page.on('pageerror', (e) => errors.push(e));
