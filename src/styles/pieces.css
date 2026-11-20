@@ -20,6 +20,8 @@
 }
 .piece b {
   font-weight: 600;
+  /* a long name without spaces breaks inside the row instead of widening the page */
+  overflow-wrap: anywhere;
 }
 .piece .meta {
   font-size: var(--text-sm);

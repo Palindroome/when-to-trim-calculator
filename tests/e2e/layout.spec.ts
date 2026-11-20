@@ -263,6 +263,30 @@ test.describe('layout', () => {
     }
   });
 
+  for (const width of [320, 375]) {
+    test(`${width}px: an unbroken long piece name wraps in the list and in the open rename`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 700 });
+      await openApp(page);
+      await fill(page, 'Nazwa (opcjonalnie)', 'Kubek'.repeat(16));
+      await page.getByRole('button', { name: 'Zapisz tę pracę z planem' }).click();
+      const clientWidth = await pageFits(page);
+      const inside = async (l: Locator) => {
+        for (const box of await rects(l)) {
+          expect(box.x).toBeGreaterThanOrEqual(0);
+          expect(box.x + box.width).toBeLessThanOrEqual(clientWidth);
+        }
+      };
+      await inside(page.locator('#pieces .piece .top > *, #pieces .piece .fb > *'));
+      await page.getByRole('button', { name: /^Zmień nazwę:/ }).click();
+      const form = page.locator('#pieces form.rename');
+      await expect(form).toBeVisible();
+      await pageFits(page);
+      await inside(form.locator('input, button'));
+    });
+  }
+
   test('on-target bars are highlighted', async ({ page }) => {
     await openApp(page);
     await page.locator('#quick').getByRole('button', { name: 'jutro' }).click();
