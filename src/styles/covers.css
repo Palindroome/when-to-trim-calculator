@@ -5,14 +5,20 @@
   padding: 0;
   border: 0;
 }
+/* floated, so the "Moje opatulenia (N)" button after it shares its row while both fit */
 .covers legend {
+  float: left;
+  display: flex;
+  align-items: center;
+  min-height: var(--control-h-sm);
   padding: 0;
-  margin-bottom: var(--space-1);
+  margin: 0 var(--space-3) var(--space-1) 0;
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text);
 }
 .covers .opts {
+  clear: both;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
@@ -25,6 +31,7 @@
 .pill {
   position: relative;
   display: block;
+  max-width: 100%;
   margin: 0;
   font-size: var(--text-sm);
   font-weight: 400;
@@ -47,7 +54,8 @@
   gap: var(--space-1);
   min-height: var(--control-h);
   padding: 0 var(--space-2);
-  white-space: nowrap;
+  /* a pill moves to the next row as a whole; only a name wider than the row (a custom cover's) wraps */
+  overflow-wrap: anywhere;
   color: var(--text-muted);
   background: var(--surface);
   border: 1px solid var(--input-border);
@@ -102,4 +110,173 @@
 }
 .pill input:disabled {
   cursor: not-allowed;
+}
+
+.cc-jump {
+  float: left;
+  margin-bottom: var(--space-1);
+}
+main.wizard .cc-jump {
+  display: none;
+}
+
+/* "Moje opatulenia": a folded card with the user's own covers, opened like the explainer */
+.cc-head {
+  margin: 0;
+}
+.cc-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--control-h);
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--text-md);
+  font-weight: 600;
+  text-align: left;
+  color: var(--text);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.cc-toggle > svg {
+  flex: none;
+  color: var(--text-muted);
+}
+/* the same chevron as the explainer's summary */
+.cc-toggle::after {
+  content: "";
+  flex: none;
+  margin-left: auto;
+  width: var(--space-2);
+  height: var(--space-2);
+  margin-right: var(--space-1);
+  border-right: var(--line-strong) solid var(--text-muted);
+  border-bottom: var(--line-strong) solid var(--text-muted);
+  transform: rotate(45deg);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.cc-toggle[aria-expanded="true"]::after {
+  transform: rotate(-135deg);
+}
+.cc p {
+  margin: var(--space-2) 0;
+  font-size: var(--text-sm);
+}
+.cc-list {
+  margin: var(--space-2) 0;
+  padding: 0;
+  list-style: none;
+}
+.cc-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+.cc-list .cover-ico {
+  flex: none;
+}
+.cc-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+.cc-acts {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+.cc button.ghost svg {
+  vertical-align: -3px;
+  margin-right: var(--space-1);
+}
+.cc-form {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
+}
+.cc-form h3 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-md);
+  overflow-wrap: anywhere;
+}
+.cc-form input[aria-invalid="true"] {
+  border-color: var(--warn);
+  border-width: var(--line-strong);
+}
+.cc-icons {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.cc-icons legend {
+  padding: 0;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.cc-icons .opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+/* icon choice: a real radio stretched invisibly over the visible face, like the cover pills */
+.cc-icon {
+  position: relative;
+  margin: 0;
+}
+.cc-icon input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  /* a native radio keeps the browser's 50% radius; this one is invisible, so it drops the native look */
+  appearance: none;
+  border-radius: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.cc-icon .face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-h);
+  height: var(--control-h);
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
+}
+.cc-icon input:checked + .face {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.cc-icon input:focus-visible + .face {
+  outline: var(--ring-width) solid var(--ring);
+  outline-offset: var(--ring-width);
+}
+/* save and cancel on one row at every width: save takes the room the cancel button leaves */
+.cc-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.cc-actions .main {
+  flex: 1 1 auto;
+  width: auto;
+}
+.cc-actions .ghost {
+  flex: none;
+  min-height: var(--control-h);
 }

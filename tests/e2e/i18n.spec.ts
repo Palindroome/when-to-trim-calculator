@@ -67,6 +67,7 @@ test.describe('language switch', () => {
       'How long each option takes',
       '4Check by weight',
       '5My pieces and calibration',
+      'My covers',
     ]);
     await expect(page.locator('#quick .chip')).toHaveText([
       'tomorrow',

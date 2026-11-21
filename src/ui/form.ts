@@ -93,7 +93,7 @@ const NUMBER_IDS = Object.keys(NUMBER_FIELDS) as NumberFieldId[];
 export const isNumberField = (id: string): id is NumberFieldId => id in NUMBER_FIELDS;
 
 /** A plain decimal number, with a dot or a comma. */
-const NUMBER_PATTERN = /^[+-]?(\d+([.,]\d*)?|[.,]\d+)$/;
+export const NUMBER_PATTERN = /^[+-]?(\d+([.,]\d*)?|[.,]\d+)$/;
 
 export type NumberCheck = 'ok' | 'empty' | 'nan' | 'range';
 

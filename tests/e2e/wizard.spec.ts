@@ -52,6 +52,7 @@ const ALL = [
   '#result',
   '4Sprawdź wagą',
   '5Moje prace i kalibracja',
+  'Moje opatulenia',
   'Jak to liczy – krok po kroku',
 ];
 

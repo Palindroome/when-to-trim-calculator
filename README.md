@@ -56,7 +56,8 @@ src/
     *.css             one partial per component: header, form, datetime, covers, buttons, result, pieces, explainer, footer, wizard, welcome, cards
   domain/             pure logic, no DOM; unit-tested
     types.ts          ids (ShapeId, ClayId, ...), Piece, Conditions, Plan
-    covers.ts         CoverId, CoverDefinition (factor, airflow, environment, planner gate), coverById
+    covers.ts         CoverId, CoverDefinition (factor, airflow, environment, planner gate), coverById,
+                      withCustomCovers (user-defined covers ordered among the built-ins), CoverPresetId
     params.ts         ModelParams + DEFAULT_PARAMS: every model constant in one typed object, including the built-in covers
     piece.ts          derivePiece: area, slowness, target loss / trimming window (pieceBreakdown: with every intermediate)
     physics.ts        psat, climate (VPD), airFactor, RateModel interface, physicalRateModel
@@ -76,6 +77,7 @@ src/
     index.ts          locale registry, getMessages(), resolveLocale() (initial language)
   storage/
     pieces.ts         StoredPiece (v1 format), PieceRepository, LocalStoragePieceRepository
+    covers.ts         StoredCover, CoverRepository, LocalStorageCoverRepository: the user's own covers (own key, `kiedy-trymowac-covers`)
     preferences.ts    chosen UI language (`kiedy-trymowac-lang`), theme (`kiedy-trymowac-theme`) and weather place (`kiedy-trymowac-weather-place`)
     wizard.ts         WizardStore: whether the first-run wizard was finished or skipped (own key, `kiedy-trymowac-wizard`)
     activity.ts       ActivityStore: time of the last interaction, for the welcome screen (own key, `kiedy-trymowac-last-active`)
@@ -93,7 +95,8 @@ src/
     render.ts         View, and the cover and plan wording several features share
     calibration.ts    perCoverCalibration: the calibration of every cover, for the bars and the calibration table
     footer.ts         site footer: author's profile links with inline SVG icons
-    icons.ts          icon(name) and coverIcon(id): the decorative stroke icons (headings, result, controls); covers without one get a neutral icon
+    icons.ts          icon(name) and coverIcon(cover): the decorative stroke icons (headings, result, controls); covers without one get a neutral icon;
+                      CUSTOM_COVER_ICONS, the icons a user-defined cover can pick
     motion.ts         every UI animation (WAAPI with a spring as CSS linear(), counting numbers); nothing under reduced motion
     numbers.ts        counting numbers in the result: their markup, per-frame wording and when they snap
     dom.ts            byId, esc, options, closest (event delegation)
@@ -101,8 +104,10 @@ src/
       header/         heading (a link back to the welcome screen), language switch, theme switch
       piece/          section 1 "Praca"
       conditions/     section 2 "Warunki", night switch, optional fill from the weather forecast (map dialog, lazy Leaflet chunk)
+      custom-covers/  "Moje opatulenia", a folded card between section 5 and the explainer: add, edit and remove the user's own covers;
+                      a "Moje opatulenia (N)" button beside the section 3 cover filter opens it (not offered in the wizard)
       datetime/       section 3 day + time pickers: calendar dialog (Cally), quick choices
-      covers/         section 3 cover filter
+      covers/         section 3 cover filter (built-in and user-defined covers as pills)
       result/         recommendation, comparison bars, alternatives, tips, save button
       weight/         section 4 weight check
       pieces/         section 5: saved pieces, feedback, calibration table
@@ -136,6 +141,8 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
 - **UI sections.** A page section is a folder in `src/ui/features/` that exports its markup and `mount(root, ctx)`. `mount` runs on every freshly rendered shell (first render and each language switch) and adds one delegated listener on the section; content re-rendered inside the section needs no new listeners. To add one, put its markup in `renderShell` (`ui/shell.ts`), its `mount` in `FEATURES` (`ui/app.ts`), and its styles in a partial in `src/styles/`, imported from `main.ts` at its place in the cascade.
 - **Fitted parameters.** Every coefficient is in `ModelParams` (`src/domain/params.ts`): evaporation coefficient, cover definitions, shape/clay/surface factors, wetness/stage offsets, window bounds, planner and tip thresholds. Pass a different object to `startApp`.
 - **Covers.** Each covering method is one `CoverDefinition` (`domain/covers.ts`) in `ModelParams.covers`: its drying factor, how airflow reaches the piece (`full` / `damped` / `none`), which conditions apply (`room` with night mode, or `dampRoom`) and an optional planner gate. The list order is the display order (bars, weight-check select, calibration table, cover filter) and the planner's preference order: the first cover is preferred as the first phase of two-phase plans, and the first / last are the fallbacks when even they are too slow / too fast. The app passes this catalog to the planner (`DryingContext.covers`), the tips and the UI; nothing else names a cover. Built-in labels and plan phrases are looked up by id in `covers.label` / `covers.phrase` of the i18n catalog through `coverLabel` / `coverPhrase` in `ui/render.ts`.
+
+  **User-defined covers** ("Moje opatulenia") are `CoverDefinition`s too: id `custom:<time in base 36>`, `environment: 'room'`, no gate, and a `factor` / `airflow` either from a preset in `ModelParams.coverPresets` (labels in `covers.custom.presets`) or typed as a percentage of open-air speed. The app keeps them in a `CoverRepository` (`AppDeps.coverRepository`) and builds the catalog with `withCustomCovers(params.covers, customs)`: each is inserted after the last studio built-in at least as fast, so the list still reads from fastest to slowest; with none, the catalog is exactly `params.covers`. In the UI a catalog entry is a `CatalogCover` (`ui/render.ts`), which adds the user's `name` and `icon` (from `CUSTOM_COVER_ICONS` in `ui/icons.ts`); `coverLabel` returns the name and `coverPhrase` the `covers.customPhrase` template. Names are user text, so every place that renders a label or a plan sentence escapes it. Calibration is per cover id, so feedback corrects a custom cover like a built-in one; editing keeps the id (and the samples), removing a cover leaves its samples without effect.
 - **Trained models.** There are two seams:
   - `RateModel` (`domain/physics.ts`) predicts grams per hour: `rate(cover: CoverDefinition, timeMs, piece, conditions, multipliers)`. It receives the cover's definition, so a trained model can key on `cover.id` or use its properties. Replace `physicalRateModel` to change the drying physics itself.
   - `Calibrator` / `CalibratorFactory` (`domain/calibration.ts`) turns feedback samples into per-cover time multipliers (`estimate`, `multipliers`, `learn`). Replace `geometricMeanCalibrator` to plug in a learned correction.
@@ -146,4 +153,4 @@ Dependencies point one way: `ui → domain, i18n, storage`. `domain` never impor
 - **Sensors.** Implement `ConditionsSource` (`domain/conditions.ts`): `read()` returns `Conditions`, and the optional `subscribe(onChange)` triggers a recalculation. `formConditionsSource` in `ui/form.ts` is the current implementation. A sensor source can wrap it and override, for example, `temp` and `rh`.
 - **Weather forecast.** The "Pobierz z prognozy pogody" button in "Warunki" exists only when `startApp` gets `AppDeps.weather`, a `WeatherProvider` (`src/weather/provider.ts`: `forecast(lat, lon)`, `searchPlace(name, language)`); `main.ts` passes `openMeteoProvider()`. Nothing is requested before the click. The click opens a map dialog (`conditions/map-picker.ts`, Leaflet with OpenStreetMap tiles; loaded with `import()`, so Leaflet is a separate chunk and no tile is requested before the click). The user places the pin by clicking, dragging or the "pin at the centre" button; the browser location, when allowed, only centres the map and places the pin, and a town search only pans the map. Only the confirmed point is sent to `forecast`, rounded to 0.1°, and stored under `kiedy-trymowac-weather-place`. The tile URL and attribution are the `TILES` constant in `map-picker.ts`. `forecastConditions` (`domain/weather.ts`) averages the next `ModelParams.forecastHours` (12) hours: night hours (`params.night`) go to the night fields while night mode is on, every hour goes to the day fields while it is off. A field group with no hours in the window keeps its values, and the hint says so. The values are written into the form as raw outdoor values, so `formConditionsSource` keeps reading them. Another forecast service is another `WeatherProvider`.
 - **Motion.** Animations are subtle (120–320 ms, springs without overshoot) and only make changes easier to follow. Only `src/ui/motion.ts` animates; features call its helpers (`captureRects`/`playFrom` around a re-render, `animateNumbers`, `captureSlides`/`slideNumbers` around a re-render (changed digits roll to their new value), `enter`/`exit`, `reveal`, `stagger`, `toggleHeight`, `slideIndicator`, `viewTransition`). Durations and easings are tokens in `tokens.css`; the JS spring is `SPRING` in `motion.ts`. Under `prefers-reduced-motion: reduce` nothing moves, and the settled page is always identical to the reduced-motion one. The e2e suite runs with reduced motion (`playwright.config.ts`); `tests/e2e/motion.spec.ts` turns it off and waits on `window.__motionIdle()`.
-- **Storage.** `PieceRepository` hides localStorage. The localStorage implementation keeps the prototype's v1 format byte-for-byte, so existing data keeps working.
+- **Storage.** `PieceRepository` hides localStorage. The localStorage implementation keeps the prototype's v1 format byte-for-byte, so existing data keeps working. Saved pieces store custom cover ids in `plan[].w` and `dom` as they are, and their sentence in `label`, so a piece still reads correctly after its cover is renamed or removed. The user's own covers live under a separate key, `kiedy-trymowac-covers` (`{"covers": StoredCover[]}`, `storage/covers.ts`), so the two repositories never write the same key; a missing or unreadable key means no custom covers, and unusable entries are skipped on load.

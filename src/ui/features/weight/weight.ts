@@ -1,5 +1,4 @@
 // Section 4 "Sprawdź wagą": the mass now against the trimming window, and the time still to wait.
-import type { CoverDefinition } from '../../../domain/covers';
 import { derivePiece } from '../../../domain/piece';
 import { assessWeight, type WeightAssessment } from '../../../domain/weight';
 import type { Messages } from '../../../i18n';
@@ -8,10 +7,13 @@ import { byId, esc } from '../../dom';
 import { readPieceInput, readThrownMs, readWeightInputs } from '../../form';
 import { icon } from '../../icons';
 import { reveal } from '../../motion';
-import { coverLabel, type View } from '../../render';
+import { type CatalogCover, coverLabel, type View } from '../../render';
 import { mountSteppers, numberField } from '../../stepper';
 
-export function markup(m: Messages, covers: readonly CoverDefinition[]): string {
+const coverOptions = (m: Messages, covers: readonly CatalogCover[]): string =>
+  covers.map((c) => `<option value="${c.id}">${esc(coverLabel(m, c))}</option>`).join('');
+
+export function markup(m: Messages, covers: readonly CatalogCover[]): string {
   const f = m.fields;
   return `<section class="card">
     <h2><span class="n">4</span>${icon('scale')}${m.sections.weight}</h2>
@@ -19,7 +21,7 @@ export function markup(m: Messages, covers: readonly CoverDefinition[]): string 
     <div class="grid">
       <div><label for="mnow">${f.massNow}</label>${numberField(m, 'mnow', f.massNow, m.units.grams, `placeholder="${f.massNowPlaceholder}"`)}</div>
       <div><label for="wnow">${f.coverSoFar}</label>
-        <select id="wnow">${covers.map((c) => `<option value="${c.id}">${coverLabel(m, c)}</option>`).join('')}</select></div>
+        <select id="wnow">${coverOptions(m, covers)}</select></div>
     </div>
     <div id="wout"></div>
   </section>`;
@@ -63,6 +65,14 @@ export function update(ctx: AppContext, invalid: boolean): void {
   // a new state (too soft / in the window / too hard) fades in
   const state = out.firstElementChild as HTMLElement | null;
   if (before && state && state.className !== before) reveal(state);
+}
+
+/** Rebuilds the "cover so far" select after the catalog changed, keeping the choice while it exists. */
+export function refreshCovers(m: Messages, covers: readonly CatalogCover[]): void {
+  const select = byId<HTMLSelectElement>('wnow');
+  const chosen = select.value;
+  select.innerHTML = coverOptions(m, covers);
+  if (covers.some((c) => c.id === chosen)) select.value = chosen;
 }
 
 export function mount(root: HTMLElement, ctx: AppContext): void {

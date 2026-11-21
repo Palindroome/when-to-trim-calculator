@@ -2,7 +2,7 @@
 // A new language: copy en.ts, translate, type it as `Messages`, register it in ./index.ts.
 // Keys ending in `Html` contain trusted markup and are inserted unescaped.
 
-import type { BuiltInCoverId } from '../domain/covers';
+import type { BuiltInCoverId, CoverPresetId } from '../domain/covers';
 import type { TipId } from '../domain/tips';
 import type {
   AirflowId,
@@ -274,6 +274,70 @@ export const pl = {
     filterHint:
       'Odznacz to, czego tym razem nie możesz lub nie chcesz użyć. Dotyczy tylko tej pracy i jej zapisanego planu.',
     filterLastOne: 'Zostaw zaznaczony co najmniej jeden sposób.',
+    /** plan phrase of a user-defined cover */
+    customPhrase: (name: string): string => `użyj opatulenia „${name}”`,
+    /** "Moje opatulenia": the user's own covers */
+    custom: {
+      title: 'Moje opatulenia',
+      /** the button beside the cover filter in "Termin" that opens the card; n = the user's covers */
+      jump: (n: number): string => `Moje opatulenia (${n})`,
+      intro:
+        'Własne sposoby okrycia, np. papierowa torba, gazeta albo odwrócone wiadro. Liczą się w porównaniu, rekomendacji i kalibracji tak jak wbudowane.',
+      empty: 'Nie masz jeszcze własnych opatuleń.',
+      add: 'Dodaj opatulenie',
+      limit: (max: number): string => `Masz już ${max} własnych opatuleń – więcej nie można dodać.`,
+      formNew: 'Nowe opatulenie',
+      formEdit: (name: string): string => `Edycja: ${name}`,
+      name: 'Nazwa',
+      namePlaceholder: 'np. torba papierowa',
+      icon: 'Ikona',
+      /** accessible names of the icon choices */
+      icons: {
+        cover: 'warstwy',
+        bowl: 'miska',
+        bagLoose: 'luźny worek',
+        bag: 'worek',
+        box: 'pudełko',
+        dampRoom: 'domek z kroplą',
+        paperBag: 'papierowa torba',
+        newspaper: 'gazeta',
+        bucket: 'wiadro',
+        clingFilm: 'folia spożywcza',
+        towel: 'ręcznik',
+        dome: 'odwrócona miska',
+        sheet: 'płachta',
+        board: 'deska z pracami',
+        sponge: 'gąbka',
+        jar: 'słoik',
+        carton: 'karton',
+      },
+      speed: 'Jak bardzo spowalnia schnięcie?',
+      presets: {
+        slight: 'Lekko spowalnia (np. papierowa torba, gazeta)',
+        likePartial: 'Jak worek częściowo',
+        likeDampCloth: 'Jak wilgotna ściereczka',
+        likeFull: 'Jak cały worek / folia',
+        likeBox: 'Jak szczelne pudełko',
+        custom: 'Własna wartość…',
+      } satisfies Record<CoverPresetId | 'custom', string>,
+      percent: 'Tempo schnięcia względem odkrytej',
+      airflow: 'Przepuszcza ruch powietrza',
+      presetNote:
+        'To wartości na start, nie pomiar. Oceny zapisanych prac („za mokra / w sam raz / za sucha”) z czasem poprawiają każde opatulenie.',
+      save: 'Zapisz',
+      cancel: 'Anuluj',
+      edit: 'edytuj',
+      remove: 'usuń',
+      editLabel: (name: string): string => `edytuj: ${name}`,
+      removeLabel: (name: string): string => `usuń: ${name}`,
+      speedSummary: (pct: string): string => `≈ ${pct}% tempa odkrytej`,
+      confirmRemove: (name: string, n: number): string =>
+        `Zapisane prace z opatuleniem „${name}”: ${n}. Usunąć to opatulenie? Prace zachowają opis planu, a ich oceny przestaną kalibrować.`,
+      nameEmpty: 'Podaj nazwę.',
+      nameTooLong: (max: number): string => `Nazwa może mieć najwyżej ${max} znaków.`,
+      nameTaken: 'Takie opatulenie już jest.',
+      percentRange: 'Podaj wartość od 1 do 100%.',
+    },
   },
 
   /** take cover phrases (`covers.phrase`), so a cover can supply its own text */

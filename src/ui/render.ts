@@ -8,22 +8,35 @@ import {
 import { type ModelParams, MS_PER_HOUR } from '../domain/params';
 import type { PlanOption } from '../domain/planner';
 import type { Formatter, Messages } from '../i18n';
+import type { IconName } from './icons';
+
+/** A cover of the catalog: its definition, plus the name and icon of a user-defined cover. */
+export interface CatalogCover extends CoverDefinition {
+  /** user-entered (not HTML-escaped); built-in covers have none and read the i18n catalog */
+  name?: string;
+  icon?: IconName;
+}
 
 export interface View {
   m: Messages;
   fmt: Formatter;
   params: ModelParams;
   /** the cover catalog, in display order */
-  covers: readonly CoverDefinition[];
+  covers: readonly CatalogCover[];
 }
 
-/** A cover's name in the bars, the calibration table and the cover selects. Built-in covers read the catalog. */
-export const coverLabel = (m: Messages, def: CoverDefinition): string =>
-  m.covers.label[def.id as BuiltInCoverId];
+/**
+ * A cover's name in the bars, the calibration table and the cover selects: its own name, or for
+ * built-in covers the i18n catalog. Plain text: escape it before inserting it into HTML.
+ */
+export const coverLabel = (m: Messages, def: CatalogCover): string =>
+  def.name ?? m.covers.label[def.id as BuiltInCoverId];
 
-/** A cover's phrase for the plan sentences. Built-in covers read the catalog. */
-export const coverPhrase = (m: Messages, def: CoverDefinition): string =>
-  m.covers.phrase[def.id as BuiltInCoverId];
+/** A cover's phrase for the plan sentences (plain text, like `coverLabel`). */
+export const coverPhrase = (m: Messages, def: CatalogCover): string =>
+  def.name === undefined
+    ? m.covers.phrase[def.id as BuiltInCoverId]
+    : m.covers.customPhrase(def.name);
 
 export function planText(v: View, o: PlanOption, startMs: number): string {
   const phrase = (id: CoverId): string => coverPhrase(v.m, coverById(v.covers, id));

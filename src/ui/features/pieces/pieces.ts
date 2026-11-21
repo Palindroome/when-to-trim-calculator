@@ -1,7 +1,7 @@
 // Section 5 "Moje prace i kalibracja": saved pieces, their feedback buttons and the calibration table.
 import type { CoverCalibration } from '../../../domain/calibration';
 import { feedbackToSample } from '../../../domain/calibration';
-import type { CoverDefinition, CoverId } from '../../../domain/covers';
+import type { CoverId } from '../../../domain/covers';
 import { MS_PER_HOUR } from '../../../domain/params';
 import { dominantCover } from '../../../domain/planner';
 import { FEEDBACK_KINDS, type FeedbackKind } from '../../../domain/types';
@@ -12,7 +12,7 @@ import { byId, closest, esc } from '../../dom';
 import { NAME_MAX_LENGTH, readName } from '../../form';
 import { icon } from '../../icons';
 import { enter, exit, scrollBehavior } from '../../motion';
-import { coverLabel, coverPhrase, planText, type View } from '../../render';
+import { type CatalogCover, coverLabel, coverPhrase, planText, type View } from '../../render';
 
 export function markup(m: Messages): string {
   return `<section class="card">
@@ -27,7 +27,7 @@ export function markup(m: Messages): string {
  * built it at save time. Unexpected plan shapes fall back to the stored `label`.
  */
 function storedPlanText(v: View, p: StoredPiece): string {
-  const find = (w: unknown): CoverDefinition | undefined => v.covers.find((c) => c.id === w);
+  const find = (w: unknown): CatalogCover | undefined => v.covers.find((c) => c.id === w);
   const plan = Array.isArray(p.plan) ? p.plan : [];
   const [a, b] = plan;
   const first = find(a?.w);
@@ -103,7 +103,7 @@ function renderCalibration(v: View, calibration: Record<CoverId, CoverCalibratio
   return `<table><tr><th>${m.calibration.cover}</th><th>${m.calibration.multiplier}</th><th>${m.calibration.count}</th></tr>${rows
     .map(
       (r) =>
-        `<tr><td>${coverLabel(m, r.c)}</td><td>${m.calibration.value(fmt.decimal(r.multiplier, 2))}</td><td>${r.samples}</td></tr>`,
+        `<tr><td>${esc(coverLabel(m, r.c))}</td><td>${m.calibration.value(fmt.decimal(r.multiplier, 2))}</td><td>${r.samples}</td></tr>`,
     )
     .join('')}</table>
          <p class="muted">${m.calibration.noteHtml}</p>`;

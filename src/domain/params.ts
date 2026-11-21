@@ -1,4 +1,4 @@
-import type { CoverDefinition } from './covers';
+import type { CoverDefinition, CoverPresetId } from './covers';
 import type { AirflowId, BatId, ClayId, FeedbackKind, ShapeId, StageId, WetnessId } from './types';
 
 /**
@@ -27,6 +27,11 @@ export interface ModelParams {
    * (bars, weight-check select, calibration table, two-phase ranking).
    */
   covers: readonly CoverDefinition[];
+  /**
+   * Speed presets for a user-defined cover: fraction of open-air drying speed and how airflow reaches
+   * the piece. A saved cover keeps the resolved values, so changing a preset does not change it.
+   */
+  coverPresets: Record<CoverPresetId, { factor: number; airflow: 'damped' | 'none' }>;
   /** air-movement multiplier near the shelf */
   airflowFactor: Record<AirflowId, number>;
   shapes: Record<ShapeId, { areaFactor: number; slowFactor: number }>;
@@ -94,6 +99,14 @@ export const DEFAULT_PARAMS: ModelParams = {
     { id: 'full', factor: 0.07, airflow: 'none', environment: 'room' },
     { id: 'box', factor: 0.05, airflow: 'none', environment: 'room' },
   ],
+  coverPresets: {
+    // starting assumptions, not measurements; feedback calibrates each saved cover
+    slight: { factor: 0.6, airflow: 'damped' },
+    likePartial: { factor: 0.3, airflow: 'damped' },
+    likeDampCloth: { factor: 0.15, airflow: 'none' },
+    likeFull: { factor: 0.07, airflow: 'none' },
+    likeBox: { factor: 0.05, airflow: 'none' },
+  },
   airflowFactor: { still: 1, light: 1.6, draft: 2.6 },
   shapes: {
     cyl: { areaFactor: 1.6, slowFactor: 1.0 },

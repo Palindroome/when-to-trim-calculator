@@ -19,6 +19,7 @@ import { DEFAULT_PARAMS } from './domain/params';
 import { physicalRateModel } from './domain/physics';
 import { getMessages, LOCALES, resolveLocale } from './i18n';
 import { LocalStorageActivityStore } from './storage/activity';
+import { LocalStorageCoverRepository } from './storage/covers';
 import { LocalStoragePieceRepository } from './storage/pieces';
 import { loadLanguage, loadTheme, saveLanguage, saveTheme } from './storage/preferences';
 import { SessionStorageSessionStore } from './storage/session';
@@ -52,6 +53,7 @@ startApp({
   onThemeChange: saveTheme,
   params,
   repository,
+  coverRepository: new LocalStorageCoverRepository(),
   wizard: new LocalStorageWizardStore(),
   activity: new LocalStorageActivityStore(),
   session: new SessionStorageSessionStore(),

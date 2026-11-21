@@ -1,9 +1,9 @@
 // Page structure: the sections in page order, each rendered by its feature module.
-import type { CoverDefinition } from '../domain/covers';
 import type { Messages } from '../i18n';
 import { stepCard } from './features/cards/cards';
 import * as conditions from './features/conditions/conditions';
 import * as coverFilter from './features/covers/covers';
+import * as customCovers from './features/custom-covers/custom-covers';
 import * as datetime from './features/datetime/datetime';
 import * as explainer from './features/explainer/explainer';
 import * as header from './features/header/header';
@@ -13,13 +13,14 @@ import * as result from './features/result/result';
 import * as weight from './features/weight/weight';
 import * as welcome from './features/welcome/welcome';
 import * as wizard from './features/wizard/wizard';
+import type { CatalogCover } from './render';
 
 /** Static page structure (the result, weight check and piece list are filled in by their features). */
 export function renderShell(
   m: Messages,
   locales: readonly string[],
   theme: header.ThemeChoice,
-  covers: readonly CoverDefinition[],
+  covers: readonly CatalogCover[],
   /** forecast window of the weather-forecast fill in "Warunki"; null when it is not offered */
   weatherHours: number | null,
 ): string {
@@ -40,6 +41,7 @@ export function renderShell(
     wizard.navMarkup(m),
     weight.markup(m, covers),
     pieces.markup(m),
+    customCovers.markup(m),
     explainer.markup(m),
   ].join('\n  ');
 }

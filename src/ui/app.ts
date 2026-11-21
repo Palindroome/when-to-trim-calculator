@@ -1,4 +1,5 @@
 // The page: its state (saved pieces, the plan to save, the language), the recalculation and the composition of the features.
+import { withCustomCovers } from '../domain/covers';
 import { explainCalculation } from '../domain/explain';
 import { MS_PER_HOUR } from '../domain/params';
 import { derivePiece } from '../domain/piece';
@@ -6,6 +7,7 @@ import { planDrying } from '../domain/planner';
 import { simulate } from '../domain/simulate';
 import { tipsFor } from '../domain/tips';
 import { createFormatter, type Messages } from '../i18n';
+import type { StoredCover } from '../storage/covers';
 import { calibrationSamples, type StoredPiece } from '../storage/pieces';
 import type { SessionSnapshot } from '../storage/session';
 import { perCoverCalibration } from './calibration';
@@ -14,6 +16,7 @@ import { byId } from './dom';
 import { createSummaryCards, renderSummaries } from './features/cards/cards';
 import * as conditionsSection from './features/conditions/conditions';
 import * as coverFilter from './features/covers/covers';
+import * as customCovers from './features/custom-covers/custom-covers';
 import * as datetime from './features/datetime/datetime';
 import * as explainer from './features/explainer/explainer';
 import * as header from './features/header/header';
@@ -37,7 +40,7 @@ import {
 } from './form';
 import { captureForm, type FormState, restoreForm } from './form-state';
 import { slideIndicator, viewTransition } from './motion';
-import type { View } from './render';
+import type { CatalogCover, View } from './render';
 import { renderShell } from './shell';
 
 export type { AppDeps } from './context';
@@ -50,6 +53,7 @@ const FEATURES = [
   header,
   pieceSection,
   conditionsSection,
+  customCovers,
   datetime,
   coverFilter,
   result,
@@ -60,8 +64,12 @@ const FEATURES = [
 
 export function startApp(deps: AppDeps): void {
   const { root, params, repository, conditions, rateModel } = deps;
-  const covers = params.covers;
-  const coverIds = covers.map((c) => c.id);
+  let custom: StoredCover[] = deps.coverRepository.load();
+  // the built-in covers with the user's own ones among them; rebuilt when those change
+  const catalog = (): readonly CatalogCover[] =>
+    withCustomCovers<CatalogCover>(params.covers, custom.map(customCovers.toCatalogCover));
+  let covers = catalog();
+  let coverIds = covers.map((c) => c.id);
   let view: View;
   let theme = deps.theme;
   let pieces: StoredPiece[] = repository.load();
@@ -80,6 +88,20 @@ export function startApp(deps: AppDeps): void {
     storePieces(next) {
       pieces = next;
       repository.save(pieces);
+    },
+    get customCovers() {
+      return custom;
+    },
+    storeCovers(next) {
+      custom = next;
+      deps.coverRepository.save(custom);
+      covers = catalog();
+      coverIds = covers.map((c) => c.id);
+      view = { ...view, covers };
+      coverFilter.refresh(root, view.m, covers);
+      weight.refreshCovers(view.m, covers);
+      piecesSection.render(ctx);
+      compute();
     },
     get saveable() {
       return saveable;

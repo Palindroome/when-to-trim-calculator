@@ -5,10 +5,20 @@ export const NOW = '2026-03-04T09:00:00+01:00';
 export const STORAGE_KEY = 'kiedy-trymowac-v1';
 export const WIZARD_KEY = 'kiedy-trymowac-wizard';
 export const ACTIVITY_KEY = 'kiedy-trymowac-last-active';
+export const COVERS_KEY = 'kiedy-trymowac-covers';
 
 export async function openApp(
   page: Page,
-  opts: { now?: string; storage?: string | null; wizard?: boolean; welcome?: boolean } = {},
+  opts: {
+    now?: string;
+    storage?: string | null;
+    /** raw value seeded under `kiedy-trymowac-covers` (the user's own covers) */
+    covers?: string;
+    /** comparison bars expected once the page is up (default: the five built-in covers) */
+    bars?: number;
+    wizard?: boolean;
+    welcome?: boolean;
+  } = {},
 ): Promise<void> {
   const now = new Date(opts.now ?? NOW);
   await page.clock.setFixedTime(now);
@@ -40,8 +50,19 @@ export async function openApp(
       [STORAGE_KEY, opts.storage] as const,
     );
   }
+  if (opts.covers !== undefined) {
+    await page.addInitScript(
+      ([key, value]) => {
+        if (!sessionStorage.getItem('__seededCovers')) {
+          localStorage.setItem(key, value);
+          sessionStorage.setItem('__seededCovers', '1');
+        }
+      },
+      [COVERS_KEY, opts.covers] as const,
+    );
+  }
   await page.goto('./');
-  await expect(page.locator('#result .bar')).toHaveCount(5);
+  await expect(page.locator('#result .bar')).toHaveCount(opts.bars ?? 5);
 }
 
 export type Field =

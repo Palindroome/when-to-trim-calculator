@@ -66,6 +66,38 @@ const ICONS = {
     body: '<path d="M2.5 8 9 2.5 15.5 8v7.5h-13z"/><path d="M9 8.5s-2 2.2-2 3.5a2 2 0 0 0 4 0c0-1.3-2-3.5-2-3.5z"/>',
   },
   cover: { body: '<path d="M9 2.5 2 6.5l7 4 7-4zM2 10l7 4 7-4"/>' },
+  // extra shapes for user-defined covers
+  paperBag: {
+    body: '<path d="M4 5.5h10l-1 10h-8zM6.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5M4 5.5l1.5 2M14 5.5l-1.5 2"/>',
+  },
+  newspaper: {
+    body: '<path d="M2.5 4.5h10v10a1.5 1.5 0 0 1-1.5 1.5H4a1.5 1.5 0 0 1-1.5-1.5zM12.5 7.5h3v7a1.5 1.5 0 0 1-3 0M5 7.5h5M5 10.5h5M5 13h3"/>',
+  },
+  bucket: { body: '<path d="M2.5 13.5h13l-1.5-8h-10zM5.5 5.5a3.5 3.5 0 0 1 7 0M1.5 16h15"/>' },
+  // a roll of cling film with the sheet pulled off it
+  clingFilm: {
+    body: '<ellipse cx="4" cy="5.5" rx="2" ry="2.5"/><path d="M4 3h10a2 2.5 0 0 1 0 5H4M6 8v7.5l2.5-1 2.5 1 2.5-1 1.5.5V8"/>',
+  },
+  // a towel hanging on a rail
+  towel: { body: '<path d="M2 3.5h14M4.5 3.5v12h9v-12M4.5 12.5h9"/>' },
+  // a bowl turned upside down over the piece, foot ring up
+  dome: { body: '<path d="M2 15h14M3 15a6 6 0 0 1 12 0M7.5 9.2V8h3v1.2"/>' },
+  // a sheet draped over the piece
+  sheet: {
+    body: '<path d="M2 15.5C2.5 9.5 5.5 5.5 9 5.5s6.5 4 7 10zM6 15.5c.3-2.5 1-4.5 2-6M12 15.5c-.3-2.5-1-4.5-2-6"/>',
+  },
+  // a ware board with two pieces on it
+  board: {
+    body: '<path d="M1.5 12h15l-1.5 3h-12zM4.5 12V9.5a1.5 1.5 0 0 1 3 0V12M10 12V8a1.5 1.5 0 0 1 3 0v4"/>',
+  },
+  sponge: {
+    body: '<rect x="2.5" y="6" width="13" height="7" rx="2"/><path d="M6 9v.01M9 10.5v.01M12 8.5v.01"/>',
+  },
+  jar: {
+    body: '<rect x="6" y="2.5" width="6" height="2" rx=".5"/><rect x="4" y="4.5" width="10" height="11" rx="2"/><path d="M4 8h10"/>',
+  },
+  // an open cardboard box with its flaps up
+  carton: { body: '<path d="M3 7.5h12v8H3zM3 7.5 1.5 4.5M15 7.5l1.5-3M7 10.5h4"/>' },
 } satisfies Record<string, IconDef>;
 
 export type IconName = keyof typeof ICONS;
@@ -89,5 +121,31 @@ const COVER_ICONS: Partial<Record<CoverId, IconName>> = {
   damp: 'dampRoom',
 };
 
-export const coverIcon = (id: CoverId, cls?: string): string =>
-  icon(COVER_ICONS[id] ?? 'cover', cls);
+/** Icons a user-defined cover can pick, in picker order; the first is the default. */
+export const CUSTOM_COVER_ICONS = [
+  'cover',
+  'bowl',
+  'bagLoose',
+  'bag',
+  'box',
+  'dampRoom',
+  'paperBag',
+  'newspaper',
+  'bucket',
+  'clingFilm',
+  'towel',
+  'dome',
+  'sheet',
+  'board',
+  'sponge',
+  'jar',
+  'carton',
+] as const satisfies readonly IconName[];
+export type CustomCoverIcon = (typeof CUSTOM_COVER_ICONS)[number];
+
+export const isCustomCoverIcon = (s: string): s is CustomCoverIcon =>
+  (CUSTOM_COVER_ICONS as readonly string[]).includes(s);
+
+/** A cover's icon: its own (user-defined covers), the built-in one, or the neutral `cover` icon. */
+export const coverIcon = (cover: { id: CoverId; icon?: IconName }, cls?: string): string =>
+  icon(cover.icon ?? COVER_ICONS[cover.id] ?? 'cover', cls);
